@@ -16,13 +16,18 @@
    * Initialisatiefunctie voor de applicatie
    */
   function init() {
+    // Debug logging toevoegen
+    console.log("App initialisatie gestart");
+    
     // Initialiseer login status
     if (typeof user !== 'undefined' && user) {
+      console.log("Gebruiker al beschikbaar in template data");
       // Gebruiker is al ingelogd (vanuit server doorgegeven)
       currentUser = user;
       isAdmin = !!isAdmin;
       loadDashboard(currentUser);
     } else {
+      console.log("Controleren van authenticatie status");
       // Controleer authenticatie status
       checkAuth();
     }
@@ -37,6 +42,7 @@
   function setupEventHandlers() {
     // Hier kunnen event handlers worden toegevoegd voor UI elementen
     // Deze worden geïmplementeerd zodra de UI componenten bestaan
+    console.log("Event handlers setup voltooid");
   }
   
   /**
@@ -44,12 +50,16 @@
    * en laadt de juiste weergave op basis daarvan
    */
   function checkAuth() {
+    console.log("Authenticatie check gestart");
+    
     // Toon loading spinner
     showLoading(true);
     
     // Server-side functie aanroepen om authenticatie te controleren
     google.script.run
       .withSuccessHandler(function(authStatus) {
+        console.log("Authenticatie check succesvol:", authStatus);
+        
         // Verberg loading spinner
         showLoading(false);
         
@@ -57,19 +67,25 @@
           // Gebruiker is ingelogd, sla gegevens op en laad het dashboard
           currentUser = authStatus.user;
           isAdmin = authStatus.isAdmin;
+          console.log("Gebruiker is ingelogd, dashboard laden");
           loadDashboard(currentUser);
         } else if (authStatus.authUrl) {
           // Gebruiker moet inloggen, redirect naar auth URL
+          console.log("Gebruiker moet inloggen, doorsturen naar:", authStatus.authUrl);
           window.top.location.href = authStatus.authUrl;
         } else if (authStatus.errorMessage) {
           // Er is een fout opgetreden
+          console.error("Authenticatie fout:", authStatus.errorMessage);
           showError(authStatus.errorMessage);
         } else {
           // Onbekende situatie, toon algemene foutmelding
+          console.error("Onbekende authenticatie situatie");
           showError('Er is een fout opgetreden bij het controleren van de authenticatie.');
         }
       })
       .withFailureHandler(function(error) {
+        console.error("Authenticatie check mislukt:", error);
+        
         // Verberg loading spinner
         showLoading(false);
         
@@ -86,14 +102,19 @@
    */
   function loadDashboard(user) {
     try {
-      // Toon de content container
+      console.log("Dashboard laden voor gebruiker:", user);
+      
+      // Verberg loading indicator en toon content
+      document.getElementById('loading').style.display = 'none';
+      
+      // Toon de content container en zorg dat die zichtbaar is
       const content = document.getElementById('content');
       content.style.display = 'block';
       
       // Basiswelkomstbericht met naam en e-mail
       const userName = user.naam || user.email.split('@')[0];
       
-      // Clear bestaande content eerst
+      // Clear bestaande content eerst om dubbele elementen te voorkomen
       content.innerHTML = '';
       
       // Voeg dashboard header toe
@@ -183,6 +204,8 @@
         </div>
       `;
       content.appendChild(tabContent);
+
+      console.log("Dashboard elementen toegevoegd aan DOM");
       
       // Voeg event handlers toe aan de tabs
       setupTabHandlers();
@@ -192,6 +215,8 @@
       
       // Voeg event handlers toe aan de formulieren
       setupFormHandlers();
+      
+      console.log("Dashboard volledig geladen");
     } catch (error) {
       console.error('Fout bij laden dashboard:', error);
       showError('Er is een fout opgetreden bij het laden van het dashboard: ' + error);
@@ -204,12 +229,21 @@
   function loadPracticesList() {
     const practicesList = document.getElementById('practices-list');
     
+    if (!practicesList) {
+      console.error('Element practices-list niet gevonden in het DOM');
+      return;
+    }
+    
+    console.log("Laden van praktijkenlijst gestart");
+    
     // Toon loading indicator
     practicesList.innerHTML = '<div class="spinner"></div><p>Laden...</p>';
     
     // Server-side functie aanroepen om praktijken op te halen
     google.script.run
       .withSuccessHandler(function(practices) {
+        console.log("Praktijken opgehaald:", practices);
+        
         if (!practices || practices.length === 0) {
           practicesList.innerHTML = `
             <div class="empty-state">
@@ -260,8 +294,11 @@
         
         // Event handlers toevoegen aan de knoppen
         setupPracticeActionHandlers();
+        console.log("Praktijkenlijst volledig geladen");
       })
       .withFailureHandler(function(error) {
+        console.error("Fout bij ophalen praktijken:", error);
+        
         // Toon foutmelding
         practicesList.innerHTML = `
           <div class="error-state">
@@ -278,6 +315,8 @@
    * Event handlers voor formulieren
    */
   function setupFormHandlers() {
+    console.log("Formulier event handlers instellen");
+    
     // Add practice form
     const addPracticeForm = document.getElementById('add-practice-form');
     if (addPracticeForm) {
@@ -297,9 +336,13 @@
         submitButton.disabled = true;
         submitButton.textContent = 'Toevoegen...';
         
+        console.log("Versturen van add practice formulier:", formData);
+        
         // Server-side functie aanroepen om praktijk toe te voegen
         google.script.run
           .withSuccessHandler(function(result) {
+            console.log("Praktijk succesvol toegevoegd:", result);
+            
             // Form resetten
             addPracticeForm.reset();
             
@@ -320,6 +363,8 @@
             showNotification('Huisartsenpraktijk succesvol toegevoegd');
           })
           .withFailureHandler(function(error) {
+            console.error("Fout bij toevoegen praktijk:", error);
+            
             // Knop weer inschakelen
             submitButton.disabled = false;
             submitButton.textContent = 'Toevoegen';
@@ -329,6 +374,8 @@
           })
           .createPractice(formData);
       });
+    } else {
+      console.warn("Add practice formulier niet gevonden");
     }
     
     // Settings form
@@ -349,9 +396,13 @@
         submitButton.disabled = true;
         submitButton.textContent = 'Opslaan...';
         
+        console.log("Versturen van settings formulier:", formData);
+        
         // Server-side functie aanroepen om instellingen bij te werken
         google.script.run
           .withSuccessHandler(function(updatedUser) {
+            console.log("Instellingen succesvol bijgewerkt:", updatedUser);
+            
             // Gebruikersgegevens bijwerken
             if (updatedUser) {
               currentUser = updatedUser;
@@ -365,6 +416,8 @@
             showNotification('Instellingen succesvol opgeslagen');
           })
           .withFailureHandler(function(error) {
+            console.error("Fout bij opslaan instellingen:", error);
+            
             // Knop weer inschakelen
             submitButton.disabled = false;
             submitButton.textContent = 'Opslaan';
@@ -374,13 +427,19 @@
           })
           .updateCurrentUserSettings(formData);
       });
+    } else {
+      console.warn("Settings formulier niet gevonden");
     }
+    
+    console.log("Formulier event handlers ingesteld");
   }
   
   /**
    * Event handlers voor praktijk acties
    */
   function setupPracticeActionHandlers() {
+    console.log("Praktijk actie handlers instellen");
+    
     // Check buttons
     const checkButtons = document.querySelectorAll('.btn-check');
     checkButtons.forEach(button => {
@@ -407,14 +466,23 @@
         deletePractice(practiceId);
       });
     });
+    
+    console.log("Praktijk actie handlers ingesteld");
   }
   
   /**
    * Event handlers voor tabs
    */
   function setupTabHandlers() {
+    console.log("Tab handlers instellen");
+    
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabPanes = document.querySelectorAll('.tab-pane');
+    
+    if (tabButtons.length === 0) {
+      console.error("Geen tab buttons gevonden");
+      return;
+    }
     
     tabButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -425,9 +493,17 @@
         // Active class toevoegen aan geselecteerde tab
         this.classList.add('active');
         const tabId = this.dataset.tab;
-        document.getElementById(tabId).classList.add('active');
+        const tabPane = document.getElementById(tabId);
+        
+        if (tabPane) {
+          tabPane.classList.add('active');
+        } else {
+          console.error("Tab pane niet gevonden voor tab:", tabId);
+        }
       });
     });
+    
+    console.log("Tab handlers ingesteld");
   }
   
   /**
@@ -436,6 +512,8 @@
    * @param {string} practiceId - ID van de praktijk
    */
   function checkPractice(practiceId) {
+    console.log("Handmatige controle gestart voor praktijk:", practiceId);
+    
     // Placeholder functie - wordt geïmplementeerd zodra WebsiteChecker is ontwikkeld
     showNotification('Deze functie wordt binnenkort geïmplementeerd');
   }
@@ -446,6 +524,8 @@
    * @param {string} practiceId - ID van de praktijk
    */
   function editPractice(practiceId) {
+    console.log("Bewerken gestart voor praktijk:", practiceId);
+    
     // Placeholder functie - wordt geïmplementeerd in een volgende fase
     showNotification('Deze functie wordt binnenkort geïmplementeerd');
   }
@@ -456,10 +536,14 @@
    * @param {string} practiceId - ID van de praktijk
    */
   function deletePractice(practiceId) {
+    console.log("Verwijderen gestart voor praktijk:", practiceId);
+    
     if (confirm('Weet u zeker dat u deze huisartsenpraktijk wilt verwijderen?')) {
       // Server-side functie aanroepen om praktijk te verwijderen
       google.script.run
         .withSuccessHandler(function(success) {
+          console.log("Verwijderen praktijk resultaat:", success);
+          
           if (success) {
             // Lijst met praktijken opnieuw laden
             loadPracticesList();
@@ -471,6 +555,8 @@
           }
         })
         .withFailureHandler(function(error) {
+          console.error("Fout bij verwijderen praktijk:", error);
+          
           // Foutmelding tonen
           showError('Fout bij verwijderen van praktijk: ' + error);
         })
@@ -484,6 +570,8 @@
    * @param {string} message - Het bericht
    */
   function showNotification(message) {
+    console.log("Notificatie tonen:", message);
+    
     // Toevoegen aan DOM indien nog niet aanwezig
     let notification = document.getElementById('notification');
     if (!notification) {
@@ -509,8 +597,15 @@
    * @param {boolean} show - True om te tonen, false om te verbergen
    */
   function showLoading(show) {
+    console.log("Loading indicator:", show ? "tonen" : "verbergen");
+    
     const loading = document.getElementById('loading');
     const content = document.getElementById('content');
+    
+    if (!loading || !content) {
+      console.error("Loading of content element niet gevonden");
+      return;
+    }
     
     if (show) {
       loading.innerHTML = '<div class="spinner"></div><p>Laden...</p>';
@@ -518,6 +613,7 @@
       content.style.display = 'none';
     } else {
       loading.style.display = 'none';
+      // Let op: content.style.display wordt apart gezet in loadDashboard
     }
   }
   
@@ -527,8 +623,15 @@
    * @param {string} message - De foutmelding
    */
   function showError(message) {
+    console.error("Foutmelding tonen:", message);
+    
     const error = document.getElementById('error');
     const errorMessage = document.getElementById('error-message');
+    
+    if (!error || !errorMessage) {
+      console.error("Error of error-message element niet gevonden");
+      return;
+    }
     
     errorMessage.textContent = message;
     error.style.display = 'block';
