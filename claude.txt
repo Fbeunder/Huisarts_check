@@ -61,17 +61,16 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### HTML_Scripts.html
-- Status: Geïmplementeerd, bugfix in behandeling (PR #28)
+- Status: Geïmplementeerd, verbeterde versie in behandeling (PR #29)
 - Bestandsnaam: HTML_Scripts.html
 - Functionaliteit: Bevat client-side JavaScript voor interactie met de gebruiker
-- Verbeteringen in PR #28: Uitgebreide logging voor betere diagnose, verbeterde DOM-manipulatie, controles op bestaande elementen, betere foutafhandeling
+- Verbeteringen in PR #29: Volledige herstructurering voor robuustere werking, gefaseerde initialisatie, uitgebreide logging en foutafhandeling, verbeterde DOM-manipulatie
 - Afhankelijkheid: HTML-templates
 
 ### HTML_Index.html
-- Status: Geïmplementeerd, verbeteringen in behandeling (PR #28)
+- Status: Geïmplementeerd
 - Bestandsnaam: HTML_Index.html
 - Functionaliteit: Hoofdtemplate voor de web interface
-- Verbeteringen in PR #28: Betere container structuur, notifications container toegevoegd, verbeterde commentaar voor onderhoudbaarheid
 - Afhankelijkheid: HTML_Scripts.html, HTML_Styles.html
 
 ### DataLayer.gs
