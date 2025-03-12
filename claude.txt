@@ -30,10 +30,10 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 ## Per module details:
 
 ### Code.gs
-- Status: Geïmplementeerd (PR #2 gemerged, bijgewerkt in PR #6)
+- Status: Geïmplementeerd en bijgewerkt (PR #8 open)
 - Bestandsnaam: Code.gs
 - Functionaliteit: Bevat de hoofdentry points voor de applicatie, inclusief het starten van de UI en het instellen van triggers voor periodieke controles
-- Afhankelijkheid: Alle andere modules
+- Afhankelijkheid: UI.gs, AuthService.gs, DataLayer.gs, Logger.gs
 
 ### appsscript.json
 - Status: Geïmplementeerd (PR #2 gemerged)
@@ -42,10 +42,10 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### UI.gs
-- Status: In ontwikkeling (Issue #7 aangemaakt)
+- Status: Geïmplementeerd (PR #8 open)
 - Bestandsnaam: UI.gs
-- Functionaliteit: Beheert de webinterface en gebruikersinteractie
-- Afhankelijkheid: HtmlTemplates/, AuthService.gs, DataLayer.gs
+- Functionaliteit: Beheert de webinterface en gebruikersinteractie, rendert verschillende pagina's en afhandelt formulierverwerking
+- Afhankelijkheid: HtmlTemplates/, AuthService.gs, DataLayer.gs, Logger.gs
 
 ### HtmlTemplates/
 - Status: Geïmplementeerd (PR #2 gemerged, bijgewerkt in PR #6)
