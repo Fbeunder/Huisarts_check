@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <title>Huisarts Check Dashboard</title>
+    <?!= include('HtmlTemplates/Styles'); ?>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Dashboard</h2>
+      
+      <div id="loading">
+        <div class="spinner"></div>
+        <p>Dashboard laden...</p>
+      </div>
+      
+      <div id="content" style="display: none;">
+        <div id="user-info">
+          <!-- Gebruikersinfo wordt hier dynamisch geladen -->
+        </div>
+        
+        <div class="tabs">
+          <div class="tab-header">
+            <button class="tab-btn active" data-tab="my-practices">Mijn Huisartsen</button>
+            <button class="tab-btn" data-tab="add-practice">Huisarts Toevoegen</button>
+            <button class="tab-btn" data-tab="check-history">Controle Geschiedenis</button>
+          </div>
+          
+          <div id="my-practices" class="tab-content active">
+            <h3>Mijn Huisartsen</h3>
+            <div id="practices-list">
+              <p>Je hebt nog geen huisartsen toegevoegd om te monitoren.</p>
+            </div>
+          </div>
+          
+          <div id="add-practice" class="tab-content">
+            <h3>Huisarts Toevoegen</h3>
+            <form id="add-practice-form">
+              <div class="form-group">
+                <label for="practice-name">Naam Huisartsenpraktijk</label>
+                <input type="text" id="practice-name" name="name" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="practice-url">Website URL</label>
+                <input type="url" id="practice-url" name="url" required placeholder="https://www.voorbeeld.nl">
+              </div>
+              
+              <button type="submit">Toevoegen</button>
+            </form>
+          </div>
+          
+          <div id="check-history" class="tab-content">
+            <h3>Controle Geschiedenis</h3>
+            <p>Hier vind je de geschiedenis van alle website controles.</p>
+            <div id="history-list">
+              <p>Geen controle geschiedenis beschikbaar.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="error" style="display: none;">
+        <h3>Er is een fout opgetreden</h3>
+        <p id="error-message"></p>
+      </div>
+      
+      <div class="text-center mt-20">
+        <button onclick="google.script.host.close()">Sluiten</button>
+      </div>
+    </div>
+    
+    <script>
+      // Bij laden van de pagina
+      document.addEventListener('DOMContentLoaded', function() {
+        // Laad gebruikersinfo
+        loadUserInfo();
+        
+        // Tabbladen functionaliteit
+        setupTabs();
+        
+        // Form submission
+        setupForm();
+      });
+      
+      // Gebruikersinfo laden
+      function loadUserInfo() {
+        // Toon loading spinner
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('content').style.display = 'none';
+        
+        // Gebruikersinfo ophalen (placeholder)
+        setTimeout(function() {
+          const userInfo = document.getElementById('user-info');
+          userInfo.innerHTML = '<p>Ingelogd als: <strong>gebruiker@example.com</strong></p>';
+          
+          // Verberg loading spinner
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('content').style.display = 'block';
+        }, 1000);
+      }
+      
+      // Tabbladen instellen
+      function setupTabs() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            
+            // Deactiveer alle tabbladen
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Activeer geselecteerde tabblad
+            this.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+          });
+        });
+      }
+      
+      // Form submission
+      function setupForm() {
+        const form = document.getElementById('add-practice-form');
+        
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Toon loading spinner
+          document.getElementById('loading').style.display = 'block';
+          document.getElementById('content').style.display = 'none';
+          
+          // Formuliergegevens ophalen
+          const name = document.getElementById('practice-name').value;
+          const url = document.getElementById('practice-url').value;
+          
+          // Placeholder voor server-side verwerking
+          setTimeout(function() {
+            // Toon een melding (in echte versie zou dit de server-side functie aanroepen)
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error-message').textContent = 
+              'Deze functionaliteit wordt geïmplementeerd in een volgende fase.';
+            
+            // Verberg loading spinner
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            
+            // Reset form
+            form.reset();
+          }, 1000);
+        });
+      }
+    </script>
+  </body>
+</html>

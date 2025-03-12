@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Huisarts Check</title>
+    <?!= include('HtmlTemplates/Styles'); ?>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Huisarts Check</h1>
+        <p>Houd bij welke huisartsen nieuwe patiënten aannemen</p>
+      </header>
+      
+      <main>
+        <div id="loading">
+          <p>Laden...</p>
+        </div>
+        
+        <div id="content" style="display: none;">
+          <!-- Hier wordt de inhoud dynamisch geladen -->
+        </div>
+        
+        <div id="error" style="display: none;">
+          <h2>Er is een fout opgetreden</h2>
+          <p id="error-message"></p>
+        </div>
+      </main>
+      
+      <footer>
+        <p>Huisarts Check v<?= CONFIG.APP_VERSION ?> | &copy; <?= new Date().getFullYear() ?></p>
+      </footer>
+    </div>
+    
+    <?!= include('HtmlTemplates/Scripts'); ?>
+  </body>
+</html>
