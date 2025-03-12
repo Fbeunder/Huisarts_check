@@ -33,7 +33,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Status: Geïmplementeerd en gemerged
 - Bestandsnaam: Code.gs
 - Functionaliteit: Bevat de hoofdentry points voor de applicatie, inclusief het starten van de UI en het instellen van triggers voor periodieke controles
-- Afhankelijkheid: UI.gs, AuthService.gs, DataLayer.gs, Logger.gs
+- Afhankelijkheid: UI.gs, AuthService.gs, DataLayer.gs, Logger.gs, WebsiteChecker.gs
 
 ### appsscript.json
 - Status: Geïmplementeerd (PR #2 gemerged)
@@ -60,13 +60,13 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### WebsiteChecker.gs
-- Status: Niet gestart
+- Status: Geïmplementeerd
 - Bestandsnaam: WebsiteChecker.gs
-- Functionaliteit: Beheert het proces van het controleren van websites
+- Functionaliteit: Beheert het proces van het controleren van websites, detecteert statusveranderingen en plant controles
 - Afhankelijkheid: OpenAIService.gs, DataLayer.gs, Logger.gs
 
 ### OpenAIService.gs
-- Status: Geïmplementeerd (PR #10 open)
+- Status: Geïmplementeerd (PR #10 gemerged)
 - Bestandsnaam: OpenAIService.gs
 - Functionaliteit: Integratie met OpenAI API voor het analyseren van huisartswebsites, inclusief extractie van relevante informatie en classificatie van patiëntenstatus
 - Afhankelijkheid: Config.gs, Logger.gs
