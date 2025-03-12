@@ -46,8 +46,13 @@ Een Apps Script applicatie die huisartsenpraktijk websites monitort om te contro
    - UI.gs
    - WebsiteChecker.gs
 
-2. Maak een map "HtmlTemplates" aan in je Apps Script project
-3. Kopieer alle HTML-bestanden naar deze map
+2. Kopieer alle HTML-bestanden uit deze repository naar je Apps Script project
+   - **Belangrijk**: Apps Script ondersteunt geen submappen zoals in deze repository
+   - Hernoem de HTML-bestanden door prefix `HTML_` toe te voegen:
+     - `HtmlTemplates/Dashboard.html` → `HTML_Dashboard.html`
+     - `HtmlTemplates/Login.html` → `HTML_Login.html`
+     - `HtmlTemplates/About.html` → `HTML_About.html`
+     - etc.
 
 ### Stap 4: Configuratie instellen
 1. Open Config.gs
@@ -145,6 +150,13 @@ Zorg ervoor dat appsscript.json de volgende OAuth scopes bevat:
 - Integratie met OpenAI web search API voor website analyse
 - E-mail verzending via Gmail API
 
+### HTML-templating in Apps Script
+Apps Script heeft specifieke beperkingen voor wat betreft bestandsstructuur:
+1. Alle bestanden worden in een platte structuur opgeslagen, zonder fysieke submappen
+2. Om HTML-templates te organiseren, gebruiken we een naamconventie met een prefix (`HTML_`)
+3. De `UI.gs` module bevat een helper functie `getHtmlTemplate()` om dit consistent te hanteren
+4. Voor meer details, zie het bestand `HTML_BESTANDENINFO.md` in deze repository
+
 ## Probleemoplossing
 
 ### Veel voorkomende problemen
@@ -161,6 +173,11 @@ Zorg ervoor dat appsscript.json de volgende OAuth scopes bevat:
 3. **Toegangsproblemen**
    - Zorg ervoor dat je bent ingelogd met hetzelfde Google-account als waarmee je de app hebt gedeployed
    - Controleer of de OAuth-scopes correct zijn ingesteld
+
+4. **HTML-templates worden niet correct geladen**
+   - Controleer of je de HTML-bestanden met prefix `HTML_` hebt hernoemd
+   - Controleer of de bestanden echt in de root van het Apps Script project staan en niet in een submap
+   - Controleer de console logs voor foutmeldingen gerelateerd aan ontbrekende bestanden
 
 ### Logs bekijken
 1. Open de Google Spreadsheet
