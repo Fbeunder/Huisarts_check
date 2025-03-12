@@ -1,3 +1,4 @@
+
 <script>
   /**
    * Bij laden van de pagina
@@ -84,40 +85,53 @@
    * @param {Object} user - Gebruikersgegevens
    */
   function loadDashboard(user) {
-    // Toon de content container
-    const content = document.getElementById('content');
-    content.style.display = 'block';
-    
-    // Basiswelkomstbericht met naam en e-mail
-    const userName = user.naam || user.email.split('@')[0];
-    content.innerHTML = `
-      <div class="dashboard-header">
+    try {
+      // Toon de content container
+      const content = document.getElementById('content');
+      content.style.display = 'block';
+      
+      // Basiswelkomstbericht met naam en e-mail
+      const userName = user.naam || user.email.split('@')[0];
+      
+      // Clear bestaande content eerst
+      content.innerHTML = '';
+      
+      // Voeg dashboard header toe
+      const dashboardHeader = document.createElement('div');
+      dashboardHeader.className = 'dashboard-header';
+      dashboardHeader.innerHTML = `
         <h2>Welkom, ${userName}</h2>
         <p>U bent ingelogd als ${user.email}</p>
-      </div>
-    `;
-    
-    // Admin-sectie indien van toepassing
-    if (isAdmin) {
-      content.innerHTML += `
-        <div class="admin-panel">
+      `;
+      content.appendChild(dashboardHeader);
+      
+      // Admin-sectie indien van toepassing
+      if (isAdmin) {
+        const adminPanel = document.createElement('div');
+        adminPanel.className = 'admin-panel';
+        adminPanel.innerHTML = `
           <h3>Admin Paneel</h3>
           <p>U heeft toegang tot admin functionaliteit.</p>
           <button id="btn-admin-users">Gebruikersbeheer</button>
           <button id="btn-admin-logs">Logboek bekijken</button>
-        </div>
-      `;
-    }
-    
-    // Placeholders voor de verschillende secties van het dashboard
-    content.innerHTML += `
-      <div class="dashboard-tabs">
+        `;
+        content.appendChild(adminPanel);
+      }
+      
+      // Voeg dashboard tabs toe
+      const tabsContainer = document.createElement('div');
+      tabsContainer.className = 'dashboard-tabs';
+      tabsContainer.innerHTML = `
         <button class="tab-button active" data-tab="my-practices">Mijn Huisartsen</button>
         <button class="tab-button" data-tab="add-practice">Toevoegen</button>
         <button class="tab-button" data-tab="settings">Instellingen</button>
-      </div>
+      `;
+      content.appendChild(tabsContainer);
       
-      <div class="tab-content">
+      // Voeg tab content toe
+      const tabContent = document.createElement('div');
+      tabContent.className = 'tab-content';
+      tabContent.innerHTML = `
         <div id="my-practices" class="tab-pane active">
           <h3>Mijn Huisartsen</h3>
           <p>Hier worden uw gemonitorde huisartsenpraktijken weergegeven.</p>
@@ -167,17 +181,21 @@
             <button type="submit">Opslaan</button>
           </form>
         </div>
-      </div>
-    `;
-    
-    // Voeg event handlers toe aan de tabs
-    setupTabHandlers();
-    
-    // Laad de lijst met huisartsen
-    loadPracticesList();
-    
-    // Voeg event handlers toe aan de formulieren
-    setupFormHandlers();
+      `;
+      content.appendChild(tabContent);
+      
+      // Voeg event handlers toe aan de tabs
+      setupTabHandlers();
+      
+      // Laad de lijst met huisartsen
+      loadPracticesList();
+      
+      // Voeg event handlers toe aan de formulieren
+      setupFormHandlers();
+    } catch (error) {
+      console.error('Fout bij laden dashboard:', error);
+      showError('Er is een fout opgetreden bij het laden van het dashboard: ' + error);
+    }
   }
   
   /**
