@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <title>Huisarts Check Instellingen</title>
+    <?!= include('HtmlTemplates/Styles'); ?>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Instellingen</h2>
+      
+      <div id="loading">
+        <div class="spinner"></div>
+        <p>Instellingen laden...</p>
+      </div>
+      
+      <div id="content" style="display: none;">
+        <form id="settings-form">
+          <h3>E-mail notificaties</h3>
+          
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="notifications-enabled" name="notificationsEnabled" checked>
+              E-mail notificaties inschakelen
+            </label>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">E-mailadres voor notificaties</label>
+            <input type="email" id="email" name="email" placeholder="Wordt standaard ingevuld met je Google account e-mail">
+          </div>
+          
+          <h3>Controlefrequentie</h3>
+          
+          <div class="form-group">
+            <label for="check-frequency">Controlefrequentie</label>
+            <select id="check-frequency" name="checkFrequency">
+              <option value="daily" selected>Dagelijks</option>
+              <option value="weekly">Wekelijks</option>
+              <option value="monthly">Maandelijks</option>
+            </select>
+          </div>
+          
+          <button type="submit">Instellingen opslaan</button>
+        </form>
+        
+        <hr>
+        
+        <h3>OpenAI API Instellingen</h3>
+        <p>Deze instellingen zijn alleen beschikbaar voor beheerders.</p>
+        
+        <div id="admin-settings" style="display: none;">
+          <form id="api-settings-form">
+            <div class="form-group">
+              <label for="api-key">OpenAI API Key</label>
+              <input type="password" id="api-key" name="apiKey">
+            </div>
+            
+            <button type="submit">API Instellingen opslaan</button>
+          </form>
+        </div>
+      </div>
+      
+      <div id="success" style="display: none;" class="success">
+        <p>Instellingen succesvol opgeslagen!</p>
+      </div>
+      
+      <div id="error" style="display: none;" class="error">
+        <p id="error-message"></p>
+      </div>
+      
+      <div class="text-center mt-20">
+        <button onclick="google.script.host.close()">Sluiten</button>
+      </div>
+    </div>
+    
+    <script>
+      // Bij laden van de pagina
+      document.addEventListener('DOMContentLoaded', function() {
+        // Laad gebruikersinstellingen
+        loadSettings();
+        
+        // Stel formulierfunctionaliteit in
+        setupForms();
+      });
+      
+      // Gebruikersinstellingen laden
+      function loadSettings() {
+        // Toon loading spinner
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('content').style.display = 'none';
+        
+        // Placeholder voor het laden van instellingen
+        // In werkelijkheid zouden we hier een server-side functie aanroepen
+        setTimeout(function() {
+          // Hier zouden we de instellingen van de gebruiker laden en het formulier invullen
+          // In deze placeholder versie vullen we het formulier met standaardwaarden
+          
+          // Verberg loading spinner
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('content').style.display = 'block';
+          
+          // Check of de gebruiker een beheerder is (placeholder)
+          checkAdmin();
+        }, 1000);
+      }
+      
+      // Controleer of de gebruiker een beheerder is
+      function checkAdmin() {
+        // Placeholder functie om te controleren of de gebruiker een beheerder is
+        // In werkelijkheid zouden we hier een server-side functie aanroepen
+        
+        // Voor deze placeholder zetten we de admin sectie uit
+        document.getElementById('admin-settings').style.display = 'none';
+      }
+      
+      // Formulierfunctionaliteit instellen
+      function setupForms() {
+        // Instellingenformulier
+        const settingsForm = document.getElementById('settings-form');
+        settingsForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Hier zouden we de instellingen opslaan met een server-side functie
+          // In deze placeholder tonen we een succesbericht
+          
+          document.getElementById('success').style.display = 'block';
+          
+          // Verberg het succesbericht na 3 seconden
+          setTimeout(function() {
+            document.getElementById('success').style.display = 'none';
+          }, 3000);
+        });
+        
+        // API instellingenformulier
+        const apiSettingsForm = document.getElementById('api-settings-form');
+        apiSettingsForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Hier zouden we de API instellingen opslaan met een server-side functie
+          // In deze placeholder tonen we een foutmelding omdat het nog niet geïmplementeerd is
+          
+          document.getElementById('error').style.display = 'block';
+          document.getElementById('error-message').textContent = 
+            'Deze functionaliteit wordt geïmplementeerd in een volgende fase.';
+          
+          // Verberg de foutmelding na 3 seconden
+          setTimeout(function() {
+            document.getElementById('error').style.display = 'none';
+          }, 3000);
+        });
+      }
+    </script>
+  </body>
+</html>
