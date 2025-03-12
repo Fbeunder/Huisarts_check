@@ -1,0 +1,102 @@
+# Projectoverzicht: Huisarts open voor inschrijving
+
+## Beschrijving
+Een Apps Script applicatie die huisartsenpraktijk websites monitort om te controleren of ze nieuwe patiënten aannemen. Gebruikers kunnen zich aanmelden met hun Google account, een persoonlijke lijst met URLs van huisartsen opgeven, en worden via e-mail op de hoogte gebracht wanneer een huisarts van status verandert naar het aannemen van nieuwe patiënten.
+
+## Architectuur: Modulestructuur
+De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waarin elke module een specifieke functionaliteit afhandelt:
+
+### Modulestructuur:
+1. Main Apps Script Project
+   - Code.gs (Hoofdbestand met onEntry points)
+   - appsscript.json (Project manifest)
+
+2. Front-end Modules
+   - UI.gs (Web interface en gebruikersinteractie)
+   - HtmlTemplates/ (HTML-templates voor de web interface)
+
+3. Back-end Modules
+   - DataLayer.gs (Database interacties)
+   - WebsiteChecker.gs (Website controle functionaliteit)
+   - OpenAIService.gs (Integratie met OpenAI web search API)
+   - EmailService.gs (Email notificatie service)
+   - AuthService.gs (Google authenticatie service)
+
+4. Hulpmodules
+   - Utilities.gs (Algemene hulpfuncties)
+   - Config.gs (Configuratie-instellingen)
+   - Logger.gs (Logging functionaliteit)
+
+## Per module details:
+
+### Code.gs
+- Status: Niet gestart
+- Bestandsnaam: Code.gs
+- Functionaliteit: Bevat de hoofdentry points voor de applicatie, inclusief het starten van de UI en het instellen van triggers voor periodieke controles
+- Afhankelijkheid: Alle andere modules
+
+### appsscript.json
+- Status: Niet gestart
+- Bestandsnaam: appsscript.json
+- Functionaliteit: Manifest bestand voor Apps Script project, met benodigde API-toegang en bibliotheekverwijzingen
+- Afhankelijkheid: Geen
+
+### UI.gs
+- Status: Niet gestart
+- Bestandsnaam: UI.gs
+- Functionaliteit: Beheert de webinterface en gebruikersinteractie
+- Afhankelijkheid: HtmlTemplates/, AuthService.gs, DataLayer.gs
+
+### HtmlTemplates/
+- Status: Niet gestart
+- Bestandsnaam: Meerdere .html bestanden
+- Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface
+- Afhankelijkheid: Geen
+
+### DataLayer.gs
+- Status: Niet gestart
+- Bestandsnaam: DataLayer.gs
+- Functionaliteit: Handelt database interacties af met Google Spreadsheet als dataopslag
+- Afhankelijkheid: Config.gs, Logger.gs
+
+### WebsiteChecker.gs
+- Status: Niet gestart
+- Bestandsnaam: WebsiteChecker.gs
+- Functionaliteit: Beheert het proces van het controleren van websites
+- Afhankelijkheid: OpenAIService.gs, DataLayer.gs, Logger.gs
+
+### OpenAIService.gs
+- Status: Niet gestart
+- Bestandsnaam: OpenAIService.gs
+- Functionaliteit: Integratie met OpenAI web search API voor het analyseren van huisartswebsites
+- Afhankelijkheid: Config.gs, Logger.gs
+
+### EmailService.gs
+- Status: Niet gestart
+- Bestandsnaam: EmailService.gs
+- Functionaliteit: Beheert het verzenden van e-mailnotificaties
+- Afhankelijkheid: DataLayer.gs, Config.gs
+
+### AuthService.gs
+- Status: Niet gestart
+- Bestandsnaam: AuthService.gs
+- Functionaliteit: Handelt Google authenticatie en gebruikersbeheer af
+- Afhankelijkheid: DataLayer.gs, Config.gs
+
+### Utilities.gs
+- Status: Niet gestart
+- Bestandsnaam: Utilities.gs
+- Functionaliteit: Bevat algemene hulpfuncties die door meerdere modules worden gebruikt
+- Afhankelijkheid: Geen
+
+### Config.gs
+- Status: Niet gestart
+- Bestandsnaam: Config.gs
+- Functionaliteit: Bevat configuratie-instellingen voor de applicatie
+- Afhankelijkheid: Geen
+
+### Logger.gs
+- Status: Niet gestart
+- Bestandsnaam: Logger.gs
+- Functionaliteit: Voorziet in logging functionaliteit voor de applicatie
+- Afhankelijkheid: Config.gs
