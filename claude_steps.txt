@@ -19,14 +19,14 @@
    - Ontwikkelen van AuthService.gs
    - Instellen van Google OAuth authenticatie
    - Koppelen van gebruikersgegevens aan de datamodel
-   - STATUS: ✅ Implementatie gereed (PR #6 wacht op goedkeuring)
+   - STATUS: ✅ Voltooid (PR #6 gemerged)
 
 4. **Web interface ontwikkelen**
    - Ontwikkelen van UI.gs
    - Maken van basis HTML-templates
    - Implementeren van gebruikersregistratie en inlogscherm
    - Dashboard voor beheren van huisartsenlijst
-   - STATUS: Deels geïmplementeerd (Basistemplates in PR #2, Login en dashboard templates in PR #6), UI.gs nog ontwikkelen
+   - STATUS: In ontwikkeling (Issue #7 aangemaakt, HTML templates geïmplementeerd in PR #2 en #6)
 
 5. **OpenAI Web Search API integratie**
    - Implementeren van OpenAIService.gs
@@ -119,11 +119,11 @@
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
 - Bij de finale versie moet een volledige handleiding worden opgesteld.
 
-## Volgende stappen na PR #6:
-Na goedkeuring van PR #6 en implementatie van de authenticatiefunctionaliteit, is de volgende stap het ontwikkelen van de UI.gs module en de WebsiteChecker.gs module. Deze modules zijn essentieel voor de kernfunctionaliteit van de applicatie.
+## Volgende stappen na Issue #7:
+Na het implementeren van de UI.gs module (Issue #7), zal de volgende stap zijn om de WebsiteChecker.gs en OpenAIService.gs modules te ontwikkelen. Deze modules zijn essentieel voor de kernfunctionaliteit van de applicatie, namelijk het controleren van huisartsenpraktijk websites om te bepalen of ze nieuwe patiënten aannemen.
 
-De UI.gs module zal de verschillende HTML-templates en client-side JavaScript integreren en zorgen voor een naadloze gebruikerservaring. Deze module bouwt voort op de authenticatiefunctionaliteit van AuthService.gs en de datamanipulatie mogelijkheden van DataLayer.gs.
+De WebsiteChecker.gs module zal verantwoordelijk zijn voor het periodiek controleren van de websites en het detecteren van statusveranderingen. Deze module werkt nauw samen met de OpenAIService.gs module, die de OpenAI Web Search API zal gebruiken om de website-inhoud te analyseren en te bepalen of een praktijk nieuwe patiënten aanneemt.
 
-De WebsiteChecker.gs module zal de logica bevatten voor het daadwerkelijk controleren van huisartsenpraktijk websites. Dit vormt het hart van de applicatie en zal integreren met de OpenAI Web Search API voor de analyse van website-inhoud.
+Na de implementatie van deze modules zal de EmailService.gs module ontwikkeld worden om gebruikers te notificeren wanneer een huisarts van status verandert.
 
-Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie. Zonder een functionele gebruikersinterface en de mogelijkheid om websites te controleren, kan de applicatie zijn kerntaak niet vervullen.
+Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie. Zonder de website-controle functionaliteit en notificatiesysteem kan de applicatie zijn kerntaak niet vervullen.
