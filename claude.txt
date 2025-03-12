@@ -60,6 +60,13 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Naamgevingsconventie: HTML-bestanden hebben prefix HTML_ voor betere integratie met Apps Script
 - Afhankelijkheid: Geen
 
+### HTML_Scripts.html
+- Status: Geïmplementeerd, bugfix in behandeling (PR #26)
+- Bestandsnaam: HTML_Scripts.html
+- Functionaliteit: Bevat client-side JavaScript voor interactie met de gebruiker
+- Verbeteringen in PR #26: Oplossen van probleem met leeg scherm na inloggen
+- Afhankelijkheid: HTML-templates
+
 ### DataLayer.gs
 - Status: Geïmplementeerd en verbeterd (PR #4 gemerged, bugfix in PR #22)
 - Bestandsnaam: DataLayer.gs
