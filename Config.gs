@@ -17,7 +17,7 @@ const CONFIG = {
   
   // Database instellingen
   // ID van de Google Spreadsheet die dient als database
-  // Dit moet worden bijgewerkt nadat het spreadsheet is aangemaakt
+  // Dit wordt automatisch ingesteld bij eerste gebruik
   SPREADSHEET_ID: '',
   
   // Namen van de tabbladen in de database spreadsheet
@@ -93,16 +93,45 @@ function setOpenAIApiKey(key) {
 }
 
 /**
+ * Functie om een nieuwe database spreadsheet te maken als deze nog niet bestaat
+ * 
+ * @return {string} ID van de nieuw aangemaakte of bestaande spreadsheet
+ */
+function createDatabaseSpreadsheet() {
+  try {
+    // Maak een nieuwe spreadsheet aan
+    const spreadsheet = SpreadsheetApp.create(CONFIG.APP_NAME + ' Database');
+    const id = spreadsheet.getId();
+    
+    // Sla het ID op in de script properties
+    setSpreadsheetId(id);
+    
+    Logger.info('Nieuwe database spreadsheet aangemaakt met ID: ' + id);
+    return id;
+  } catch (error) {
+    Logger.error('Fout bij aanmaken van database spreadsheet: ' + error.toString());
+    return null;
+  }
+}
+
+/**
  * Functie om de spreadsheet-ID op te halen uit de script properties
+ * Als er nog geen ID is ingesteld, wordt automatisch een nieuwe spreadsheet aangemaakt
  * 
  * @return {string} ID van de spreadsheet
  */
 function getSpreadsheetId() {
   const scriptProperties = PropertiesService.getScriptProperties();
-  const id = scriptProperties.getProperty('SPREADSHEET_ID');
+  let id = scriptProperties.getProperty('SPREADSHEET_ID');
   
   if (!id) {
-    Logger.warning('Spreadsheet ID is niet ingesteld');
+    Logger.warning('Spreadsheet ID is niet ingesteld, aanmaken van nieuwe spreadsheet...');
+    id = createDatabaseSpreadsheet();
+    
+    if (!id) {
+      Logger.error('Kon geen nieuwe spreadsheet aanmaken');
+      throw new Error('Database kon niet worden geïnitialiseerd');
+    }
   }
   
   return id;
