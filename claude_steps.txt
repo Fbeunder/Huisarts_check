@@ -1,0 +1,110 @@
+# Ontwikkelstappen voor Huisarts open voor inschrijving
+
+## Must-haves
+
+1. **Basisprojectstructuur opzetten**
+   - Aanmaken van het Apps Script project
+   - Instellen van het appsscript.json manifest
+   - Toevoegen van benodigde OAuth scopes
+   - Toevoegen van Config.gs met basis configuratie
+
+2. **Google Spreadsheet datamodel opzetten**
+   - Opzetten van een Google Spreadsheet als database
+   - Tabellen voor gebruikers, huisartsen, en monitoring logs
+   - Implementeren van DataLayer.gs voor CRUD-operaties
+
+3. **Authenticatie implementeren**
+   - Ontwikkelen van AuthService.gs
+   - Instellen van Google OAuth authenticatie
+   - Koppelen van gebruikersgegevens aan de datamodel
+
+4. **Web interface ontwikkelen**
+   - Ontwikkelen van UI.gs
+   - Maken van basis HTML-templates
+   - Implementeren van gebruikersregistratie en inlogscherm
+   - Dashboard voor beheren van huisartsenlijst
+
+5. **OpenAI Web Search API integratie**
+   - Implementeren van OpenAIService.gs
+   - API key management
+   - Functionaliteit voor het controleren van website inhoud
+
+6. **Website monitoring systeem**
+   - Ontwikkelen van WebsiteChecker.gs
+   - Logica voor het periodiek controleren van websites
+   - Detecteren van veranderingen in status
+   - Zorgen dat websites niet dubbel worden gecontroleerd
+
+7. **Email notificatie systeem**
+   - Ontwikkelen van EmailService.gs
+   - Templates voor notificatie emails
+   - Systeem voor het verzenden van notificaties bij statuswijzigingen
+
+8. **Logging en error handling**
+   - Implementeren van Logger.gs
+   - Foutafhandeling in alle modules
+   - Gebruikersgerichte foutmeldingen in UI
+
+9. **Triggers en scheduling**
+   - Instellen van periodieke controles via triggers
+   - Optimalisatie van controlefrequentie
+   - Balanceren van API-aanroepen voor kostenefficiëntie
+
+10. **Testen en bugfixing**
+    - End-to-end testen van de applicatie
+    - Foutscenario's testen
+    - Oplossen van bugs
+
+## Nice-to-haves
+
+1. **Geavanceerde gebruikersinstellingen**
+   - Aanpasbare controlefrequentie per website
+   - Prioriteiten voor websites instellen
+   - Mogelijkheid voor gebruikers om notificatie-instellingen aan te passen
+
+2. **Dashboard met statistieken**
+   - Visualisatie van controlegeschiedenis
+   - Statistieken over statusveranderingen
+   - Trends in beschikbaarheid van huisartsen
+
+3. **Verbeterde context-analyse**
+   - Meer gedetailleerde informatie uit websites halen
+   - Beter begrijpen van specifieke inschrijvingsvoorwaarden
+   - Detectie van wachtlijsten en geschatte wachttijden
+
+4. **Multi-taal ondersteuning**
+   - Nederlands en Engels als ondersteunde talen
+   - Vertalingen voor gebruikersinterface en notificaties
+
+5. **Admin-dashboard**
+   - Overzicht van alle gebruikers en gemonitorde websites
+   - Mogelijkheid om systeeminstellingen aan te passen
+   - Monitoring van API-gebruik en kosten
+
+6. **Export-functionaliteit**
+   - Exporteren van resultaten naar CSV/Excel
+   - Rapporten genereren over beschikbaarheid
+
+7. **Mobile-friendly interface**
+   - Responsieve design voor de webinterface
+   - Optimalisatie voor mobiele apparaten
+
+8. **Documentatie**
+   - Gebruikershandleiding
+   - Installatie-instructies voor beheerders
+   - API-documentatie
+
+9. **Integratie met andere systemen**
+   - Webhooks voor integratie met andere applicaties
+   - API voor toegang tot de data
+
+10. **Performantie-optimalisaties**
+    - Caching van resultaten
+    - Optimalisatie van database-queries
+    - Efficiënter gebruik van API-calls
+
+## Opmerkingen:
+- Script ID is nog niet bekend, dit moet opgevraagd worden nadat het Apps Script project is aangemaakt.
+- Voor het gebruik van de OpenAI Web Search API is een API key nodig, die veilig moet worden opgeslagen.
+- Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
+- Bij de finale versie moet een volledige handleiding worden opgesteld.
