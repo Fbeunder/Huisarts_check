@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <title>Inloggen - Huisarts Check</title>
+    <?!= include('HTML_Styles'); ?>
+  </head>
+  <body>
+    <div class="container login-container">
+      <h1>Huisarts Check</h1>
+      <div class="login-card">
+        <h2>Inloggen</h2>
+        <p>Log in met je Google account om toegang te krijgen tot de Huisarts Check.</p>
+        
+        <? if (errorMessage) { ?>
+          <div class="error-message">
+            <p><?= errorMessage ?></p>
+          </div>
+        <? } ?>
+        
+        <div class="login-button">
+          <a href="<?= authUrl ?>" class="google-login-button">
+            <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google" width="20" height="20">
+            Inloggen met Google
+          </a>
+        </div>
+        
+        <div class="login-info">
+          <p>We gebruiken je Google account enkel voor authenticatie en om je op de hoogte te houden van veranderingen in huisartsenpraktijk status.</p>
+        </div>
+      </div>
+      
+      <div class="about-link">
+        <a href="javascript:void(0)" onclick="loadAboutPage()">Over de Huisarts Check</a>
+      </div>
+    </div>
+    
+    <script>
+      function loadAboutPage() {
+        // Navigeer naar de over-pagina
+        window.location.href = '<?= ScriptApp.getService().getUrl(); ?>?page=about';
+      }
+    </script>
+  </body>
+</html>
