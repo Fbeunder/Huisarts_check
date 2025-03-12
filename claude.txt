@@ -63,7 +63,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Status: Geïmplementeerd
 - Bestandsnaam: WebsiteChecker.gs
 - Functionaliteit: Beheert het proces van het controleren van websites, detecteert statusveranderingen en plant controles
-- Afhankelijkheid: OpenAIService.gs, DataLayer.gs, Logger.gs
+- Afhankelijkheid: OpenAIService.gs, DataLayer.gs, Logger.gs, EmailService.gs
 
 ### OpenAIService.gs
 - Status: Geïmplementeerd (PR #10 gemerged)
@@ -72,10 +72,10 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### EmailService.gs
-- Status: Niet gestart
+- Status: Geïmplementeerd (PR #14 in review)
 - Bestandsnaam: EmailService.gs
-- Functionaliteit: Beheert het verzenden van e-mailnotificaties
-- Afhankelijkheid: DataLayer.gs, Config.gs
+- Functionaliteit: Beheert het verzenden van e-mailnotificaties aan gebruikers bij statuswijzigingen, inclusief HTML-templates en gebruikersvoorkeuren
+- Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### AuthService.gs
 - Status: Geïmplementeerd (PR #6 gemerged)
