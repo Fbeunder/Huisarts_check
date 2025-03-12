@@ -12,12 +12,16 @@
    * - Verbeterde foutafhandeling
    * - Verbeterd: Robuustere controle van authenticatiestatus is null/undefined
    * - Verbeterd: Duidelijkere foutmeldingen bij authenticatieproblemen
+   * - Toegevoegd: Verbeterde foutdetectie voor web-client-content-script.js
+   * - Toegevoegd: Automatische herstelpogingen bij authenticatieproblemen
    */
 
   // Globale variabelen voor applicatiestatus
   let currentUser = null;
   let isAdmin = false;
   let appInitialized = false;
+  let authRetryCount = 0;
+  const MAX_AUTH_RETRIES = 3;
 
   /**
    * Bij laden van de pagina
@@ -61,6 +65,9 @@
         throw new Error("Error element niet gevonden in DOM");
       }
       
+      // Installeer globale error handlers om te helpen bij het debuggen
+      installGlobalErrorHandlers();
+      
       // Toon loading spinner tijdens initialisatie
       showLoading(true);
       
@@ -101,10 +108,26 @@
   }
   
   /**
+   * Installeer globale error handlers voor betere debugging
+   */
+  function installGlobalErrorHandlers() {
+    // Globale error handler voor onafgevangen fouten
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.error("[GLOBAL-ERROR]", message, "bij", source, "lijn:", lineno, ":", error);
+      return false; // Laat de browser de fout ook standaard afhandelen
+    };
+    
+    // Handler voor onafgevangen Promise-fouten
+    window.addEventListener('unhandledrejection', function(event) {
+      console.error("[PROMISE-ERROR] Onafgevangen Promise-fout:", event.reason);
+    });
+  }
+  
+  /**
    * Controleert de authenticatiestatus van de gebruiker
    */
   function checkAuthentication() {
-    console.log("[AUTH] Authenticatiecontrole gestart");
+    console.log("[AUTH] Authenticatiecontrole gestart (poging " + (authRetryCount + 1) + "/" + MAX_AUTH_RETRIES + ")");
     
     // Toon loading indicator
     showLoading(true);
@@ -116,18 +139,9 @@
           try {
             console.log("[AUTH] Authenticatiecontrole resultaat ontvangen:", authStatus);
             
-            // Verbeterde controle: Controleer eerst of authStatus bestaat
-            if (authStatus === null || authStatus === undefined) {
-              console.error("[AUTH-WARNING] Authenticatiestatus is null of undefined");
-              showLoading(false);
-              showError("Authenticatiefout: Geen geldige status ontvangen. Probeer de pagina te vernieuwen of log opnieuw in.");
-              
-              // Probeer opnieuw in te loggen na korte delay
-              setTimeout(function() {
-                console.log("[AUTH] Authenticatie opnieuw proberen na null/undefined status");
-                window.location.reload();
-              }, 3000);
-              
+            // BUGFIX: Verbeterde controle voor null/undefined authStatus
+            if (!authStatus) {
+              handleAuthenticationError("Authenticatiestatus is null of undefined");
               return;
             }
             
@@ -135,6 +149,7 @@
             if (authStatus.loggedIn === true && authStatus.user) {
               // Gebruiker is ingelogd
               console.log("[AUTH] Gebruiker is ingelogd, gebruikersinterface initialiseren");
+              authRetryCount = 0; // Reset retry counter bij succes
               currentUser = authStatus.user;
               isAdmin = !!authStatus.isAdmin;
               
@@ -148,33 +163,65 @@
               window.top.location.href = authStatus.authUrl;
             } else if (authStatus.errorMessage) {
               // Er is een specifieke foutmelding
-              console.error("[AUTH-ERROR] Authenticatiefout:", authStatus.errorMessage);
-              showLoading(false);
-              showError("Authenticatiefout: " + authStatus.errorMessage + ". Probeer de pagina te vernieuwen of log opnieuw in.");
+              handleAuthenticationError(authStatus.errorMessage);
             } else {
               // Onbekende authenticatiestatus (wel een object, maar geen herkenbare velden)
-              console.error("[AUTH-ERROR] Onbekende of ongeldige authenticatiestatus structuur");
-              showLoading(false);
-              showError("Authenticatiefout: Onbekende status. Probeer de pagina te vernieuwen of log opnieuw in.");
+              handleAuthenticationError("Onbekende of ongeldige authenticatiestatus structuur");
             }
           } catch (innerError) {
             // Extra veiligheid: vang uitzonderingen in de successHandler op
             console.error("[AUTH-ERROR] Fout in authenticatie successHandler:", innerError);
-            showLoading(false);
-            showError("Interne authenticatiefout: " + innerError.message + ". Probeer de pagina te vernieuwen.");
+            handleAuthenticationError("Interne authenticatiefout: " + innerError.message);
           }
         })
         .withFailureHandler(function(error) {
           console.error("[AUTH-ERROR] Authenticatiecontrole mislukt:", error);
-          showLoading(false);
-          showError("Authenticatiefout: " + (error.message || error) + ". Probeer het later opnieuw.");
+          handleAuthenticationError("Authenticatiefout: " + (error.message || error));
         })
         .checkLoginStatus();
     } catch (error) {
       // Vang eventuele fouten op bij het aanroepen van google.script.run
       console.error("[AUTH-ERROR] Kon authenticatiefunctie niet aanroepen:", error);
-      showLoading(false);
-      showError("Kon niet verbinden met de server. Controleer uw internetverbinding en probeer het opnieuw.");
+      handleAuthenticationError("Kon niet verbinden met de server. Controleer uw internetverbinding.");
+    }
+  }
+  
+  /**
+   * Centrale functie voor het afhandelen van authenticatiefouten
+   * 
+   * @param {string} errorMessage - De foutmelding
+   */
+  function handleAuthenticationError(errorMessage) {
+    console.error("[AUTH-ERROR]", errorMessage);
+    showLoading(false);
+    
+    // Toon gebruiksvriendelijke foutmelding
+    showError("Authenticatiefout: " + errorMessage + ". Probeer de pagina te vernieuwen of log opnieuw in.");
+    
+    // Probeer automatisch te herstellen van de fout
+    if (authRetryCount < MAX_AUTH_RETRIES) {
+      authRetryCount++;
+      const retryDelay = authRetryCount * 2000; // Toenemende wachttijd tussen pogingen
+      
+      console.log("[AUTH] Automatische herpoging over " + (retryDelay/1000) + " seconden (poging " + authRetryCount + "/" + MAX_AUTH_RETRIES + ")");
+      
+      setTimeout(function() {
+        // Herlaad de pagina als we het maximale aantal retries bereiken
+        if (authRetryCount >= MAX_AUTH_RETRIES) {
+          console.log("[AUTH] Maximaal aantal herpogingen bereikt, pagina herladen");
+          window.location.reload();
+        } else {
+          console.log("[AUTH] Nieuwe poging tot authenticatie");
+          checkAuthentication();
+        }
+      }, retryDelay);
+    } else {
+      console.log("[AUTH] Maximaal aantal herpogingen bereikt, pagina herladen over 5 seconden");
+      
+      // Als alle retries mislukken, herlaad de pagina na 5 seconden
+      setTimeout(function() {
+        window.location.reload();
+      }, 5000);
     }
   }
   
@@ -510,36 +557,47 @@
     practicesList.innerHTML = '<div class="spinner"></div><p>Laden...</p>';
     
     // Haal praktijken op van server
-    google.script.run
-      .withSuccessHandler(function(practices) {
-        console.log("[DATA] Praktijken succesvol opgehaald:", practices);
-        
-        if (!practices || practices.length === 0) {
-          // Geen praktijken gevonden
+    try {
+      google.script.run
+        .withSuccessHandler(function(practices) {
+          console.log("[DATA] Praktijken succesvol opgehaald:", practices);
+          
+          if (!practices || practices.length === 0) {
+            // Geen praktijken gevonden
+            practicesList.innerHTML = `
+              <div class="empty-state">
+                <p>U heeft nog geen huisartsenpraktijken toegevoegd.</p>
+                <p>Ga naar de "Toevoegen" tab om te beginnen.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          // Bouw de lijst met praktijken
+          renderPracticesList(practicesList, practices);
+        })
+        .withFailureHandler(function(error) {
+          console.error("[DATA-ERROR] Fout bij ophalen praktijken:", error);
+          
           practicesList.innerHTML = `
-            <div class="empty-state">
-              <p>U heeft nog geen huisartsenpraktijken toegevoegd.</p>
-              <p>Ga naar de "Toevoegen" tab om te beginnen.</p>
+            <div class="error-state">
+              <p>Er is een fout opgetreden bij het ophalen van uw huisartsenpraktijken:</p>
+              <p>${error}</p>
+              <button onclick="loadPracticesList()">Opnieuw proberen</button>
             </div>
           `;
-          return;
-        }
-        
-        // Bouw de lijst met praktijken
-        renderPracticesList(practicesList, practices);
-      })
-      .withFailureHandler(function(error) {
-        console.error("[DATA-ERROR] Fout bij ophalen praktijken:", error);
-        
-        practicesList.innerHTML = `
-          <div class="error-state">
-            <p>Er is een fout opgetreden bij het ophalen van uw huisartsenpraktijken:</p>
-            <p>${error}</p>
-            <button onclick="loadPracticesList()">Opnieuw proberen</button>
-          </div>
-        `;
-      })
-      .getPracticesByUser(currentUser.userId);
+        })
+        .getPracticesByUser(currentUser.userId);
+    } catch (error) {
+      console.error("[DATA-ERROR] Fout bij aanroepen getPracticesByUser:", error);
+      practicesList.innerHTML = `
+        <div class="error-state">
+          <p>Kon geen verbinding maken met de server:</p>
+          <p>${error.message || error}</p>
+          <button onclick="loadPracticesList()">Opnieuw proberen</button>
+        </div>
+      `;
+    }
   }
   
   /**
@@ -667,44 +725,56 @@
     }
     
     // Verstuur data naar server
-    google.script.run
-      .withSuccessHandler(function(result) {
-        console.log("[ACTION] Praktijk succesvol toegevoegd:", result);
-        
-        // Reset formulier
-        form.reset();
-        
-        // Schakel submit knop weer in
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = 'Toevoegen';
-        }
-        
-        // Ga terug naar praktijkenlijst tab
-        const practicesTab = document.querySelector('.tab-button[data-tab="my-practices"]');
-        if (practicesTab) {
-          practicesTab.click();
-        }
-        
-        // Ververs praktijkenlijst
-        loadPracticesList();
-        
-        // Toon bevestiging
-        showNotification("Huisartsenpraktijk succesvol toegevoegd");
-      })
-      .withFailureHandler(function(error) {
-        console.error("[ACTION-ERROR] Fout bij toevoegen praktijk:", error);
-        
-        // Schakel submit knop weer in
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = 'Toevoegen';
-        }
-        
-        // Toon foutmelding
-        showError("Fout bij toevoegen: " + error);
-      })
-      .createPractice(formData);
+    try {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log("[ACTION] Praktijk succesvol toegevoegd:", result);
+          
+          // Reset formulier
+          form.reset();
+          
+          // Schakel submit knop weer in
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Toevoegen';
+          }
+          
+          // Ga terug naar praktijkenlijst tab
+          const practicesTab = document.querySelector('.tab-button[data-tab="my-practices"]');
+          if (practicesTab) {
+            practicesTab.click();
+          }
+          
+          // Ververs praktijkenlijst
+          loadPracticesList();
+          
+          // Toon bevestiging
+          showNotification("Huisartsenpraktijk succesvol toegevoegd");
+        })
+        .withFailureHandler(function(error) {
+          console.error("[ACTION-ERROR] Fout bij toevoegen praktijk:", error);
+          
+          // Schakel submit knop weer in
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Toevoegen';
+          }
+          
+          // Toon foutmelding
+          showError("Fout bij toevoegen: " + error);
+        })
+        .createPractice(formData);
+    } catch (error) {
+      console.error("[ACTION-ERROR] Fout bij aanroepen createPractice:", error);
+      // Schakel submit knop weer in
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Toevoegen';
+      }
+      
+      // Toon foutmelding
+      showError("Fout bij toevoegen: " + (error.message || error));
+    }
   }
   
   /**
@@ -730,37 +800,49 @@
     }
     
     // Verstuur data naar server
-    google.script.run
-      .withSuccessHandler(function(updatedUser) {
-        console.log("[ACTION] Instellingen succesvol bijgewerkt:", updatedUser);
-        
-        // Update gebruikersgegevens
-        if (updatedUser) {
-          currentUser = updatedUser;
-        }
-        
-        // Schakel submit knop weer in
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = 'Opslaan';
-        }
-        
-        // Toon bevestiging
-        showNotification("Instellingen succesvol opgeslagen");
-      })
-      .withFailureHandler(function(error) {
-        console.error("[ACTION-ERROR] Fout bij opslaan instellingen:", error);
-        
-        // Schakel submit knop weer in
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = 'Opslaan';
-        }
-        
-        // Toon foutmelding
-        showError("Fout bij opslaan: " + error);
-      })
-      .updateCurrentUserSettings(formData);
+    try {
+      google.script.run
+        .withSuccessHandler(function(updatedUser) {
+          console.log("[ACTION] Instellingen succesvol bijgewerkt:", updatedUser);
+          
+          // Update gebruikersgegevens
+          if (updatedUser) {
+            currentUser = updatedUser;
+          }
+          
+          // Schakel submit knop weer in
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Opslaan';
+          }
+          
+          // Toon bevestiging
+          showNotification("Instellingen succesvol opgeslagen");
+        })
+        .withFailureHandler(function(error) {
+          console.error("[ACTION-ERROR] Fout bij opslaan instellingen:", error);
+          
+          // Schakel submit knop weer in
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Opslaan';
+          }
+          
+          // Toon foutmelding
+          showError("Fout bij opslaan: " + error);
+        })
+        .updateCurrentUserSettings(formData);
+    } catch (error) {
+      console.error("[ACTION-ERROR] Fout bij aanroepen updateCurrentUserSettings:", error);
+      // Schakel submit knop weer in
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Opslaan';
+      }
+      
+      // Toon foutmelding
+      showError("Fout bij opslaan: " + (error.message || error));
+    }
   }
   
   /**
@@ -770,8 +852,36 @@
    */
   function handleCheckPractice(practiceId) {
     console.log("[ACTION] Controleren praktijk:", practiceId);
-    showNotification("Controle functionaliteit wordt binnenkort geïmplementeerd");
-    // TODO: Implementeren wanneer WebsiteChecker gereed is
+    
+    // Toon loading notification
+    showNotification("Controle starten voor praktijk...");
+    
+    // Call server-side functie om de praktijk te controleren
+    try {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log("[ACTION] Controleresultaat:", result);
+          
+          if (result && result.success) {
+            // Update de UI met het resultaat
+            showNotification("Controle voltooid: " + (result.message || "Status bijgewerkt"));
+            
+            // Ververs de praktijkenlijst om de nieuwe status te tonen
+            loadPracticesList();
+          } else {
+            // Toon foutmelding als de controle niet succesvol was
+            showError("Controle mislukt: " + (result.message || "Onbekende fout"));
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error("[ACTION-ERROR] Fout bij controleren praktijk:", error);
+          showError("Fout bij controleren: " + error);
+        })
+        .checkPracticeNow(practiceId);
+    } catch (error) {
+      console.error("[ACTION-ERROR] Fout bij aanroepen checkPracticeNow:", error);
+      showError("Fout bij controleren: " + (error.message || error));
+    }
   }
   
   /**
@@ -795,25 +905,30 @@
     
     if (confirm("Weet u zeker dat u deze huisartsenpraktijk wilt verwijderen?")) {
       // Verstuur verwijderverzoek naar server
-      google.script.run
-        .withSuccessHandler(function(success) {
-          console.log("[ACTION] Verwijderen praktijk resultaat:", success);
-          
-          if (success) {
-            // Ververs praktijkenlijst
-            loadPracticesList();
+      try {
+        google.script.run
+          .withSuccessHandler(function(success) {
+            console.log("[ACTION] Verwijderen praktijk resultaat:", success);
             
-            // Toon bevestiging
-            showNotification("Huisartsenpraktijk succesvol verwijderd");
-          } else {
-            showError("Kon de huisartsenpraktijk niet verwijderen");
-          }
-        })
-        .withFailureHandler(function(error) {
-          console.error("[ACTION-ERROR] Fout bij verwijderen praktijk:", error);
-          showError("Fout bij verwijderen: " + error);
-        })
-        .deletePractice(practiceId);
+            if (success) {
+              // Ververs praktijkenlijst
+              loadPracticesList();
+              
+              // Toon bevestiging
+              showNotification("Huisartsenpraktijk succesvol verwijderd");
+            } else {
+              showError("Kon de huisartsenpraktijk niet verwijderen");
+            }
+          })
+          .withFailureHandler(function(error) {
+            console.error("[ACTION-ERROR] Fout bij verwijderen praktijk:", error);
+            showError("Fout bij verwijderen: " + error);
+          })
+          .deletePractice(practiceId);
+      } catch (error) {
+        console.error("[ACTION-ERROR] Fout bij aanroepen deletePractice:", error);
+        showError("Fout bij verwijderen: " + (error.message || error));
+      }
     }
   }
   
@@ -915,16 +1030,55 @@
    * Voorkomt dat de MutationObserver wordt gebruikt op niet-bestaande elementen
    */
   if (typeof MutationObserver !== 'undefined') {
-    const originalObserve = MutationObserver.prototype.observe;
-    
-    MutationObserver.prototype.observe = function(target, options) {
-      if (!target || !(target instanceof Node)) {
-        console.warn("[OBSERVE-FIX] Poging om MutationObserver te gebruiken op ongeldige target");
-        return; // Voorkom de fout door de observe niet uit te voeren
-      }
-      return originalObserve.call(this, target, options);
-    };
-    
-    console.log("[PATCH] MutationObserver.observe is gepatcht voor veiligere operatie");
+    try {
+      const originalObserve = MutationObserver.prototype.observe;
+      
+      // Vervang de originele observe functie met onze veilige versie
+      MutationObserver.prototype.observe = function(target, options) {
+        // Controleer of target een geldige DOM node is
+        if (!target || !(target instanceof Node)) {
+          console.warn("[OBSERVE-FIX] Poging om MutationObserver te gebruiken op ongeldige target gedetecteerd en geblokkeerd");
+          return; // Voorkom de fout door de observe niet uit te voeren
+        }
+        
+        // Als target geldig is, roep de originele functie aan
+        return originalObserve.call(this, target, options);
+      };
+      
+      console.log("[PATCH] MutationObserver.observe is gepatcht voor veiligere operatie");
+    } catch (error) {
+      console.error("[PATCH-ERROR] Kon MutationObserver.observe niet patchen:", error);
+    }
+  } else {
+    console.warn("[OBSERVE-FIX] MutationObserver is niet beschikbaar in deze browser");
   }
+  
+  /**
+   * Detecteert en ondervangt fouten in Google Cloud externe scripts
+   */
+  function patchContentScripts() {
+    try {
+      // Zoek naar <iframe> elementen die externe scripts laden
+      const iframes = document.querySelectorAll('iframe');
+      
+      iframes.forEach(iframe => {
+        if (iframe && iframe.src && iframe.src.includes('web-client-content-script.js')) {
+          console.log("[PATCH] Externe content script iframe gedetecteerd, veiligheidshandlers toevoegen");
+          
+          // Vang fouten op die afkomstig zijn van het iframe
+          iframe.onerror = function(error) {
+            console.warn("[IFRAME-ERROR] Fout in extern script:", error);
+            return true; // Voorkom dat de fout zich verder verspreidt
+          };
+        }
+      });
+      
+      console.log("[PATCH] Content script error handlers geïnstalleerd");
+    } catch (error) {
+      console.error("[PATCH-ERROR] Kon content scripts niet patchen:", error);
+    }
+  }
+  
+  // Voer de content script patch uit na een korte vertraging
+  setTimeout(patchContentScripts, 1000);
 </script>
