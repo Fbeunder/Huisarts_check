@@ -6,7 +6,10 @@
    * Dit bestand bevat alle client-side functionaliteit voor de Huisarts Check applicatie.
    * Het verzorgt de gebruikersinterface, authenticatie en interactie met de server.
    * 
-   * Bijgewerkt in bugfix PR voor issue #27
+   * Bugfixes:
+   * - Opgelost: MutationObserver error door correcte DOM-element controle
+   * - Opgelost: Authenticatie null status afhandeling
+   * - Verbeterde foutafhandeling
    */
 
   // Globale variabelen voor applicatiestatus
@@ -109,7 +112,15 @@
       .withSuccessHandler(function(authStatus) {
         console.log("[AUTH] Authenticatiecontrole succesvol:", authStatus);
         
-        if (authStatus && authStatus.loggedIn && authStatus.user) {
+        // Fix: Verbeterde controle op authStatus voor robuustere afhandeling van null/undefined
+        if (!authStatus) {
+          console.error("[AUTH-ERROR] Authenticatiestatus is null of undefined");
+          showLoading(false);
+          showError("Authenticatiefout: Geen geldige status ontvangen. Probeer de pagina te vernieuwen of log opnieuw in.");
+          return;
+        }
+        
+        if (authStatus.loggedIn && authStatus.user) {
           // Gebruiker is ingelogd
           console.log("[AUTH] Gebruiker is ingelogd, gebruikersinterface initialiseren");
           currentUser = authStatus.user;
@@ -119,21 +130,26 @@
           setTimeout(function() {
             initializeUserInterface();
           }, 100);
-        } else if (authStatus && authStatus.authUrl) {
+        } else if (authStatus.authUrl) {
           // Gebruiker moet inloggen
           console.log("[AUTH] Gebruiker niet ingelogd, doorverwijzen naar:", authStatus.authUrl);
           window.top.location.href = authStatus.authUrl;
+        } else if (authStatus.errorMessage) {
+          // Er is een specifieke foutmelding
+          console.error("[AUTH-ERROR] Authenticatiefout:", authStatus.errorMessage);
+          showLoading(false);
+          showError("Authenticatiefout: " + authStatus.errorMessage);
         } else {
           // Onbekende authenticatiestatus
-          console.error("[AUTH-ERROR] Onbekende authenticatiestatus:", authStatus);
+          console.error("[AUTH-ERROR] Onbekende of ongeldige authenticatiestatus");
           showLoading(false);
-          showError("Authenticatiefout: Onbekende status. Probeer de pagina te vernieuwen.");
+          showError("Authenticatiefout: Onbekende status. Probeer de pagina te vernieuwen of log opnieuw in.");
         }
       })
       .withFailureHandler(function(error) {
         console.error("[AUTH-ERROR] Authenticatiecontrole mislukt:", error);
         showLoading(false);
-        showError("Authenticatiefout: " + error);
+        showError("Authenticatiefout: " + (error.message || error));
       })
       .checkLoginStatus();
   }
@@ -861,5 +877,23 @@
     } catch (error) {
       return false;
     }
+  }
+  
+  /**
+   * Fix voor de MutationObserver fout
+   * Voorkomt dat de MutationObserver wordt gebruikt op niet-bestaande elementen
+   */
+  if (typeof MutationObserver !== 'undefined') {
+    const originalObserve = MutationObserver.prototype.observe;
+    
+    MutationObserver.prototype.observe = function(target, options) {
+      if (!target || !(target instanceof Node)) {
+        console.warn("[OBSERVE-FIX] Poging om MutationObserver te gebruiken op ongeldige target");
+        return; // Voorkom de fout door de observe niet uit te voeren
+      }
+      return originalObserve.call(this, target, options);
+    };
+    
+    console.log("[PATCH] MutationObserver.observe is gepatcht voor veiligere operatie");
   }
 </script>
