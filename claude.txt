@@ -30,7 +30,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 ## Per module details:
 
 ### Code.gs
-- Status: Geïmplementeerd en bijgewerkt (PR #8 open)
+- Status: Geïmplementeerd en gemerged
 - Bestandsnaam: Code.gs
 - Functionaliteit: Bevat de hoofdentry points voor de applicatie, inclusief het starten van de UI en het instellen van triggers voor periodieke controles
 - Afhankelijkheid: UI.gs, AuthService.gs, DataLayer.gs, Logger.gs
@@ -42,7 +42,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### UI.gs
-- Status: Geïmplementeerd (PR #8 open)
+- Status: Geïmplementeerd (PR #8 gemerged)
 - Bestandsnaam: UI.gs
 - Functionaliteit: Beheert de webinterface en gebruikersinteractie, rendert verschillende pagina's en afhandelt formulierverwerking
 - Afhankelijkheid: HtmlTemplates/, AuthService.gs, DataLayer.gs, Logger.gs
@@ -66,9 +66,9 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: OpenAIService.gs, DataLayer.gs, Logger.gs
 
 ### OpenAIService.gs
-- Status: Niet gestart
+- Status: Geïmplementeerd (PR #10 open)
 - Bestandsnaam: OpenAIService.gs
-- Functionaliteit: Integratie met OpenAI web search API voor het analyseren van huisartswebsites
+- Functionaliteit: Integratie met OpenAI API voor het analyseren van huisartswebsites, inclusief extractie van relevante informatie en classificatie van patiëntenstatus
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### EmailService.gs
