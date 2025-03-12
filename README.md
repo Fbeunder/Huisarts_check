@@ -54,39 +54,49 @@ Een Apps Script applicatie die huisartsenpraktijk websites monitort om te contro
      - `HtmlTemplates/About.html` → `HTML_About.html`
      - etc.
 
-### Stap 4: Configuratie instellen
-1. Open Config.gs
-2. Vul de volgende parameters in:
-   - Zorg dat de tabbladen precies overeenkomen met de namen die je in de spreadsheet hebt aangemaakt
+### Stap 4: appsscript.json configureren
+Het appsscript.json bestand bevat essentiële project instellingen en OAuth scopes. Dit is een verborgen bestand dat je als volgt kunt instellen:
 
-### Stap 5: API-sleutels configureren
-1. Ga naar Project Settings (tandwiel pictogram) > Script properties
-2. Klik op "Add script property"
-3. Voeg de volgende properties toe:
-   - Naam: SPREADSHEET_ID, Waarde: [ID van je spreadsheet]
-   - Naam: OPENAI_API_KEY, Waarde: [je OpenAI API-sleutel]
+1. In de Apps Script editor, klik op het Projectinstellingen (⚙️) icoon
+2. Klik op het tabblad "Projectmanifest bewerken" (of "Edit Project Manifest")
+3. Vervang de bestaande code met de inhoud van het appsscript.json bestand uit deze repository:
 
-### Stap 6: OAuth Scopes instellen
-Zorg ervoor dat appsscript.json de volgende OAuth scopes bevat:
 ```json
 {
   "timeZone": "Europe/Amsterdam",
   "dependencies": {},
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
-  "webapp": {
-    "access": "ANYONE",
-    "executeAs": "USER_DEPLOYING"
-  },
   "oauthScopes": [
-    "https://www.googleapis.com/auth/script.scriptapp",
     "https://www.googleapis.com/auth/script.container.ui",
     "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/gmail.send",
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/script.scriptapp",
+    "https://www.googleapis.com/auth/script.external_request",
     "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/gmail.send"
-  ]
+    "https://www.googleapis.com/auth/userinfo.profile"
+  ],
+  "webapp": {
+    "access": "ANYONE",
+    "executeAs": "USER_ACCESSING"
+  }
 }
 ```
+
+4. Klik op "Opslaan"
+
+### Stap 5: Configuratie instellen
+1. Open Config.gs
+2. Vul de volgende parameters in:
+   - Zorg dat de tabbladen precies overeenkomen met de namen die je in de spreadsheet hebt aangemaakt
+
+### Stap 6: API-sleutels configureren
+1. Ga naar Project Settings (tandwiel pictogram) > Script properties
+2. Klik op "Add script property"
+3. Voeg de volgende properties toe:
+   - Naam: SPREADSHEET_ID, Waarde: [ID van je spreadsheet]
+   - Naam: OPENAI_API_KEY, Waarde: [je OpenAI API-sleutel]
 
 ### Stap 7: Project deployen
 1. Klik op "Deploy" > "New deployment"
@@ -172,7 +182,8 @@ Apps Script heeft specifieke beperkingen voor wat betreft bestandsstructuur:
 
 3. **Toegangsproblemen**
    - Zorg ervoor dat je bent ingelogd met hetzelfde Google-account als waarmee je de app hebt gedeployed
-   - Controleer of de OAuth-scopes correct zijn ingesteld
+   - Controleer of de OAuth-scopes correct zijn ingesteld in appsscript.json
+   - Als je een "This app isn't verified" melding krijgt, klik op "Advanced" en dan "Go to [App Name] (unsafe)"
 
 4. **HTML-templates worden niet correct geladen**
    - Controleer of je de HTML-bestanden met prefix `HTML_` hebt hernoemd
