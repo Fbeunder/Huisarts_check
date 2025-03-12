@@ -1,0 +1,135 @@
+<script>
+  /**
+   * Bij laden van de pagina
+   */
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialiseer de applicatie
+    init();
+  });
+  
+  /**
+   * Initialisatiefunctie voor de applicatie
+   */
+  function init() {
+    // Controleer authenticatie status
+    checkAuth();
+  }
+  
+  /**
+   * Controleert of de gebruiker is geauthenticeerd
+   * en laadt de juiste weergave op basis daarvan
+   */
+  function checkAuth() {
+    // Toon loading spinner
+    showLoading(true);
+    
+    // Server-side functie aanroepen om authenticatie te controleren
+    google.script.run
+      .withSuccessHandler(function(user) {
+        // Verberg loading spinner
+        showLoading(false);
+        
+        if (user && user.email) {
+          // Gebruiker is ingelogd, laad het dashboard
+          loadDashboard(user);
+        } else {
+          // Gebruiker is niet ingelogd, laad het login scherm
+          loadLoginScreen();
+        }
+      })
+      .withFailureHandler(function(error) {
+        // Verberg loading spinner
+        showLoading(false);
+        
+        // Toon foutmelding
+        showError('Er is een fout opgetreden bij het controleren van de authenticatie: ' + error);
+      })
+      .getCurrentUser();
+  }
+  
+  /**
+   * Laadt het dashboard met gebruikersgegevens
+   * 
+   * @param {Object} user - Gebruikersgegevens
+   */
+  function loadDashboard(user) {
+    // Placeholder voor dashboard
+    const content = document.getElementById('content');
+    content.innerHTML = '<h2>Welkom, ' + user.email + '</h2>' +
+                         '<p>Het dashboard wordt geladen...</p>';
+    content.style.display = 'block';
+    
+    // Server-side functie aanroepen om dashboard data te laden
+    // In deze initiële versie is dit nog een placeholder
+    setTimeout(function() {
+      content.innerHTML += '<p>Dashboard functionaliteit wordt geïmplementeerd in een volgende fase.</p>';
+    }, 1000);
+  }
+  
+  /**
+   * Laadt het login scherm
+   */
+  function loadLoginScreen() {
+    const content = document.getElementById('content');
+    content.innerHTML = '<h2>Inloggen</h2>' +
+                         '<p>Log in met je Google account om toegang te krijgen tot Huisarts Check.</p>' +
+                         '<button onclick="login()">Inloggen met Google</button>';
+    content.style.display = 'block';
+  }
+  
+  /**
+   * Inlogfunctie
+   */
+  function login() {
+    // In deze initiële versie is dit nog een placeholder
+    // Dit zal worden geïmplementeerd zodra de AuthService is ontwikkeld
+    showError('Inlogfunctionaliteit wordt geïmplementeerd in een volgende fase.');
+  }
+  
+  /**
+   * Toont of verbergt de laad-indicator
+   * 
+   * @param {boolean} show - True om te tonen, false om te verbergen
+   */
+  function showLoading(show) {
+    const loading = document.getElementById('loading');
+    const content = document.getElementById('content');
+    
+    if (show) {
+      loading.innerHTML = '<div class="spinner"></div><p>Laden...</p>';
+      loading.style.display = 'block';
+      content.style.display = 'none';
+    } else {
+      loading.style.display = 'none';
+    }
+  }
+  
+  /**
+   * Toont een foutmelding
+   * 
+   * @param {string} message - De foutmelding
+   */
+  function showError(message) {
+    const error = document.getElementById('error');
+    const errorMessage = document.getElementById('error-message');
+    
+    errorMessage.textContent = message;
+    error.style.display = 'block';
+    
+    // Verberg de foutmelding na 5 seconden
+    setTimeout(function() {
+      error.style.display = 'none';
+    }, 5000);
+  }
+  
+  /**
+   * Functie om HTML templates in te sluiten
+   * (Dit is een hulpfunctie voor de server-side include)
+   * 
+   * @param {string} filename - Bestandsnaam van de template
+   * @return {string} HTML inhoud van de template
+   */
+  function include(filename) {
+    return HtmlService.createHtmlOutputFromFile(filename).getContent();
+  }
+</script>
