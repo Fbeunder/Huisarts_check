@@ -7,53 +7,63 @@
    - Instellen van het appsscript.json manifest
    - Toevoegen van benodigde OAuth scopes
    - Toevoegen van Config.gs met basis configuratie
+   - STATUS: PR in afwachting van goedkeuring (#2)
 
 2. **Google Spreadsheet datamodel opzetten**
    - Opzetten van een Google Spreadsheet als database
    - Tabellen voor gebruikers, huisartsen, en monitoring logs
    - Implementeren van DataLayer.gs voor CRUD-operaties
+   - STATUS: Nog niet gestart
 
 3. **Authenticatie implementeren**
    - Ontwikkelen van AuthService.gs
    - Instellen van Google OAuth authenticatie
    - Koppelen van gebruikersgegevens aan de datamodel
+   - STATUS: Nog niet gestart
 
 4. **Web interface ontwikkelen**
    - Ontwikkelen van UI.gs
    - Maken van basis HTML-templates
    - Implementeren van gebruikersregistratie en inlogscherm
    - Dashboard voor beheren van huisartsenlijst
+   - STATUS: Basistemplates in PR #2, rest nog niet gestart
 
 5. **OpenAI Web Search API integratie**
    - Implementeren van OpenAIService.gs
    - API key management
    - Functionaliteit voor het controleren van website inhoud
+   - STATUS: Nog niet gestart
 
 6. **Website monitoring systeem**
    - Ontwikkelen van WebsiteChecker.gs
    - Logica voor het periodiek controleren van websites
    - Detecteren van veranderingen in status
    - Zorgen dat websites niet dubbel worden gecontroleerd
+   - STATUS: Nog niet gestart
 
 7. **Email notificatie systeem**
    - Ontwikkelen van EmailService.gs
    - Templates voor notificatie emails
    - Systeem voor het verzenden van notificaties bij statuswijzigingen
+   - STATUS: Nog niet gestart
 
 8. **Logging en error handling**
    - Implementeren van Logger.gs
    - Foutafhandeling in alle modules
    - Gebruikersgerichte foutmeldingen in UI
+   - STATUS: Logger.gs in PR #2, rest nog niet gestart
 
 9. **Triggers en scheduling**
    - Instellen van periodieke controles via triggers
    - Optimalisatie van controlefrequentie
    - Balanceren van API-aanroepen voor kostenefficiëntie
+   - STATUS: Basisstructuur in PR #2, implementatie nog niet gestart
 
 10. **Testen en bugfixing**
     - End-to-end testen van de applicatie
     - Foutscenario's testen
     - Oplossen van bugs
+    - STATUS: Nog niet gestart
 
 ## Nice-to-haves
 
@@ -108,3 +118,8 @@
 - Voor het gebruik van de OpenAI Web Search API is een API key nodig, die veilig moet worden opgeslagen.
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
 - Bij de finale versie moet een volledige handleiding worden opgesteld.
+
+## Volgende stappen na PR #2:
+Na goedkeuring van PR #2 en implementatie van de basisprojectstructuur, is de volgende stap het ontwikkelen van het Google Spreadsheet datamodel en de DataLayer.gs module. Dit is cruciaal voor de werking van alle andere modules, aangezien het de basis vormt voor de dataopslag van de applicatie.
+
+Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie. Zonder een functionele dataopslag kunnen er geen gebruikers, huisartsen of controlegegevens worden bijgehouden.
