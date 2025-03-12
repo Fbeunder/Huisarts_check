@@ -69,13 +69,13 @@
     - Aanpassen UI.gs om te werken met de platte bestandenstructuur van Apps Script
     - Helper functie voor HTML-templates toevoegen
     - Documenteren van de naamgevingsconventie voor HTML-bestanden
-    - STATUS: ⏳ In behandeling (PR #18)
+    - STATUS: ⏳ In behandeling (PR #20)
 
 12. **Testen en bugfixing**
     - End-to-end testen van de applicatie
     - Foutscenario's testen
     - Oplossen van bugs
-    - STATUS: Niet gestart
+    - STATUS: ⏳ In behandeling (Bug #19 in behandeling via PR #20)
 
 ## Nice-to-haves
 
@@ -132,10 +132,11 @@
 - De nieuwe README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
 
 ## Volgende stappen:
-1. **Afronden HTML-templating fix (PR #18)**
-   - De huidige implementatie van de UI.gs refereert naar HTML-bestanden in een map (HtmlTemplates/). Dit werkt niet in Apps Script omdat Apps Script geen mappenstructuur ondersteunt.
-   - Implementeren van de voorgestelde oplossing met een eenvoudig naamconventie en helper functie voor consistente toegang.
-   - Deze aanpassing is noodzakelijk voor de basiswerking van de applicatie.
+1. **Voltooien HTML-templating fix (PR #20)**
+   - Verplaatsen van HTML-bestanden van HtmlTemplates/ naar de hoofdmap met HTML_ prefix
+   - Updaten van UI.gs om deze bestanden correct te laden
+   - Verwijderen van dubbele OpenAIServiceClass declaratie
+   - Deze aanpassing is noodzakelijk voor de basiswerking van de applicatie aangezien er momenteel een SyntaxError optreedt.
 
 2. **Volledige end-to-end testen**
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
@@ -157,4 +158,4 @@
    - Verbeteren van code-kwaliteit en onderhoudbaarheid
    - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de onderhoudbaarheid van de code.
 
-De HTML-templating fix en end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
+De HTML-templating fix (PR #20) is noodzakelijk voor de basiswerking van de applicatie omdat Apps Script geen mappenstructuur ondersteunt en de huidige implementatie een SyntaxError veroorzaakt. End-to-end testen is ook noodzakelijk om de betrouwbaarheid van de applicatie te garanderen. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
