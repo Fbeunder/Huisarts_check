@@ -101,14 +101,21 @@
     - Uitgebreide logging met consistente format voor betere diagnose
     - Expliciete controles op DOM-elementen voor veiligere DOM-manipulatie
     - Betere controle over de volgorde van initialisatie om race conditions te voorkomen
-    - STATUS: ⏳ In behandeling (PR #29)
+    - STATUS: ✅ Voltooid (PR #29 gemerged)
 
-17. **Volledige end-to-end testen**
+17. **Bugfix: Console errors (3X)**
+    - Oplossen van MutationObserver fout bij het observeren van ongeldige DOM-elementen
+    - Verbeteren van foutafhandeling voor authenticatiestatus wanneer deze null is
+    - Verbeterde gebruikersfeedback bij authenticatieproblemen
+    - Toevoegen van patch voor MutationObserver.observe functie
+    - STATUS: ⏳ In behandeling (PR #31)
+
+18. **Volledige end-to-end testen**
     - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
     - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
     - Foutscenario's testen en verbeteren van error handling
     - Opstellen van testscenario's en testcases
-    - STATUS: ⏳ Gepland (Na voltooiing van PR #29)
+    - STATUS: ⏳ Gepland (Na voltooiing van PR #31)
 
 ## Nice-to-haves
 
@@ -165,12 +172,10 @@
 - De README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
 
 ## Volgende stappen:
-1. **Voltooien van complete herstructurering voor leeg scherm probleem (PR #29)**
-   - Volledige herstructurering van HTML_Scripts.html voor een robuustere werking
-   - Implementeren van gefaseerde initialisatie met betere foutafhandeling
-   - Duidelijke scheiding van verantwoordelijkheden in kleinere functies
-   - Betere controle over de volgorde van initialisatie om race conditions te voorkomen
-   - Deze aanpassing is noodzakelijk voor de basiswerking van de applicatie omdat het een blokkerende fout oplost die verhindert dat gebruikers de applicatie kunnen gebruiken.
+1. **Voltooien van console errors bugfix (PR #31)**
+   - Voltooien en mergen van de MutationObserver en authenticatie fixes
+   - Verifiëren dat er geen console errors meer zijn na inloggen
+   - Deze stap is noodzakelijk voor de basiswerking van de applicatie omdat het fouten oplost die de gebruikerservaring verstoren.
 
 2. **Volledige end-to-end testen**
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
@@ -192,4 +197,4 @@
    - Verbeteren van code-kwaliteit en onderhoudbaarheid
    - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de onderhoudbaarheid van de code.
 
-De bugfix voor leeg scherm na inloggen (PR #29) en end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie omdat deze kritieke fouten oplossen die verhinderen dat gebruikers de applicatie correct kunnen gebruiken. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
+De bugfix voor console errors (PR #31) en de end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie omdat deze kritieke fouten oplossen en zorgen voor een betrouwbare werking. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
