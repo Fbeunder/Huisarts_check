@@ -46,8 +46,20 @@ class AuthServiceClass {
       
       const userEmail = Session.getActiveUser().getEmail();
       
+      // Controleer of de database is geïnitialiseerd
+      if (!DataLayer.checkConnection()) {
+        // Initialiseer de database indien nodig
+        Logger.info('Database initialiseren in AuthService');
+        DataLayer.initializeDatabase();
+      }
+      
       // Probeer de gebruiker op te halen uit de database
-      let user = DataLayer.getUserByEmail(userEmail);
+      let user = null;
+      try {
+        user = DataLayer.getUserByEmail(userEmail);
+      } catch (error) {
+        Logger.warning('Fout bij ophalen van gebruiker, database mogelijk nog niet volledig geïnitialiseerd: ' + error.toString());
+      }
       
       // Als de gebruiker niet bestaat, maak deze aan
       if (!user) {
@@ -56,9 +68,10 @@ class AuthServiceClass {
         // Haal de naam van de gebruiker op als die beschikbaar is
         let userName = '';
         try {
-          userName = Session.getActiveUser().getUsername() || '';
+          userName = Session.getActiveUser().getUsername() || userEmail.split('@')[0];
         } catch (e) {
           // Negeer fouten bij het ophalen van de gebruikersnaam
+          userName = userEmail.split('@')[0];
         }
         
         // Maak een nieuw gebruikersobject aan
@@ -72,13 +85,25 @@ class AuthServiceClass {
         };
         
         // Sla de nieuwe gebruiker op in de database
-        user = DataLayer.createUser(newUser);
-        Logger.info('Nieuwe gebruiker aangemaakt: ' + userEmail);
+        try {
+          user = DataLayer.createUser(newUser);
+          Logger.info('Nieuwe gebruiker aangemaakt: ' + userEmail);
+        } catch (createError) {
+          Logger.error('Fout bij aanmaken van gebruiker in database: ' + createError.toString());
+          // Als het aanmaken mislukt, probeer het nog een keer na database initialisatie
+          DataLayer.initializeDatabase();
+          user = DataLayer.createUser(newUser);
+        }
       }
       
       // Update lastLogin voor de gebruiker
       if (user) {
-        DataLayer.updateUser(user.userId, {lastLogin: new Date()});
+        try {
+          DataLayer.updateUser(user.userId, {lastLogin: new Date()});
+        } catch (updateError) {
+          Logger.warning('Kon lastLogin niet bijwerken: ' + updateError.toString());
+          // Dit is geen kritieke fout, dus we laten de gebruiker doorgaan
+        }
       }
       
       return user;
@@ -153,6 +178,20 @@ class AuthServiceClass {
         };
       }
       
+      // Controleer of de database is geïnitialiseerd
+      if (!DataLayer.checkConnection()) {
+        Logger.info('Database initialiseren in checkLoginStatus');
+        const initialized = DataLayer.initializeDatabase();
+        
+        if (!initialized) {
+          return {
+            loggedIn: false,
+            authUrl: null,
+            errorMessage: 'Er is een probleem met de database. Probeer het later nog eens of neem contact op met de beheerder.'
+          };
+        }
+      }
+      
       // Gebruiker ophalen of aanmaken indien nodig
       const user = this.getCurrentUser();
       
@@ -160,7 +199,7 @@ class AuthServiceClass {
         return {
           loggedIn: false,
           authUrl: null,
-          errorMessage: 'Er is een fout opgetreden bij het ophalen van uw gebruikersinformatie.'
+          errorMessage: 'Er is een fout opgetreden bij het ophalen van uw gebruikersinformatie. Probeer het later nog eens.'
         };
       }
       
@@ -181,10 +220,18 @@ class AuthServiceClass {
       };
     } catch (error) {
       Logger.error('Fout bij login check: ' + error.toString());
+      
+      // Probeer database initialisatie als fallback
+      try {
+        DataLayer.initializeDatabase();
+      } catch (dbError) {
+        Logger.error('Kon database niet initialiseren: ' + dbError.toString());
+      }
+      
       return {
         loggedIn: false,
         authUrl: null,
-        errorMessage: 'Er is een fout opgetreden bij het verifiëren van uw login status.'
+        errorMessage: 'Er is een fout opgetreden bij het verifiëren van uw login status. Probeer het later nog eens.'
       };
     }
   }
@@ -309,6 +356,57 @@ class AuthServiceClass {
       return true;
     } catch (error) {
       Logger.error('Fout bij activeren gebruiker: ' + error.toString());
+      return false;
+    }
+  }
+  
+  /**
+   * Maakt een noodfallback admin gebruiker aan als er nog geen admins zijn
+   * Dit is handig bij de eerste setup van de applicatie
+   * 
+   * @param {string} email - E-mailadres van de gebruiker
+   * @return {boolean} true als aanmaken is gelukt, anders false
+   */
+  createEmergencyAdmin(email) {
+    try {
+      // Controleer of de database is geïnitialiseerd
+      if (!DataLayer.checkConnection()) {
+        Logger.info('Database initialiseren voor emergency admin');
+        DataLayer.initializeDatabase();
+      }
+      
+      // Controleer of er al een admin gebruiker bestaat
+      const allUsers = DataLayer.getAllUsers();
+      const hasAdmin = allUsers.some(user => user.isAdmin === true);
+      
+      if (hasAdmin) {
+        Logger.warning('Poging om emergency admin aan te maken terwijl er al een admin bestaat');
+        return false;
+      }
+      
+      // Controleer of de gebruiker al bestaat
+      let user = DataLayer.getUserByEmail(email);
+      
+      if (user) {
+        // Update bestaande gebruiker naar admin
+        DataLayer.updateUser(user.userId, {isAdmin: true});
+        Logger.info('Bestaande gebruiker ingesteld als emergency admin: ' + email);
+      } else {
+        // Maak een nieuwe admin gebruiker aan
+        user = DataLayer.createUser({
+          email: email,
+          naam: 'Admin',
+          isActive: true,
+          isAdmin: true,
+          notificationsEnabled: true,
+          checkFrequency: 'daily'
+        });
+        Logger.info('Nieuwe emergency admin aangemaakt: ' + email);
+      }
+      
+      return true;
+    } catch (error) {
+      Logger.error('Fout bij aanmaken emergency admin: ' + error.toString());
       return false;
     }
   }
