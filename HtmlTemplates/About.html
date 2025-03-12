@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <title>Over Huisarts Check</title>
+    <?!= include('HtmlTemplates/Styles'); ?>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Over Huisarts Check</h2>
+      
+      <p>
+        Huisarts Check is een applicatie waarmee je kunt monitoren of huisartsenpraktijken
+        nieuwe patiënten aannemen. De applicatie controleert periodiek de websites van
+        huisartsen en stuurt een e-mail wanneer een huisarts van status verandert.
+      </p>
+      
+      <h3>Hoe werkt het?</h3>
+      <ol>
+        <li>Log in met je Google account</li>
+        <li>Voeg de websites van huisartsen toe die je wilt monitoren</li>
+        <li>De applicatie controleert dagelijks of de status is veranderd</li>
+        <li>Ontvang een e-mail wanneer een huisarts nieuwe patiënten aanneemt</li>
+      </ol>
+      
+      <h3>Versie informatie</h3>
+      <table>
+        <tr>
+          <th>Versie</th>
+          <td><?= CONFIG.APP_VERSION ?></td>
+        </tr>
+        <tr>
+          <th>Ontwikkelaar</th>
+          <td><?= CONFIG.DEVELOPER ?></td>
+        </tr>
+      </table>
+      
+      <div class="text-center mt-20">
+        <button onclick="google.script.host.close()">Sluiten</button>
+      </div>
+    </div>
+  </body>
+</html>
