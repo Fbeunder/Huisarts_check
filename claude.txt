@@ -30,13 +30,13 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 ## Per module details:
 
 ### Code.gs
-- Status: PR in afwachting van goedkeuring
+- Status: Geïmplementeerd (PR #2 gemerged)
 - Bestandsnaam: Code.gs
 - Functionaliteit: Bevat de hoofdentry points voor de applicatie, inclusief het starten van de UI en het instellen van triggers voor periodieke controles
 - Afhankelijkheid: Alle andere modules
 
 ### appsscript.json
-- Status: PR in afwachting van goedkeuring
+- Status: Geïmplementeerd (PR #2 gemerged)
 - Bestandsnaam: appsscript.json
 - Functionaliteit: Manifest bestand voor Apps Script project, met benodigde API-toegang en bibliotheekverwijzingen
 - Afhankelijkheid: Geen
@@ -48,15 +48,15 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: HtmlTemplates/, AuthService.gs, DataLayer.gs
 
 ### HtmlTemplates/
-- Status: PR in afwachting van goedkeuring (basistemplates)
+- Status: Geïmplementeerd (PR #2 gemerged)
 - Bestandsnaam: Meerdere .html bestanden
 - Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface
 - Afhankelijkheid: Geen
 
 ### DataLayer.gs
-- Status: Niet gestart
+- Status: Geïmplementeerd (PR #4 wacht op goedkeuring)
 - Bestandsnaam: DataLayer.gs
-- Functionaliteit: Handelt database interacties af met Google Spreadsheet als dataopslag
+- Functionaliteit: Handelt database interacties af met Google Spreadsheet als dataopslag, biedt CRUD-operaties voor gebruikers, huisartsenpraktijken en controles
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### WebsiteChecker.gs
@@ -90,13 +90,13 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### Config.gs
-- Status: PR in afwachting van goedkeuring
+- Status: Geïmplementeerd (PR #2 gemerged)
 - Bestandsnaam: Config.gs
 - Functionaliteit: Bevat configuratie-instellingen voor de applicatie
 - Afhankelijkheid: Geen
 
 ### Logger.gs
-- Status: PR in afwachting van goedkeuring
+- Status: Geïmplementeerd (PR #2 gemerged)
 - Bestandsnaam: Logger.gs
 - Functionaliteit: Voorziet in logging functionaliteit voor de applicatie
 - Afhankelijkheid: Config.gs
