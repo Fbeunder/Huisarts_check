@@ -91,6 +91,24 @@ class DataLayerClass {
       sheet.setFrozenRows(1);
     } else {
       Logger.info(`Tabblad ${sheetName} bestaat al`);
+      
+      // Controleer of het tabblad de juiste headers heeft
+      const existingHeaders = this._getHeaders(sheet);
+      let headersMissing = false;
+      
+      for (const header of headers) {
+        if (existingHeaders.indexOf(header) === -1) {
+          headersMissing = true;
+          Logger.warning(`Header '${header}' ontbreekt in ${sheetName} tabblad`);
+        }
+      }
+      
+      // Als er headers ontbreken, voeg ze toe aan het bestaande tabblad
+      if (headersMissing) {
+        Logger.info(`Bijwerken van headers in bestaand tabblad: ${sheetName}`);
+        sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+        sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+      }
     }
   }
   
@@ -159,7 +177,14 @@ class DataLayerClass {
     const sheet = spreadsheet.getSheetByName(sheetName);
     
     if (!sheet) {
-      throw new Error(`Tabblad '${sheetName}' niet gevonden`);
+      // Als het tabblad niet bestaat, initialiseer de database
+      this.initializeDatabase();
+      // Probeer het tabblad opnieuw op te halen
+      const refreshedSheet = spreadsheet.getSheetByName(sheetName);
+      if (!refreshedSheet) {
+        throw new Error(`Tabblad '${sheetName}' kon niet worden aangemaakt`);
+      }
+      return refreshedSheet;
     }
     
     return sheet;
@@ -175,21 +200,26 @@ class DataLayerClass {
    * @private
    */
   _findRowIndex(sheet, idColumnName, idValue) {
-    const data = sheet.getDataRange().getValues();
-    const headers = data[0];
-    const idColumnIndex = headers.indexOf(idColumnName);
-    
-    if (idColumnIndex === -1) {
-      throw new Error(`Kolom '${idColumnName}' niet gevonden`);
-    }
-    
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][idColumnIndex] === idValue) {
-        return i + 1; // +1 because array is 0-indexed, but sheets are 1-indexed
+    try {
+      const data = sheet.getDataRange().getValues();
+      const headers = data[0];
+      const idColumnIndex = headers.indexOf(idColumnName);
+      
+      if (idColumnIndex === -1) {
+        throw new Error(`Kolom '${idColumnName}' niet gevonden`);
       }
+      
+      for (let i = 1; i < data.length; i++) {
+        if (data[i][idColumnIndex] === idValue) {
+          return i + 1; // +1 because array is 0-indexed, but sheets are 1-indexed
+        }
+      }
+      
+      return -1; // Not found
+    } catch (error) {
+      Logger.error(`Fout bij zoeken naar rij met ${idColumnName}=${idValue}: ${error.toString()}`);
+      throw error;
     }
-    
-    return -1; // Not found
   }
   
   /**
@@ -200,7 +230,16 @@ class DataLayerClass {
    * @private
    */
   _getHeaders(sheet) {
-    return sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (!sheet || sheet.getLastRow() === 0) {
+      return [];
+    }
+    
+    const lastColumn = sheet.getLastColumn();
+    if (lastColumn === 0) {
+      return [];
+    }
+    
+    return sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
   }
   
   /**
@@ -228,7 +267,7 @@ class DataLayerClass {
    * @private
    */
   _objectToRow(headers, obj) {
-    return headers.map(header => obj[header] || '');
+    return headers.map(header => obj[header] !== undefined ? obj[header] : '');
   }
   
   // --- Gebruikersbeheer functies ---
@@ -243,16 +282,49 @@ class DataLayerClass {
     try {
       Logger.info('Aanmaken van nieuwe gebruiker: ' + JSON.stringify(userInfo));
       
+      // Zorg ervoor dat de database geïnitialiseerd is
+      this.initializeDatabase();
+      
       // Genereer een uniek ID als deze niet is opgegeven
       const userId = userInfo.userId || this._generateId();
       
       // Haal het gebruikers-tabblad op
       const sheet = this._getSheet(CONFIG.SHEETS.USERS);
-      const headers = this._getHeaders(sheet);
+      
+      // Controleer of we headers kunnen ophalen
+      let headers;
+      try {
+        headers = this._getHeaders(sheet);
+        if (headers.length === 0) {
+          // Als er geen headers zijn, initialiseer het tabblad opnieuw
+          this._initializeSheet(SpreadsheetApp.openById(getSpreadsheetId()), 
+                                CONFIG.SHEETS.USERS, 
+                                ['userId', 'email', 'naam', 'dateCreated', 'lastLogin', 
+                                 'isActive', 'isAdmin', 'notificationsEnabled', 'checkFrequency']);
+          headers = this._getHeaders(sheet);
+        }
+      } catch (headerError) {
+        Logger.error('Fout bij ophalen headers: ' + headerError.toString());
+        // Initialiseer het tabblad opnieuw
+        this._initializeSheet(SpreadsheetApp.openById(getSpreadsheetId()), 
+                             CONFIG.SHEETS.USERS, 
+                             ['userId', 'email', 'naam', 'dateCreated', 'lastLogin', 
+                              'isActive', 'isAdmin', 'notificationsEnabled', 'checkFrequency']);
+        headers = this._getHeaders(sheet);
+      }
       
       // Controleer of de gebruiker al bestaat op basis van e-mail
-      if (userInfo.email && this.getUserByEmail(userInfo.email)) {
-        throw new Error('Een gebruiker met dit e-mailadres bestaat al');
+      try {
+        if (userInfo.email) {
+          const existingUser = this.getUserByEmail(userInfo.email);
+          if (existingUser) {
+            Logger.info('Gebruiker met e-mail ' + userInfo.email + ' bestaat al, deze wordt geretourneerd');
+            return existingUser;
+          }
+        }
+      } catch (emailError) {
+        Logger.warning('Kon niet controleren of e-mailadres al bestaat: ' + emailError.toString());
+        // Doorgaan met aanmaken gebruiker
       }
       
       // Bereid de gebruikersdata voor
@@ -270,7 +342,8 @@ class DataLayerClass {
       };
       
       // Voeg de nieuwe gebruiker toe
-      sheet.appendRow(this._objectToRow(headers, userData));
+      const rowData = this._objectToRow(headers, userData);
+      sheet.appendRow(rowData);
       
       Logger.info('Nieuwe gebruiker aangemaakt met ID: ' + userId);
       return userData;
@@ -290,14 +363,25 @@ class DataLayerClass {
     try {
       const sheet = this._getSheet(CONFIG.SHEETS.USERS);
       const headers = this._getHeaders(sheet);
-      const rowIndex = this._findRowIndex(sheet, 'userId', userId);
       
-      if (rowIndex === -1) {
+      if (headers.length === 0) {
+        Logger.warning('Geen headers gevonden in gebruikerstabblad');
         return null;
       }
       
-      const userData = sheet.getRange(rowIndex, 1, 1, headers.length).getValues()[0];
-      return this._rowToObject(headers, userData);
+      try {
+        const rowIndex = this._findRowIndex(sheet, 'userId', userId);
+        
+        if (rowIndex === -1) {
+          return null;
+        }
+        
+        const userData = sheet.getRange(rowIndex, 1, 1, headers.length).getValues()[0];
+        return this._rowToObject(headers, userData);
+      } catch (error) {
+        Logger.error('Fout bij zoeken naar gebruiker: ' + error.toString());
+        return null;
+      }
     } catch (error) {
       Logger.error('Fout bij ophalen van gebruiker met ID ' + userId + ': ' + error.toString());
       return null;
@@ -314,6 +398,11 @@ class DataLayerClass {
     try {
       const sheet = this._getSheet(CONFIG.SHEETS.USERS);
       const data = sheet.getDataRange().getValues();
+      
+      if (data.length === 0) {
+        return null;
+      }
+      
       const headers = data[0];
       const emailIndex = headers.indexOf('email');
       
@@ -347,6 +436,11 @@ class DataLayerClass {
       
       const sheet = this._getSheet(CONFIG.SHEETS.USERS);
       const headers = this._getHeaders(sheet);
+      
+      if (headers.length === 0) {
+        throw new Error('Geen headers gevonden in gebruikerstabblad');
+      }
+      
       const rowIndex = this._findRowIndex(sheet, 'userId', userId);
       
       if (rowIndex === -1) {
@@ -408,6 +502,11 @@ class DataLayerClass {
     try {
       const sheet = this._getSheet(CONFIG.SHEETS.USERS);
       const data = sheet.getDataRange().getValues();
+      
+      if (data.length <= 1) {
+        return [];
+      }
+      
       const headers = data[0];
       
       // Converteer data naar array van objecten, sla de headers over
@@ -578,6 +677,11 @@ class DataLayerClass {
     try {
       const sheet = this._getSheet(CONFIG.SHEETS.PRACTICES);
       const data = sheet.getDataRange().getValues();
+      
+      if (data.length <= 1) {
+        return [];
+      }
+      
       const headers = data[0];
       
       // Converteer data naar array van objecten, sla de headers over
@@ -598,6 +702,11 @@ class DataLayerClass {
     try {
       const sheet = this._getSheet(CONFIG.SHEETS.PRACTICES);
       const data = sheet.getDataRange().getValues();
+      
+      if (data.length <= 1) {
+        return [];
+      }
+      
       const headers = data[0];
       const userIdIndex = headers.indexOf('userId');
       
@@ -670,6 +779,11 @@ class DataLayerClass {
     try {
       const sheet = this._getSheet(CONFIG.SHEETS.CHECKS);
       const data = sheet.getDataRange().getValues();
+      
+      if (data.length <= 1) {
+        return [];
+      }
+      
       const headers = data[0];
       const practiceIdIndex = headers.indexOf('practiceId');
       
@@ -708,6 +822,11 @@ class DataLayerClass {
       // Haal alle controles op
       const sheet = this._getSheet(CONFIG.SHEETS.CHECKS);
       const data = sheet.getDataRange().getValues();
+      
+      if (data.length <= 1) {
+        return [];
+      }
+      
       const headers = data[0];
       const practiceIdIndex = headers.indexOf('practiceId');
       
@@ -763,6 +882,11 @@ class DataLayerClass {
     try {
       const sheet = this._getSheet(CONFIG.SHEETS.CHECKS);
       const data = sheet.getDataRange().getValues();
+      
+      if (data.length <= 1) {
+        return [];
+      }
+      
       const headers = data[0];
       const timestampIndex = headers.indexOf('timestamp');
       
@@ -837,6 +961,11 @@ class DataLayerClass {
     try {
       const sheet = this._getSheet(CONFIG.SHEETS.LOGS);
       const data = sheet.getDataRange().getValues();
+      
+      if (data.length <= 1) {
+        return [];
+      }
+      
       const headers = data[0];
       
       // Bereid indices voor voor filtering
