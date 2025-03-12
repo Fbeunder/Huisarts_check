@@ -45,7 +45,7 @@
    - Ontwikkelen van EmailService.gs
    - Templates voor notificatie emails
    - Systeem voor het verzenden van notificaties bij statuswijzigingen
-   - STATUS: Nog niet gestart
+   - STATUS: ✅ Geïmplementeerd (PR #14 in review)
 
 8. **Logging en error handling**
    - Implementeren van Logger.gs
@@ -63,7 +63,7 @@
     - End-to-end testen van de applicatie
     - Foutscenario's testen
     - Oplossen van bugs
-    - STATUS: Testfunctionaliteit voor DataLayer, AuthService en WebsiteChecker geïmplementeerd, volledige systeemtests nog niet gestart
+    - STATUS: Testfunctionaliteit voor DataLayer, AuthService, WebsiteChecker en EmailService geïmplementeerd, volledige systeemtests nog niet gestart
 
 ## Nice-to-haves
 
@@ -119,27 +119,36 @@
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
 - Bij de finale versie moet een volledige handleiding worden opgesteld.
 
-## Volgende stappen na WebsiteChecker.gs implementatie:
-Nu dat de WebsiteChecker.gs module is geïmplementeerd, is de volgende stap het ontwikkelen van de EmailService.gs module. Deze module is verantwoordelijk voor het notificeren van gebruikers bij statusveranderingen van hun gecontroleerde huisartsenpraktijken.
+## Volgende stappen na EmailService.gs implementatie:
+Nu dat de EmailService.gs module is geïmplementeerd, zijn de belangrijkste basismodules voor de functionaliteit van de applicatie voltooid. De volgende stappen zijn gericht op het testen en verbeteren van de applicatie.
 
 ### Aanbevolen volgorde:
 
-1. **EmailService.gs implementeren**
-   - Ontwikkelen van de EmailService.gs module voor het versturen van notificaties aan gebruikers
-   - Templates voor e-mails maken voor verschillende soorten notificaties (vooral statusveranderingen)
-   - Integreren met de DataLayer en WebsiteChecker om gebruikers te notificeren bij statusveranderingen
-   - Functionaliteit voor het beheren van e-mailvoorkeuren van gebruikers
-
-2. **Volledige end-to-end testen**
+1. **Volledige end-to-end testen**
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
    - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
    - Foutscenario's testen en verbeteren van error handling
+   - Opstellen van testscenario's en testcases
 
-3. **Gebruikersinterface verbeteren**
+2. **Gebruikersinterface verbeteren**
    - Toevoegen van functionaliteit om handmatige controles te starten vanuit de UI
    - Weergeven van controleresultaten en geschiedenis in de gebruikersinterface
    - Verbeteren van gebruikerservaring voor het beheren van huisartsenpraktijken
+   - Implementeren van notificatie-instellingen in de gebruikersinterface
 
-De EmailService.gs implementatie is noodzakelijk voor de basiswerking van de applicatie, omdat het essentieel is voor gebruikers om genotificeerd te worden wanneer de status van hun huisartsenpraktijk verandert. Dit is de kerntaak van de applicatie: niet alleen websites controleren, maar ook gebruikers proactief informeren over veranderingen.
+3. **Documentatie en handleidingen**
+   - Opstellen van een readme.md met installatie-instructies
+   - Maken van gebruikershandleiding
+   - Documenteren van de benodigde omgeving en vereisten
+   - Verzamelen van requirements en afhankelijkheden
 
-De volgende twee stappen (end-to-end testen en UI verbeteringen) zijn eveneens belangrijk, maar zijn meer gericht op het verbeteren van de stabiliteit en gebruikerservaring van de applicatie, en zijn strikt genomen niet noodzakelijk voor de basisfunctionaliteit.
+4. **Utilities.gs implementeren**
+   - Ontwikkelen van de Utilities.gs module voor herbruikbare functionaliteit
+   - Refactoren van bestaande code om duplicatie te verminderen
+   - Toevoegen van hulpfuncties voor veelvoorkomende taken
+
+De eerste twee stappen (end-to-end testen en UI verbeteringen) zijn essentieel voor de stabiliteit en gebruiksvriendelijkheid van de applicatie, maar zijn niet strikt noodzakelijk voor de basisfunctionaliteit die nu al is geïmplementeerd. De applicatie kan in zijn huidige vorm al gebruikt worden, maar deze verbeteringen zullen de gebruikerservaring en betrouwbaarheid significant verbeteren.
+
+De documentatie en Utilities.gs-stappen zijn nice-to-haves die de code beter onderhoudbaar maken en nieuwe gebruikers helpen bij het installeren en gebruiken van de applicatie.
+
+De vervolgstappen zijn niet noodzakelijk voor de basiswerking van de applicatie, aangezien alle kernfunctionaliteit nu is geïmplementeerd. De applicatie kan in zijn huidige vorm al worden gebruikt door eindgebruikers. De voorgestelde vervolgstappen zijn gericht op het verbeteren van de gebruikerservaring, betrouwbaarheid en onderhoudbaarheid van de code.
