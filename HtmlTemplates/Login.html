@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inloggen - Huisarts Check</title>
+    <?!= include('HtmlTemplates/Styles'); ?>
+    <style>
+      .login-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .login-button {
+        display: inline-block;
+        background-color: #4285F4;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-top: 1rem;
+      }
+      .login-button:hover {
+        background-color: #3367D6;
+      }
+      .error-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Huisarts Check</h1>
+        <p>Houd bij welke huisartsen nieuwe patiënten aannemen</p>
+      </header>
+      
+      <main>
+        <div class="login-container">
+          <h2>Inloggen</h2>
+          
+          <? if (errorMessage) { ?>
+            <div class="error-message">
+              <?= errorMessage ?>
+            </div>
+          <? } ?>
+          
+          <p>
+            Welkom bij Huisarts Check. Met deze applicatie kunt u huisartsenpraktijken monitoren
+            om te zien of ze nieuwe patiënten aannemen. 
+          </p>
+          
+          <p>
+            Log in met uw Google-account om toegang te krijgen tot de applicatie.
+          </p>
+          
+          <a href="<?= authUrl ?>" class="login-button">
+            Inloggen met Google
+          </a>
+        </div>
+      </main>
+      
+      <footer>
+        <p>Huisarts Check v<?= CONFIG.APP_VERSION ?> | &copy; <?= new Date().getFullYear() ?></p>
+      </footer>
+    </div>
+  </body>
+</html>
