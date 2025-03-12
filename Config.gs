@@ -30,12 +30,14 @@ const CONFIG = {
   
   // OpenAI API instellingen
   OPENAI_API: {
-    URL: 'https://api.openai.com/v1/chat/completions',
-    MODEL: 'gpt-4',
+    URL: 'https://api.openai.com/v1/responses',
+    MODEL: 'gpt-4o',
     // API key moet veilig worden opgeslagen en opgehaald
     // API_KEY: PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY'),
     MAX_TOKENS: 2000,
     TEMPERATURE: 0.2,
+    SEARCH_CONTEXT_SIZE: 'medium',  // 'low', 'medium', of 'high'
+    COUNTRY_CODE: 'NL',  // ISO-landcode voor Nederland
   },
   
   // Email instellingen
