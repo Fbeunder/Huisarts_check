@@ -13,7 +13,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 
 2. Front-end Modules
    - UI.gs (Web interface en gebruikersinteractie)
-   - HtmlTemplates/ (HTML-templates voor de web interface)
+   - HTML-templates (HTML-templates voor de web interface met prefix HTML_)
 
 3. Back-end Modules
    - DataLayer.gs (Database interacties)
@@ -29,6 +29,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 
 5. Documentatie
    - README.md (Uitgebreide installatie- en configuratiegids)
+   - HTML_BESTANDENINFO.md (Documentatie over HTML-bestandenconventie)
 
 ## Per module details:
 
@@ -45,15 +46,17 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### UI.gs
-- Status: Geïmplementeerd (PR #8 gemerged)
+- Status: Geïmplementeerd en bijgewerkt (PR #8 en #18 gemerged)
 - Bestandsnaam: UI.gs
 - Functionaliteit: Beheert de webinterface en gebruikersinteractie, rendert verschillende pagina's en afhandelt formulierverwerking
-- Afhankelijkheid: HtmlTemplates/, AuthService.gs, DataLayer.gs, Logger.gs
+- Bevat helper functie getHtmlTemplate() voor consistente toegang tot HTML-templates
+- Afhankelijkheid: HTML-templates, AuthService.gs, DataLayer.gs, Logger.gs
 
-### HtmlTemplates/
-- Status: Geïmplementeerd (PR #2 gemerged, bijgewerkt in PR #6)
-- Bestandsnaam: Meerdere .html bestanden
+### HTML-templates
+- Status: Geïmplementeerd (PR #2 gemerged, bijgewerkt in PR #6, aangepast in PR #18)
+- Bestandsnaam: HTML-bestanden met prefix HTML_
 - Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface, inclusief login en dashboard
+- Naamgevingsconventie: HTML-bestanden hebben prefix HTML_ voor betere integratie met Apps Script
 - Afhankelijkheid: Geen
 
 ### DataLayer.gs
@@ -69,9 +72,9 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: OpenAIService.gs, DataLayer.gs, Logger.gs, EmailService.gs
 
 ### OpenAIService.gs
-- Status: Geïmplementeerd (PR #10 gemerged)
+- Status: Geïmplementeerd (PR #10 gemerged, verbeterd in PR #12)
 - Bestandsnaam: OpenAIService.gs
-- Functionaliteit: Integratie met OpenAI API voor het analyseren van huisartswebsites, inclusief extractie van relevante informatie en classificatie van patiëntenstatus
+- Functionaliteit: Integratie met OpenAI Web Search API voor het analyseren van huisartswebsites, inclusief extractie van relevante informatie en classificatie van patiëntenstatus
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### EmailService.gs
@@ -105,7 +108,13 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Config.gs
 
 ### README.md
-- Status: Bijgewerkt (PR #16 in review)
+- Status: Geïmplementeerd (PR #16 gemerged)
 - Bestandsnaam: README.md
 - Functionaliteit: Bevat uitgebreide documentatie voor installatie, configuratie en gebruik van de applicatie
+- Afhankelijkheid: Geen
+
+### HTML_BESTANDENINFO.md
+- Status: Geïmplementeerd (PR #18 gepland)
+- Bestandsnaam: HTML_BESTANDENINFO.md
+- Functionaliteit: Documenteert de naamgevingsconventie en het gebruik van HTML-templates in Apps Script
 - Afhankelijkheid: Geen
