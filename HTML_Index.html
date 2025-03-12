@@ -11,19 +11,25 @@
       <h1>Huisarts Check</h1>
       <p>Welkom bij de Huisarts Check. Deze applicatie helpt je bij het vinden van een huisarts die nieuwe patiënten aanneemt.</p>
       
+      <!-- Loading indicator, wordt getoond tijdens het laden -->
       <div id="loading">
         <div class="spinner"></div>
         <p>Laden...</p>
       </div>
       
+      <!-- Hoofdinhoud container, wordt gevuld na authenticatie -->
       <div id="content" style="display: none;">
         <!-- Inhoud wordt hier dynamisch geladen -->
       </div>
       
+      <!-- Error container voor foutmeldingen -->
       <div id="error" style="display: none;">
         <h3>Er is een fout opgetreden</h3>
         <p id="error-message"></p>
       </div>
+      
+      <!-- Notifications container voor korte berichten -->
+      <div id="notification" class="notification" style="display: none;"></div>
     </div>
     
     <?!= include('HTML_Scripts'); ?>
