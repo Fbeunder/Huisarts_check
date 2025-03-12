@@ -229,6 +229,31 @@ class WebsiteCheckerClass {
           currentStatus: normalizedStatus,
           lastStatusChange: new Date()
         });
+        
+        // Stuur een e-mailnotificatie over de statusverandering
+        try {
+          // Controleer of EmailService beschikbaar is
+          if (typeof EmailService !== 'undefined') {
+            Logger.info(`Versturen van notificatie voor statuswijziging van praktijk ${practice.practiceId}`);
+            
+            // Stuur een e-mail notificatie
+            const emailResult = EmailService.sendStatusChangeNotification(
+              practice.userId,
+              practice.practiceId,
+              oldStatus,
+              normalizedStatus
+            );
+            
+            if (!emailResult.success) {
+              Logger.warning(`Kon geen e-mailnotificatie verzenden: ${emailResult.message}`);
+            }
+          } else {
+            Logger.warning('EmailService is niet beschikbaar, geen notificatie verzonden');
+          }
+        } catch (emailError) {
+          // Vang fouten af zodat de rest van de functie nog steeds werkt
+          Logger.error(`Fout bij versturen van e-mailnotificatie: ${emailError.toString()}`);
+        }
       }
       
       return {
@@ -411,6 +436,14 @@ function runWebsiteChecks() {
     Logger.info('Starten van geplande website controles');
     const results = WebsiteChecker.checkAllWebsites();
     Logger.info(`Website controles voltooid. Totaal: ${results.totalChecked}, Statuswijzigingen: ${results.statusChanges}`);
+    
+    // Verwerk eventuele statuswijzigingen en stuur e-mails
+    if (results.statusChanges > 0 && typeof processAllStatusChanges === 'function') {
+      Logger.info('Verwerken van statuswijzigingen voor e-mailnotificaties');
+      const emailResults = processAllStatusChanges();
+      Logger.info(`E-mailnotificaties verwerkt: ${emailResults.processedCount || 0} verzonden`);
+    }
+    
     return results;
   } catch (error) {
     Logger.error(`Fout bij uitvoeren van website controles: ${error.toString()}`);
