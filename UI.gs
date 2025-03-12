@@ -72,8 +72,7 @@ class UIClass {
       template.practices = DataLayer.getPracticesByUser(authStatus.user.userId);
       
       return template.evaluate()
-        .setTitle('Dashboard - Huisarts Check')
-        .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl');
+        .setTitle('Dashboard - Huisarts Check');
     } catch (error) {
       Logger.error('Fout bij renderen van dashboard: ' + error.toString());
       return this.renderError('Er is een fout opgetreden bij het laden van het dashboard: ' + error.toString());
@@ -105,8 +104,7 @@ class UIClass {
       template.isAdmin = authStatus.isAdmin;
       
       return template.evaluate()
-        .setTitle('Instellingen - Huisarts Check')
-        .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl');
+        .setTitle('Instellingen - Huisarts Check');
     } catch (error) {
       Logger.error('Fout bij renderen van instellingenpagina: ' + error.toString());
       return this.renderError('Er is een fout opgetreden bij het laden van de instellingen: ' + error.toString());
@@ -134,8 +132,7 @@ class UIClass {
       template.errorMessage = errorMessage;
       
       return template.evaluate()
-        .setTitle('Inloggen - Huisarts Check')
-        .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl');
+        .setTitle('Inloggen - Huisarts Check');
     } catch (error) {
       Logger.error('Fout bij renderen van login pagina: ' + error.toString());
       return this.renderError('Er is een fout opgetreden bij het laden van de login pagina.');
@@ -168,7 +165,6 @@ class UIClass {
       
       return template.evaluate()
         .setTitle('Huisarts Check')
-        .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl')
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     } catch (error) {
       Logger.error('Fout bij renderen van hoofdpagina: ' + error.toString());
@@ -189,8 +185,7 @@ class UIClass {
       const template = getHtmlTemplate('About');
       
       return template.evaluate()
-        .setTitle('Over - Huisarts Check')
-        .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl');
+        .setTitle('Over - Huisarts Check');
     } catch (error) {
       Logger.error('Fout bij renderen van Over pagina: ' + error.toString());
       return this.renderError('Er is een fout opgetreden bij het laden van de pagina.');
@@ -554,8 +549,7 @@ class UIClass {
       `;
       
       return HtmlService.createHtmlOutput(html)
-        .setTitle('Fout - Huisarts Check')
-        .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl');
+        .setTitle('Fout - Huisarts Check');
     } catch (error) {
       Logger.error('Fout bij renderen van foutpagina: ' + error.toString());
       return HtmlService.createHtmlOutput('<h2>Er is een fout opgetreden</h2><p>Details konden niet worden geladen.</p>');
