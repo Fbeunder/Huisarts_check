@@ -46,10 +46,11 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### UI.gs
-- Status: Geïmplementeerd en bijgewerkt (PR #8 en #18 gemerged)
+- Status: Geïmplementeerd en bijgewerkt (PR #8 en #18 gemerged, bugfix in PR #24)
 - Bestandsnaam: UI.gs
 - Functionaliteit: Beheert de webinterface en gebruikersinteractie, rendert verschillende pagina's en afhandelt formulierverwerking
 - Bevat helper functie getHtmlTemplate() voor consistente toegang tot HTML-templates
+- Bevat bugfix voor favicon probleem wat pagina rendering verhinderde
 - Afhankelijkheid: HTML-templates, AuthService.gs, DataLayer.gs, Logger.gs
 
 ### HTML-templates
