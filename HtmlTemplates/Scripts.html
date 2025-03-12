@@ -7,12 +7,35 @@
     init();
   });
   
+  // Globale variabele voor gebruikersgegevens
+  let currentUser = null;
+  let isAdmin = false;
+  
   /**
    * Initialisatiefunctie voor de applicatie
    */
   function init() {
-    // Controleer authenticatie status
-    checkAuth();
+    // Initialiseer login status
+    if (typeof user !== 'undefined' && user) {
+      // Gebruiker is al ingelogd (vanuit server doorgegeven)
+      currentUser = user;
+      isAdmin = !!isAdmin;
+      loadDashboard(currentUser);
+    } else {
+      // Controleer authenticatie status
+      checkAuth();
+    }
+    
+    // Event handlers registreren
+    setupEventHandlers();
+  }
+  
+  /**
+   * Registreert event handlers voor interactieve elementen
+   */
+  function setupEventHandlers() {
+    // Hier kunnen event handlers worden toegevoegd voor UI elementen
+    // Deze worden geïmplementeerd zodra de UI componenten bestaan
   }
   
   /**
@@ -25,16 +48,24 @@
     
     // Server-side functie aanroepen om authenticatie te controleren
     google.script.run
-      .withSuccessHandler(function(user) {
+      .withSuccessHandler(function(authStatus) {
         // Verberg loading spinner
         showLoading(false);
         
-        if (user && user.email) {
-          // Gebruiker is ingelogd, laad het dashboard
-          loadDashboard(user);
+        if (authStatus.loggedIn && authStatus.user) {
+          // Gebruiker is ingelogd, sla gegevens op en laad het dashboard
+          currentUser = authStatus.user;
+          isAdmin = authStatus.isAdmin;
+          loadDashboard(currentUser);
+        } else if (authStatus.authUrl) {
+          // Gebruiker moet inloggen, redirect naar auth URL
+          window.top.location.href = authStatus.authUrl;
+        } else if (authStatus.errorMessage) {
+          // Er is een fout opgetreden
+          showError(authStatus.errorMessage);
         } else {
-          // Gebruiker is niet ingelogd, laad het login scherm
-          loadLoginScreen();
+          // Onbekende situatie, toon algemene foutmelding
+          showError('Er is een fout opgetreden bij het controleren van de authenticatie.');
         }
       })
       .withFailureHandler(function(error) {
@@ -44,7 +75,7 @@
         // Toon foutmelding
         showError('Er is een fout opgetreden bij het controleren van de authenticatie: ' + error);
       })
-      .getCurrentUser();
+      .checkLoginStatus();
   }
   
   /**
@@ -53,37 +84,405 @@
    * @param {Object} user - Gebruikersgegevens
    */
   function loadDashboard(user) {
-    // Placeholder voor dashboard
+    // Toon de content container
     const content = document.getElementById('content');
-    content.innerHTML = '<h2>Welkom, ' + user.email + '</h2>' +
-                         '<p>Het dashboard wordt geladen...</p>';
     content.style.display = 'block';
     
-    // Server-side functie aanroepen om dashboard data te laden
-    // In deze initiële versie is dit nog een placeholder
+    // Basiswelkomstbericht met naam en e-mail
+    const userName = user.naam || user.email.split('@')[0];
+    content.innerHTML = `
+      <div class="dashboard-header">
+        <h2>Welkom, ${userName}</h2>
+        <p>U bent ingelogd als ${user.email}</p>
+      </div>
+    `;
+    
+    // Admin-sectie indien van toepassing
+    if (isAdmin) {
+      content.innerHTML += `
+        <div class="admin-panel">
+          <h3>Admin Paneel</h3>
+          <p>U heeft toegang tot admin functionaliteit.</p>
+          <button id="btn-admin-users">Gebruikersbeheer</button>
+          <button id="btn-admin-logs">Logboek bekijken</button>
+        </div>
+      `;
+    }
+    
+    // Placeholders voor de verschillende secties van het dashboard
+    content.innerHTML += `
+      <div class="dashboard-tabs">
+        <button class="tab-button active" data-tab="my-practices">Mijn Huisartsen</button>
+        <button class="tab-button" data-tab="add-practice">Toevoegen</button>
+        <button class="tab-button" data-tab="settings">Instellingen</button>
+      </div>
+      
+      <div class="tab-content">
+        <div id="my-practices" class="tab-pane active">
+          <h3>Mijn Huisartsen</h3>
+          <p>Hier worden uw gemonitorde huisartsenpraktijken weergegeven.</p>
+          <div id="practices-list">Laden...</div>
+        </div>
+        
+        <div id="add-practice" class="tab-pane">
+          <h3>Huisarts Toevoegen</h3>
+          <form id="add-practice-form">
+            <div class="form-group">
+              <label for="practice-name">Naam van de praktijk:</label>
+              <input type="text" id="practice-name" name="naam" required>
+            </div>
+            <div class="form-group">
+              <label for="practice-url">Website URL:</label>
+              <input type="url" id="practice-url" name="websiteUrl" required>
+            </div>
+            <div class="form-group">
+              <label for="practice-notes">Notities:</label>
+              <textarea id="practice-notes" name="notes"></textarea>
+            </div>
+            <button type="submit">Toevoegen</button>
+          </form>
+        </div>
+        
+        <div id="settings" class="tab-pane">
+          <h3>Instellingen</h3>
+          <form id="settings-form">
+            <div class="form-group">
+              <label for="user-name">Naam:</label>
+              <input type="text" id="user-name" name="naam" value="${user.naam || ''}">
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" name="notificationsEnabled" ${user.notificationsEnabled ? 'checked' : ''}>
+                E-mailnotificaties ontvangen
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="check-frequency">Controlefrequentie:</label>
+              <select id="check-frequency" name="checkFrequency">
+                <option value="daily" ${user.checkFrequency === 'daily' ? 'selected' : ''}>Dagelijks</option>
+                <option value="weekly" ${user.checkFrequency === 'weekly' ? 'selected' : ''}>Wekelijks</option>
+                <option value="monthly" ${user.checkFrequency === 'monthly' ? 'selected' : ''}>Maandelijks</option>
+              </select>
+            </div>
+            <button type="submit">Opslaan</button>
+          </form>
+        </div>
+      </div>
+    `;
+    
+    // Voeg event handlers toe aan de tabs
+    setupTabHandlers();
+    
+    // Laad de lijst met huisartsen
+    loadPracticesList();
+    
+    // Voeg event handlers toe aan de formulieren
+    setupFormHandlers();
+  }
+  
+  /**
+   * Laadt de lijst met huisartsenpraktijken
+   */
+  function loadPracticesList() {
+    const practicesList = document.getElementById('practices-list');
+    
+    // Toon loading indicator
+    practicesList.innerHTML = '<div class="spinner"></div><p>Laden...</p>';
+    
+    // Server-side functie aanroepen om praktijken op te halen
+    google.script.run
+      .withSuccessHandler(function(practices) {
+        if (!practices || practices.length === 0) {
+          practicesList.innerHTML = `
+            <div class="empty-state">
+              <p>U heeft nog geen huisartsenpraktijken toegevoegd.</p>
+              <p>Klik op de "Toevoegen" tab om te beginnen.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Bouw de lijst op
+        let listHtml = '<div class="practices-grid">';
+        
+        practices.forEach(practice => {
+          // Status klasse bepalen
+          let statusClass = 'status-unknown';
+          let statusText = 'Onbekend';
+          
+          if (practice.currentStatus === 'ja') {
+            statusClass = 'status-accepting';
+            statusText = 'Neemt patiënten aan';
+          } else if (practice.currentStatus === 'nee') {
+            statusClass = 'status-not-accepting';
+            statusText = 'Neemt geen patiënten aan';
+          }
+          
+          // Praktijk card toevoegen
+          listHtml += `
+            <div class="practice-card">
+              <h4>${practice.naam}</h4>
+              <div class="practice-status ${statusClass}">
+                <span>${statusText}</span>
+              </div>
+              <div class="practice-url">
+                <a href="${practice.websiteUrl}" target="_blank">${practice.websiteUrl}</a>
+              </div>
+              <div class="practice-actions">
+                <button class="btn-check" data-id="${practice.practiceId}">Controleren</button>
+                <button class="btn-edit" data-id="${practice.practiceId}">Bewerken</button>
+                <button class="btn-delete" data-id="${practice.practiceId}">Verwijderen</button>
+              </div>
+            </div>
+          `;
+        });
+        
+        listHtml += '</div>';
+        practicesList.innerHTML = listHtml;
+        
+        // Event handlers toevoegen aan de knoppen
+        setupPracticeActionHandlers();
+      })
+      .withFailureHandler(function(error) {
+        // Toon foutmelding
+        practicesList.innerHTML = `
+          <div class="error-state">
+            <p>Er is een fout opgetreden bij het ophalen van uw huisartsenpraktijken:</p>
+            <p>${error}</p>
+            <button onclick="loadPracticesList()">Opnieuw proberen</button>
+          </div>
+        `;
+      })
+      .getPracticesByUser(currentUser.userId);
+  }
+  
+  /**
+   * Event handlers voor formulieren
+   */
+  function setupFormHandlers() {
+    // Add practice form
+    const addPracticeForm = document.getElementById('add-practice-form');
+    if (addPracticeForm) {
+      addPracticeForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Formulierdata verzamelen
+        const formData = {
+          userId: currentUser.userId,
+          naam: this.elements.naam.value,
+          websiteUrl: this.elements.websiteUrl.value,
+          notes: this.elements.notes.value
+        };
+        
+        // Submit knop uitschakelen tijdens verwerking
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Toevoegen...';
+        
+        // Server-side functie aanroepen om praktijk toe te voegen
+        google.script.run
+          .withSuccessHandler(function(result) {
+            // Form resetten
+            addPracticeForm.reset();
+            
+            // Tab terugschakelen naar mijn huisartsen
+            const myPracticesTab = document.querySelector('.tab-button[data-tab="my-practices"]');
+            if (myPracticesTab) {
+              myPracticesTab.click();
+            }
+            
+            // Lijst met praktijken opnieuw laden
+            loadPracticesList();
+            
+            // Knop weer inschakelen
+            submitButton.disabled = false;
+            submitButton.textContent = 'Toevoegen';
+            
+            // Bevestigingsbericht tonen
+            showNotification('Huisartsenpraktijk succesvol toegevoegd');
+          })
+          .withFailureHandler(function(error) {
+            // Knop weer inschakelen
+            submitButton.disabled = false;
+            submitButton.textContent = 'Toevoegen';
+            
+            // Foutmelding tonen
+            showError('Fout bij toevoegen van praktijk: ' + error);
+          })
+          .createPractice(formData);
+      });
+    }
+    
+    // Settings form
+    const settingsForm = document.getElementById('settings-form');
+    if (settingsForm) {
+      settingsForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Formulierdata verzamelen
+        const formData = {
+          naam: this.elements.naam.value,
+          notificationsEnabled: this.elements.notificationsEnabled.checked,
+          checkFrequency: this.elements.checkFrequency.value
+        };
+        
+        // Submit knop uitschakelen tijdens verwerking
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Opslaan...';
+        
+        // Server-side functie aanroepen om instellingen bij te werken
+        google.script.run
+          .withSuccessHandler(function(updatedUser) {
+            // Gebruikersgegevens bijwerken
+            if (updatedUser) {
+              currentUser = updatedUser;
+            }
+            
+            // Knop weer inschakelen
+            submitButton.disabled = false;
+            submitButton.textContent = 'Opslaan';
+            
+            // Bevestigingsbericht tonen
+            showNotification('Instellingen succesvol opgeslagen');
+          })
+          .withFailureHandler(function(error) {
+            // Knop weer inschakelen
+            submitButton.disabled = false;
+            submitButton.textContent = 'Opslaan';
+            
+            // Foutmelding tonen
+            showError('Fout bij opslaan van instellingen: ' + error);
+          })
+          .updateCurrentUserSettings(formData);
+      });
+    }
+  }
+  
+  /**
+   * Event handlers voor praktijk acties
+   */
+  function setupPracticeActionHandlers() {
+    // Check buttons
+    const checkButtons = document.querySelectorAll('.btn-check');
+    checkButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const practiceId = this.dataset.id;
+        checkPractice(practiceId);
+      });
+    });
+    
+    // Edit buttons
+    const editButtons = document.querySelectorAll('.btn-edit');
+    editButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const practiceId = this.dataset.id;
+        editPractice(practiceId);
+      });
+    });
+    
+    // Delete buttons
+    const deleteButtons = document.querySelectorAll('.btn-delete');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const practiceId = this.dataset.id;
+        deletePractice(practiceId);
+      });
+    });
+  }
+  
+  /**
+   * Event handlers voor tabs
+   */
+  function setupTabHandlers() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // Active class verwijderen van alle tabs
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabPanes.forEach(pane => pane.classList.remove('active'));
+        
+        // Active class toevoegen aan geselecteerde tab
+        this.classList.add('active');
+        const tabId = this.dataset.tab;
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+  }
+  
+  /**
+   * Controleert een huisartsenpraktijk
+   * 
+   * @param {string} practiceId - ID van de praktijk
+   */
+  function checkPractice(practiceId) {
+    // Placeholder functie - wordt geïmplementeerd zodra WebsiteChecker is ontwikkeld
+    showNotification('Deze functie wordt binnenkort geïmplementeerd');
+  }
+  
+  /**
+   * Bewerkt een huisartsenpraktijk
+   * 
+   * @param {string} practiceId - ID van de praktijk
+   */
+  function editPractice(practiceId) {
+    // Placeholder functie - wordt geïmplementeerd in een volgende fase
+    showNotification('Deze functie wordt binnenkort geïmplementeerd');
+  }
+  
+  /**
+   * Verwijdert een huisartsenpraktijk
+   * 
+   * @param {string} practiceId - ID van de praktijk
+   */
+  function deletePractice(practiceId) {
+    if (confirm('Weet u zeker dat u deze huisartsenpraktijk wilt verwijderen?')) {
+      // Server-side functie aanroepen om praktijk te verwijderen
+      google.script.run
+        .withSuccessHandler(function(success) {
+          if (success) {
+            // Lijst met praktijken opnieuw laden
+            loadPracticesList();
+            
+            // Bevestigingsbericht tonen
+            showNotification('Huisartsenpraktijk succesvol verwijderd');
+          } else {
+            showError('Kon de huisartsenpraktijk niet verwijderen');
+          }
+        })
+        .withFailureHandler(function(error) {
+          // Foutmelding tonen
+          showError('Fout bij verwijderen van praktijk: ' + error);
+        })
+        .deletePractice(practiceId);
+    }
+  }
+  
+  /**
+   * Toont een notificatie
+   * 
+   * @param {string} message - Het bericht
+   */
+  function showNotification(message) {
+    // Toevoegen aan DOM indien nog niet aanwezig
+    let notification = document.getElementById('notification');
+    if (!notification) {
+      notification = document.createElement('div');
+      notification.id = 'notification';
+      notification.className = 'notification';
+      document.body.appendChild(notification);
+    }
+    
+    // Bericht instellen en tonen
+    notification.textContent = message;
+    notification.classList.add('show');
+    
+    // Na 3 seconden verbergen
     setTimeout(function() {
-      content.innerHTML += '<p>Dashboard functionaliteit wordt geïmplementeerd in een volgende fase.</p>';
-    }, 1000);
-  }
-  
-  /**
-   * Laadt het login scherm
-   */
-  function loadLoginScreen() {
-    const content = document.getElementById('content');
-    content.innerHTML = '<h2>Inloggen</h2>' +
-                         '<p>Log in met je Google account om toegang te krijgen tot Huisarts Check.</p>' +
-                         '<button onclick="login()">Inloggen met Google</button>';
-    content.style.display = 'block';
-  }
-  
-  /**
-   * Inlogfunctie
-   */
-  function login() {
-    // In deze initiële versie is dit nog een placeholder
-    // Dit zal worden geïmplementeerd zodra de AuthService is ontwikkeld
-    showError('Inlogfunctionaliteit wordt geïmplementeerd in een volgende fase.');
+      notification.classList.remove('show');
+    }, 3000);
   }
   
   /**
@@ -120,16 +519,5 @@
     setTimeout(function() {
       error.style.display = 'none';
     }, 5000);
-  }
-  
-  /**
-   * Functie om HTML templates in te sluiten
-   * (Dit is een hulpfunctie voor de server-side include)
-   * 
-   * @param {string} filename - Bestandsnaam van de template
-   * @return {string} HTML inhoud van de template
-   */
-  function include(filename) {
-    return HtmlService.createHtmlOutputFromFile(filename).getContent();
   }
 </script>
