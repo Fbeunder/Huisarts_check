@@ -10,6 +10,8 @@
    * - Opgelost: MutationObserver error door correcte DOM-element controle
    * - Opgelost: Authenticatie null status afhandeling
    * - Verbeterde foutafhandeling
+   * - Verbeterd: Robuustere controle van authenticatiestatus is null/undefined
+   * - Verbeterd: Duidelijkere foutmeldingen bij authenticatieproblemen
    */
 
   // Globale variabelen voor applicatiestatus
@@ -107,51 +109,73 @@
     // Toon loading indicator
     showLoading(true);
     
-    // Server-side functie aanroepen voor authenticatie
-    google.script.run
-      .withSuccessHandler(function(authStatus) {
-        console.log("[AUTH] Authenticatiecontrole succesvol:", authStatus);
-        
-        // Fix: Verbeterde controle op authStatus voor robuustere afhandeling van null/undefined
-        if (!authStatus) {
-          console.error("[AUTH-ERROR] Authenticatiestatus is null of undefined");
+    try {
+      // Server-side functie aanroepen voor authenticatie
+      google.script.run
+        .withSuccessHandler(function(authStatus) {
+          try {
+            console.log("[AUTH] Authenticatiecontrole resultaat ontvangen:", authStatus);
+            
+            // Verbeterde controle: Controleer eerst of authStatus bestaat
+            if (authStatus === null || authStatus === undefined) {
+              console.error("[AUTH-WARNING] Authenticatiestatus is null of undefined");
+              showLoading(false);
+              showError("Authenticatiefout: Geen geldige status ontvangen. Probeer de pagina te vernieuwen of log opnieuw in.");
+              
+              // Probeer opnieuw in te loggen na korte delay
+              setTimeout(function() {
+                console.log("[AUTH] Authenticatie opnieuw proberen na null/undefined status");
+                window.location.reload();
+              }, 3000);
+              
+              return;
+            }
+            
+            // Nu we zeker weten dat authStatus bestaat, kunnen we verdergaan
+            if (authStatus.loggedIn === true && authStatus.user) {
+              // Gebruiker is ingelogd
+              console.log("[AUTH] Gebruiker is ingelogd, gebruikersinterface initialiseren");
+              currentUser = authStatus.user;
+              isAdmin = !!authStatus.isAdmin;
+              
+              // Korte timeout om de browser de kans te geven de DOM te updaten
+              setTimeout(function() {
+                initializeUserInterface();
+              }, 100);
+            } else if (authStatus.authUrl) {
+              // Gebruiker moet inloggen
+              console.log("[AUTH] Gebruiker niet ingelogd, doorverwijzen naar:", authStatus.authUrl);
+              window.top.location.href = authStatus.authUrl;
+            } else if (authStatus.errorMessage) {
+              // Er is een specifieke foutmelding
+              console.error("[AUTH-ERROR] Authenticatiefout:", authStatus.errorMessage);
+              showLoading(false);
+              showError("Authenticatiefout: " + authStatus.errorMessage + ". Probeer de pagina te vernieuwen of log opnieuw in.");
+            } else {
+              // Onbekende authenticatiestatus (wel een object, maar geen herkenbare velden)
+              console.error("[AUTH-ERROR] Onbekende of ongeldige authenticatiestatus structuur");
+              showLoading(false);
+              showError("Authenticatiefout: Onbekende status. Probeer de pagina te vernieuwen of log opnieuw in.");
+            }
+          } catch (innerError) {
+            // Extra veiligheid: vang uitzonderingen in de successHandler op
+            console.error("[AUTH-ERROR] Fout in authenticatie successHandler:", innerError);
+            showLoading(false);
+            showError("Interne authenticatiefout: " + innerError.message + ". Probeer de pagina te vernieuwen.");
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error("[AUTH-ERROR] Authenticatiecontrole mislukt:", error);
           showLoading(false);
-          showError("Authenticatiefout: Geen geldige status ontvangen. Probeer de pagina te vernieuwen of log opnieuw in.");
-          return;
-        }
-        
-        if (authStatus.loggedIn && authStatus.user) {
-          // Gebruiker is ingelogd
-          console.log("[AUTH] Gebruiker is ingelogd, gebruikersinterface initialiseren");
-          currentUser = authStatus.user;
-          isAdmin = !!authStatus.isAdmin;
-          
-          // Korte timeout om de browser de kans te geven de DOM te updaten
-          setTimeout(function() {
-            initializeUserInterface();
-          }, 100);
-        } else if (authStatus.authUrl) {
-          // Gebruiker moet inloggen
-          console.log("[AUTH] Gebruiker niet ingelogd, doorverwijzen naar:", authStatus.authUrl);
-          window.top.location.href = authStatus.authUrl;
-        } else if (authStatus.errorMessage) {
-          // Er is een specifieke foutmelding
-          console.error("[AUTH-ERROR] Authenticatiefout:", authStatus.errorMessage);
-          showLoading(false);
-          showError("Authenticatiefout: " + authStatus.errorMessage);
-        } else {
-          // Onbekende authenticatiestatus
-          console.error("[AUTH-ERROR] Onbekende of ongeldige authenticatiestatus");
-          showLoading(false);
-          showError("Authenticatiefout: Onbekende status. Probeer de pagina te vernieuwen of log opnieuw in.");
-        }
-      })
-      .withFailureHandler(function(error) {
-        console.error("[AUTH-ERROR] Authenticatiecontrole mislukt:", error);
-        showLoading(false);
-        showError("Authenticatiefout: " + (error.message || error));
-      })
-      .checkLoginStatus();
+          showError("Authenticatiefout: " + (error.message || error) + ". Probeer het later opnieuw.");
+        })
+        .checkLoginStatus();
+    } catch (error) {
+      // Vang eventuele fouten op bij het aanroepen van google.script.run
+      console.error("[AUTH-ERROR] Kon authenticatiefunctie niet aanroepen:", error);
+      showLoading(false);
+      showError("Kon niet verbinden met de server. Controleer uw internetverbinding en probeer het opnieuw.");
+    }
   }
   
   /**
@@ -160,6 +184,13 @@
   function initializeUserInterface() {
     try {
       console.log("[UI] Gebruikersinterface initialisatie gestart voor gebruiker:", currentUser);
+      
+      // Controleer of we een geldig gebruikersobject hebben
+      if (!currentUser || !currentUser.userId) {
+        console.error("[UI-ERROR] Ongeldige gebruikersgegevens voor UI initialisatie");
+        showError("Fout: Ongeldige gebruikersgegevens. Probeer opnieuw in te loggen.");
+        return;
+      }
       
       // Verberg loading indicator
       showLoading(false);
