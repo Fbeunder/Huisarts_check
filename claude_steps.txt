@@ -75,13 +75,18 @@
     - Robuustere database-initialisatie implementeren
     - Automatische creatie van database spreadsheet bij eerste gebruik
     - Verbeterde foutafhandeling voor gebruikersregistratie
-    - STATUS: ⏳ In behandeling (PR #22)
+    - STATUS: ✅ Voltooid (PR #22 gemerged)
 
-13. **Testen en bugfixing**
+13. **Bugfix: Favicon fout bij pagina rendering**
+    - Oplossen van fout "The favicon icon image type is not supported" 
+    - Verwijderen van niet-ondersteunde favicon URL referenties
+    - STATUS: ⏳ In behandeling (PR #24)
+
+14. **Testen en bugfixing**
     - End-to-end testen van de applicatie
     - Foutscenario's testen
     - Oplossen van bugs
-    - STATUS: ⏳ Gepland (Na voltooiing van PR #22)
+    - STATUS: ⏳ Gepland (Na voltooiing van PR #24)
 
 ## Nice-to-haves
 
@@ -135,14 +140,13 @@
 - Script ID is nog niet bekend, dit moet opgevraagd worden nadat het Apps Script project is aangemaakt.
 - Voor het gebruik van de OpenAI Web Search API is een API key nodig, die veilig moet worden opgeslagen.
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
-- De nieuwe README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
+- De README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
 
 ## Volgende stappen:
-1. **Voltooien van database initialisatie bugfix (PR #22)**
-   - Verbeteren van database-initialisatie om fout bij starten op te lossen
-   - Oplossen van probleem met gebruikersregistratie
-   - Automatische spreadsheet creatie implementeren bij eerste gebruik
-   - Deze aanpassing is noodzakelijk voor de basiswerking van de applicatie
+1. **Voltooien van favicon bugfix (PR #24)**
+   - Verwijderen van niet-ondersteunde favicon URL's in UI.gs
+   - Testen van de applicatie na deze fix
+   - Deze aanpassing is noodzakelijk voor de basiswerking van de applicatie omdat het een blokkerende fout oplost
 
 2. **Volledige end-to-end testen**
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
@@ -164,4 +168,4 @@
    - Verbeteren van code-kwaliteit en onderhoudbaarheid
    - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de onderhoudbaarheid van de code.
 
-De database initialisatie bugfix (PR #22) is noodzakelijk voor de basiswerking van de applicatie omdat deze een kritieke fout oplost die verhindert dat gebruikers zich kunnen registreren of inloggen in de applicatie. End-to-end testen is ook noodzakelijk om de betrouwbaarheid van de applicatie te garanderen. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
+De favicon bugfix (PR #24) en end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie omdat deze kritieke fouten oplossen die verhinderen dat gebruikers de applicatie correct kunnen gebruiken. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
