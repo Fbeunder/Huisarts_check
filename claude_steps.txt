@@ -32,7 +32,7 @@
    - Implementeren van OpenAIService.gs
    - API key management
    - Functionaliteit voor het controleren van website inhoud
-   - STATUS: ✅ Voltooid (PR #10 gemerged)
+   - STATUS: ✅ Voltooid (PR #10 gemerged, verbeterd in PR #12)
 
 6. **Website monitoring systeem**
    - Ontwikkelen van WebsiteChecker.gs
@@ -63,13 +63,19 @@
     - Opstellen van een README.md met installatie-instructies
     - Maken van gebruikershandleiding
     - Documenteren van de benodigde omgeving en vereisten
-    - STATUS: ✅ In behandeling (PR #16)
+    - STATUS: ✅ Voltooid (PR #16 gemerged)
 
-11. **Testen en bugfixing**
+11. **Fix HTML-templating structuur**
+    - Aanpassen UI.gs om te werken met de platte bestandenstructuur van Apps Script
+    - Helper functie voor HTML-templates toevoegen
+    - Documenteren van de naamgevingsconventie voor HTML-bestanden
+    - STATUS: ⏳ In behandeling (PR #18)
+
+12. **Testen en bugfixing**
     - End-to-end testen van de applicatie
     - Foutscenario's testen
     - Oplossen van bugs
-    - STATUS: Testfunctionaliteit voor DataLayer, AuthService, WebsiteChecker en EmailService geïmplementeerd, volledige systeemtests nog niet gestart
+    - STATUS: Niet gestart
 
 ## Nice-to-haves
 
@@ -125,26 +131,30 @@
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
 - De nieuwe README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
 
-## Volgende stappen na README.md implementatie:
-Nu dat de README.md is bijgewerkt met gedetailleerde installatie- en configuratiestappen, is er nog één belangrijk onderdeel over voordat de basisapplicatie volledig is afgerond: het testen en bugfixing proces.
+## Volgende stappen:
+1. **Afronden HTML-templating fix (PR #18)**
+   - De huidige implementatie van de UI.gs refereert naar HTML-bestanden in een map (HtmlTemplates/). Dit werkt niet in Apps Script omdat Apps Script geen mappenstructuur ondersteunt.
+   - Implementeren van de voorgestelde oplossing met een eenvoudig naamconventie en helper functie voor consistente toegang.
+   - Deze aanpassing is noodzakelijk voor de basiswerking van de applicatie.
 
-### Aanbevolen volgorde:
-
-1. **Volledige end-to-end testen**
+2. **Volledige end-to-end testen**
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
    - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
    - Foutscenario's testen en verbeteren van error handling
    - Opstellen van testscenario's en testcases
+   - Deze stap is noodzakelijk voor de basiswerking van de applicatie.
 
-2. **Gebruikersinterface verbeteren**
+3. **Gebruikersinterface verbeteren**
    - Toevoegen van functionaliteit om handmatige controles te starten vanuit de UI
    - Weergeven van controleresultaten en geschiedenis in de gebruikersinterface
    - Verbeteren van gebruikerservaring voor het beheren van huisartsenpraktijken
    - Implementeren van notificatie-instellingen in de gebruikersinterface
+   - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de gebruikerservaring.
 
-3. **Utilities.gs implementeren**
+4. **Utilities.gs implementeren**
    - Als nice-to-have voor code-optimalisatie
    - Verplaatsen van herbruikbare functies naar deze module
    - Verbeteren van code-kwaliteit en onderhoudbaarheid
+   - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de onderhoudbaarheid van de code.
 
-De vervolgstap voor end-to-end testen is noodzakelijk voor de basiswerking van de applicatie om te garanderen dat alle onderdelen correct samenwerken. De andere vervolgstappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking van de applicatie, maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
+De HTML-templating fix en end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
