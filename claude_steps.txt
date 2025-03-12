@@ -26,13 +26,13 @@
    - Maken van basis HTML-templates
    - Implementeren van gebruikersregistratie en inlogscherm
    - Dashboard voor beheren van huisartsenlijst
-   - STATUS: ✅ Voltooid (PR #8 open, HTML templates geïmplementeerd in PR #2 en #6)
+   - STATUS: ✅ Voltooid (PR #8 gemerged)
 
 5. **OpenAI Web Search API integratie**
    - Implementeren van OpenAIService.gs
    - API key management
    - Functionaliteit voor het controleren van website inhoud
-   - STATUS: Nog niet gestart
+   - STATUS: ✅ Voltooid (PR #10 open)
 
 6. **Website monitoring systeem**
    - Ontwikkelen van WebsiteChecker.gs
@@ -119,25 +119,21 @@
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
 - Bij de finale versie moet een volledige handleiding worden opgesteld.
 
-## Volgende stappen na PR #8:
-Na het implementeren van de UI.gs module (PR #8), zal de volgende stap zijn om zowel de OpenAIService.gs als de WebsiteChecker.gs modules te ontwikkelen. Dit zijn de kerncomponenten die verantwoordelijk zijn voor het daadwerkelijk controleren van de huisartsenpraktijk websites.
+## Volgende stappen na PR #10:
+Na het implementeren van de OpenAIService.gs module (PR #10), zal de volgende stap zijn om de WebsiteChecker.gs module te ontwikkelen. Deze module is verantwoordelijk voor het coördineren van het proces van het periodiek controleren van websites en het detecteren van statusveranderingen.
 
 ### Aanbevolen volgorde:
 
-1. **OpenAIService.gs implementeren**
-   - Ontwikkelen van de OpenAIService.gs module die verantwoordelijk is voor de integratie met de OpenAI Web Search API
-   - Implementeren van functies voor het analyseren van website-inhoud om te bepalen of praktijken nieuwe patiënten aannemen
-   - Veilig beheren van API-keys en optimaliseren van API-aanroepen voor kostenefficiëntie
-
-2. **WebsiteChecker.gs implementeren**
+1. **WebsiteChecker.gs implementeren**
    - Ontwikkelen van de WebsiteChecker.gs module die de controle van websites coördineert
    - Implementeren van logica voor het periodiek controleren van websites
    - Ontwikkelen van mechanismen voor het detecteren van statusveranderingen
    - Integreren met de OpenAIService voor het analyseren van website-inhoud
+   - Integreren met de DataLayer voor het opslaan van controleresultaten
 
-3. **EmailService.gs implementeren**
+2. **EmailService.gs implementeren**
    - Ontwikkelen van de EmailService.gs module voor het versturen van notificaties aan gebruikers
    - Templates voor e-mails maken voor verschillende soorten notificaties
    - Integreren met de DataLayer en WebsiteChecker om gebruikers te notificeren bij statusveranderingen
 
-Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie, omdat ze de kerntaak uitvoeren: het controleren van huisartsenpraktijk websites en het notificeren van gebruikers wanneer hun status verandert. Deze functionaliteit is cruciaal voor het volledig benutten van de reeds geïmplementeerde authenticatie, datamodel en gebruikersinterface.
+Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie, omdat ze de kerntaak uitvoeren: het controleren van huisartsenpraktijk websites en het notificeren van gebruikers wanneer hun status verandert. Deze functionaliteit is cruciaal voor het volledig benutten van de reeds geïmplementeerde authenticatie, datamodel, gebruikersinterface en OpenAI integratie.
