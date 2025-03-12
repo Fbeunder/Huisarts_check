@@ -7,13 +7,13 @@
    - Instellen van het appsscript.json manifest
    - Toevoegen van benodigde OAuth scopes
    - Toevoegen van Config.gs met basis configuratie
-   - STATUS: PR in afwachting van goedkeuring (#2)
+   - STATUS: ✅ Voltooid (PR #2 gemerged)
 
 2. **Google Spreadsheet datamodel opzetten**
    - Opzetten van een Google Spreadsheet als database
    - Tabellen voor gebruikers, huisartsen, en monitoring logs
    - Implementeren van DataLayer.gs voor CRUD-operaties
-   - STATUS: Nog niet gestart
+   - STATUS: ✅ Geïmplementeerd (PR #4, wacht op goedkeuring)
 
 3. **Authenticatie implementeren**
    - Ontwikkelen van AuthService.gs
@@ -26,7 +26,7 @@
    - Maken van basis HTML-templates
    - Implementeren van gebruikersregistratie en inlogscherm
    - Dashboard voor beheren van huisartsenlijst
-   - STATUS: Basistemplates in PR #2, rest nog niet gestart
+   - STATUS: Basistemplates geïmplementeerd (PR #2 gemerged), rest nog niet gestart
 
 5. **OpenAI Web Search API integratie**
    - Implementeren van OpenAIService.gs
@@ -51,13 +51,13 @@
    - Implementeren van Logger.gs
    - Foutafhandeling in alle modules
    - Gebruikersgerichte foutmeldingen in UI
-   - STATUS: Logger.gs in PR #2, rest nog niet gestart
+   - STATUS: Logger.gs geïmplementeerd (PR #2 gemerged), integratie in overige modules loopt
 
 9. **Triggers en scheduling**
    - Instellen van periodieke controles via triggers
    - Optimalisatie van controlefrequentie
    - Balanceren van API-aanroepen voor kostenefficiëntie
-   - STATUS: Basisstructuur in PR #2, implementatie nog niet gestart
+   - STATUS: Basisstructuur geïmplementeerd (PR #2 gemerged), volledige implementatie nog niet gestart
 
 10. **Testen en bugfixing**
     - End-to-end testen van de applicatie
@@ -119,7 +119,9 @@
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
 - Bij de finale versie moet een volledige handleiding worden opgesteld.
 
-## Volgende stappen na PR #2:
-Na goedkeuring van PR #2 en implementatie van de basisprojectstructuur, is de volgende stap het ontwikkelen van het Google Spreadsheet datamodel en de DataLayer.gs module. Dit is cruciaal voor de werking van alle andere modules, aangezien het de basis vormt voor de dataopslag van de applicatie.
+## Volgende stappen na PR #4:
+Na goedkeuring van PR #4 en implementatie van het Google Spreadsheet datamodel, is de volgende stap het ontwikkelen van de AuthService.gs module voor gebruikersauthenticatie. Dit is belangrijk omdat gebruikers moeten kunnen inloggen om hun eigen huisartslijsten te kunnen beheren.
 
-Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie. Zonder een functionele dataopslag kunnen er geen gebruikers, huisartsen of controlegegevens worden bijgehouden.
+Tegelijkertijd kan ook worden begonnen met de ontwikkeling van de UI.gs module, die de gebruikersinterface beheert en gebruik maakt van de eerder gemaakte HTML-templates.
+
+Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie. De authenticatielaag zorgt ervoor dat gebruikers veilig kunnen inloggen, terwijl de UI-laag de interactie met de gebruiker mogelijk maakt. Beide functionaliteiten bouwen voort op het nu geïmplementeerde datamodel.
