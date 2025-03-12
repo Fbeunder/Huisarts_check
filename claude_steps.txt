@@ -69,13 +69,19 @@
     - Aanpassen UI.gs om te werken met de platte bestandenstructuur van Apps Script
     - Helper functie voor HTML-templates toevoegen
     - Documenteren van de naamgevingsconventie voor HTML-bestanden
-    - STATUS: ⏳ In behandeling (PR #20)
+    - STATUS: ✅ Voltooid (PR #20 gemerged)
 
-12. **Testen en bugfixing**
+12. **Bugfix: Database initialisatieproblemen**
+    - Robuustere database-initialisatie implementeren
+    - Automatische creatie van database spreadsheet bij eerste gebruik
+    - Verbeterde foutafhandeling voor gebruikersregistratie
+    - STATUS: ⏳ In behandeling (PR #22)
+
+13. **Testen en bugfixing**
     - End-to-end testen van de applicatie
     - Foutscenario's testen
     - Oplossen van bugs
-    - STATUS: ⏳ In behandeling (Bug #19 in behandeling via PR #20)
+    - STATUS: ⏳ Gepland (Na voltooiing van PR #22)
 
 ## Nice-to-haves
 
@@ -132,11 +138,11 @@
 - De nieuwe README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
 
 ## Volgende stappen:
-1. **Voltooien HTML-templating fix (PR #20)**
-   - Verplaatsen van HTML-bestanden van HtmlTemplates/ naar de hoofdmap met HTML_ prefix
-   - Updaten van UI.gs om deze bestanden correct te laden
-   - Verwijderen van dubbele OpenAIServiceClass declaratie
-   - Deze aanpassing is noodzakelijk voor de basiswerking van de applicatie aangezien er momenteel een SyntaxError optreedt.
+1. **Voltooien van database initialisatie bugfix (PR #22)**
+   - Verbeteren van database-initialisatie om fout bij starten op te lossen
+   - Oplossen van probleem met gebruikersregistratie
+   - Automatische spreadsheet creatie implementeren bij eerste gebruik
+   - Deze aanpassing is noodzakelijk voor de basiswerking van de applicatie
 
 2. **Volledige end-to-end testen**
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
@@ -158,4 +164,4 @@
    - Verbeteren van code-kwaliteit en onderhoudbaarheid
    - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de onderhoudbaarheid van de code.
 
-De HTML-templating fix (PR #20) is noodzakelijk voor de basiswerking van de applicatie omdat Apps Script geen mappenstructuur ondersteunt en de huidige implementatie een SyntaxError veroorzaakt. End-to-end testen is ook noodzakelijk om de betrouwbaarheid van de applicatie te garanderen. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
+De database initialisatie bugfix (PR #22) is noodzakelijk voor de basiswerking van de applicatie omdat deze een kritieke fout oplost die verhindert dat gebruikers zich kunnen registreren of inloggen in de applicatie. End-to-end testen is ook noodzakelijk om de betrouwbaarheid van de applicatie te garanderen. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
