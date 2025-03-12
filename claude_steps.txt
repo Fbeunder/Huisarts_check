@@ -13,20 +13,20 @@
    - Opzetten van een Google Spreadsheet als database
    - Tabellen voor gebruikers, huisartsen, en monitoring logs
    - Implementeren van DataLayer.gs voor CRUD-operaties
-   - STATUS: ✅ Geïmplementeerd (PR #4, wacht op goedkeuring)
+   - STATUS: ✅ Voltooid (PR #4 gemerged)
 
 3. **Authenticatie implementeren**
    - Ontwikkelen van AuthService.gs
    - Instellen van Google OAuth authenticatie
    - Koppelen van gebruikersgegevens aan de datamodel
-   - STATUS: Nog niet gestart
+   - STATUS: ✅ Implementatie gereed (PR #6 wacht op goedkeuring)
 
 4. **Web interface ontwikkelen**
    - Ontwikkelen van UI.gs
    - Maken van basis HTML-templates
    - Implementeren van gebruikersregistratie en inlogscherm
    - Dashboard voor beheren van huisartsenlijst
-   - STATUS: Basistemplates geïmplementeerd (PR #2 gemerged), rest nog niet gestart
+   - STATUS: Deels geïmplementeerd (Basistemplates in PR #2, Login en dashboard templates in PR #6), UI.gs nog ontwikkelen
 
 5. **OpenAI Web Search API integratie**
    - Implementeren van OpenAIService.gs
@@ -63,7 +63,7 @@
     - End-to-end testen van de applicatie
     - Foutscenario's testen
     - Oplossen van bugs
-    - STATUS: Nog niet gestart
+    - STATUS: Testfunctionaliteit voor DataLayer en AuthService geïmplementeerd, volledige systeemtests nog niet gestart
 
 ## Nice-to-haves
 
@@ -119,9 +119,11 @@
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
 - Bij de finale versie moet een volledige handleiding worden opgesteld.
 
-## Volgende stappen na PR #4:
-Na goedkeuring van PR #4 en implementatie van het Google Spreadsheet datamodel, is de volgende stap het ontwikkelen van de AuthService.gs module voor gebruikersauthenticatie. Dit is belangrijk omdat gebruikers moeten kunnen inloggen om hun eigen huisartslijsten te kunnen beheren.
+## Volgende stappen na PR #6:
+Na goedkeuring van PR #6 en implementatie van de authenticatiefunctionaliteit, is de volgende stap het ontwikkelen van de UI.gs module en de WebsiteChecker.gs module. Deze modules zijn essentieel voor de kernfunctionaliteit van de applicatie.
 
-Tegelijkertijd kan ook worden begonnen met de ontwikkeling van de UI.gs module, die de gebruikersinterface beheert en gebruik maakt van de eerder gemaakte HTML-templates.
+De UI.gs module zal de verschillende HTML-templates en client-side JavaScript integreren en zorgen voor een naadloze gebruikerservaring. Deze module bouwt voort op de authenticatiefunctionaliteit van AuthService.gs en de datamanipulatie mogelijkheden van DataLayer.gs.
 
-Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie. De authenticatielaag zorgt ervoor dat gebruikers veilig kunnen inloggen, terwijl de UI-laag de interactie met de gebruiker mogelijk maakt. Beide functionaliteiten bouwen voort op het nu geïmplementeerde datamodel.
+De WebsiteChecker.gs module zal de logica bevatten voor het daadwerkelijk controleren van huisartsenpraktijk websites. Dit vormt het hart van de applicatie en zal integreren met de OpenAI Web Search API voor de analyse van website-inhoud.
+
+Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie. Zonder een functionele gebruikersinterface en de mogelijkheid om websites te controleren, kan de applicatie zijn kerntaak niet vervullen.
