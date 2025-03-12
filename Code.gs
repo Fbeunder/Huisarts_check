@@ -76,11 +76,16 @@ function showAbout() {
 function runWebsiteChecks() {
   try {
     Logger.info('Gestart met periodieke website controles');
-    // Hier wordt de WebsiteChecker aangeroepen om de controles uit te voeren
-    // WebsiteChecker.checkAllWebsites();
-    Logger.info('Periodieke website controles voltooid');
+    // WebsiteChecker aanroepen om de controles uit te voeren
+    const results = WebsiteChecker.checkAllWebsites();
+    Logger.info(`Periodieke website controles voltooid: ${results.totalChecked} websites gecontroleerd, ${results.statusChanges} statuswijzigingen`);
+    return results;
   } catch (error) {
     Logger.error('Fout bij het uitvoeren van periodieke website controles: ' + error.toString());
+    return {
+      success: false,
+      message: `Fout bij uitvoeren van website controles: ${error.toString()}`
+    };
   }
 }
 
@@ -172,6 +177,67 @@ function getPracticesByUser(userId) {
  */
 function updatePractice(practiceId, updates) {
   return DataLayer.updatePractice(practiceId, updates);
+}
+
+/**
+ * Handmatig controleren van een specifieke website (voor client-side gebruik)
+ * 
+ * @param {string} url - URL van de website om te controleren
+ * @param {string} userId - ID van de gebruiker die de website monitort
+ * @return {Object} Resultaat van de controle
+ */
+function checkWebsiteManually(url, userId) {
+  return WebsiteChecker.checkSingleWebsite(url, userId);
+}
+
+/**
+ * Start een handmatige controle van alle websites van een gebruiker (voor client-side gebruik)
+ * 
+ * @param {string} userId - ID van de gebruiker
+ * @return {Object} Resultaten van de controle
+ */
+function checkAllUserWebsites(userId) {
+  try {
+    Logger.info(`Starten van handmatige controle voor alle websites van gebruiker ${userId}`);
+    
+    // Haal alle praktijken van de gebruiker op
+    const practices = DataLayer.getPracticesByUser(userId);
+    
+    if (!practices || practices.length === 0) {
+      return {
+        success: true,
+        message: 'Geen huisartsenpraktijken gevonden om te controleren',
+        totalChecked: 0,
+        statusChanges: 0
+      };
+    }
+    
+    // Converteer praktijken naar het formaat dat WebsiteChecker.checkWebsiteBatch verwacht
+    const websitesToCheck = practices.map(practice => ({
+      practiceId: practice.practiceId,
+      userId: userId,
+      websiteUrl: practice.websiteUrl
+    }));
+    
+    // Gebruik WebsiteChecker om de batch te controleren
+    const batchResults = WebsiteChecker.checkWebsiteBatch(websitesToCheck);
+    
+    Logger.info(`Handmatige controle voltooid voor gebruiker ${userId}: ${batchResults.checked} websites gecontroleerd, ${batchResults.statusChanges} statuswijzigingen`);
+    
+    return {
+      success: true,
+      message: `Controle voltooid voor ${batchResults.checked} huisartsenpraktijken`,
+      totalChecked: batchResults.checked,
+      statusChanges: batchResults.statusChanges,
+      errors: batchResults.errors
+    };
+  } catch (error) {
+    Logger.error(`Fout bij handmatig controleren van alle websites voor gebruiker ${userId}: ${error.toString()}`);
+    return {
+      success: false,
+      message: `Fout bij controleren van websites: ${error.toString()}`
+    };
+  }
 }
 
 /**
