@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <title>Huisarts Check</title>
+    <?!= include('HTML_Styles'); ?>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Huisarts Check</h1>
+      <p>Welkom bij de Huisarts Check. Deze applicatie helpt je bij het vinden van een huisarts die nieuwe patiënten aanneemt.</p>
+      
+      <div id="loading">
+        <div class="spinner"></div>
+        <p>Laden...</p>
+      </div>
+      
+      <div id="content" style="display: none;">
+        <!-- Inhoud wordt hier dynamisch geladen -->
+      </div>
+      
+      <div id="error" style="display: none;">
+        <h3>Er is een fout opgetreden</h3>
+        <p id="error-message"></p>
+      </div>
+    </div>
+    
+    <?!= include('HTML_Scripts'); ?>
+  </body>
+</html>

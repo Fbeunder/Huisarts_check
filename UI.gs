@@ -23,6 +23,17 @@ function getHtmlTemplate(templateName) {
 }
 
 /**
+ * Helper functie om HTML-inhoud vanuit andere bestanden in te voegen
+ * Deze functie wordt gebruikt in de HTML-templates voor includes
+ * 
+ * @param {string} filename - Naam van het bestand om in te voegen
+ * @return {string} De inhoud van het bestand
+ */
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+/**
  * UI klasse voor het beheren van de gebruikersinterface
  */
 class UIClass {

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <title>Instellingen - Huisarts Check</title>
+    <?!= include('HTML_Styles'); ?>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Instellingen</h2>
+      
+      <div id="loading">
+        <div class="spinner"></div>
+        <p>Instellingen laden...</p>
+      </div>
+      
+      <div id="content" style="display: none;">
+        <form id="settings-form">
+          <h3>Gebruikersinstellingen</h3>
+          
+          <div class="form-group">
+            <label for="user-name">Naam:</label>
+            <input type="text" id="user-name" name="naam" value="<?= user.naam || '' ?>">
+          </div>
+          
+          <div class="form-group">
+            <label for="user-email">E-mail:</label>
+            <input type="email" id="user-email" disabled value="<?= user.email ?>">
+            <small>E-mailadres is gekoppeld aan je Google account en kan niet worden gewijzigd.</small>
+          </div>
+          
+          <div class="form-group">
+            <label>
+              <input type="checkbox" name="notificationsEnabled" <?= user.notificationsEnabled ? 'checked' : '' ?>>
+              E-mailnotificaties ontvangen
+            </label>
+            <small>Ontvang een e-mail wanneer een huisarts van status verandert en nieuwe patiënten aanneemt.</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="check-frequency">Controlefrequentie:</label>
+            <select id="check-frequency" name="checkFrequency">
+              <option value="daily" <?= user.checkFrequency === 'daily' ? 'selected' : '' ?>>Dagelijks</option>
+              <option value="weekly" <?= user.checkFrequency === 'weekly' ? 'selected' : '' ?>>Wekelijks</option>
+              <option value="monthly" <?= user.checkFrequency === 'monthly' ? 'selected' : '' ?>>Maandelijks</option>
+            </select>
+            <small>Hoe vaak moeten huisartsenpraktijken worden gecontroleerd op statusveranderingen?</small>
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit">Opslaan</button>
+            <button type="button" onclick="window.location.href = '<?= ScriptApp.getService().getUrl(); ?>';">Annuleren</button>
+          </div>
+        </form>
+        
+        <? if (isAdmin) { ?>
+          <div class="admin-settings">
+            <h3>Admin Instellingen</h3>
+            
+            <div class="form-group">
+              <label for="admin-check-interval">Globale controle interval (uren):</label>
+              <input type="number" id="admin-check-interval" min="1" max="24" value="24">
+            </div>
+            
+            <div class="form-group">
+              <label for="admin-api-key">OpenAI API Key:</label>
+              <input type="password" id="admin-api-key">
+              <button type="button" id="btn-save-api-key">Update API Key</button>
+            </div>
+            
+            <div class="form-group">
+              <button type="button" id="btn-trigger-check">Start handmatige controle (alle websites)</button>
+            </div>
+          </div>
+        <? } ?>
+      </div>
+      
+      <div id="error" style="display: none;">
+        <h3>Er is een fout opgetreden</h3>
+        <p id="error-message"></p>
+      </div>
+    </div>
+    
+    <script>
+      // Bij laden van de pagina
+      document.addEventListener('DOMContentLoaded', function() {
+        showLoading(false);
+        document.getElementById('content').style.display = 'block';
+        
+        // Form submission
+        setupForm();
+      });
+      
+      // Form submission
+      function setupForm() {
+        const form = document.getElementById('settings-form');
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          showLoading(true);
+          
+          // Formulierdata verzamelen
+          const formData = {
+            naam: this.elements.naam.value,
+            notificationsEnabled: this.elements.notificationsEnabled.checked,
+            checkFrequency: this.elements.checkFrequency.value
+          };
+          
+          // Server-side functie aanroepen (placeholder)
+          setTimeout(function() {
+            showLoading(false);
+            document.getElementById('content').style.display = 'block';
+            
+            // Placeholder voor succes melding
+            showNotification('Instellingen opgeslagen');
+          }, 1000);
+        });
+        
+        // Admin functionaliteit indien aanwezig
+        const saveApiKeyBtn = document.getElementById('btn-save-api-key');
+        if (saveApiKeyBtn) {
+          saveApiKeyBtn.addEventListener('click', function() {
+            const apiKey = document.getElementById('admin-api-key').value;
+            if (apiKey) {
+              showNotification('API key opgeslagen');
+            } else {
+              showError('Voer een geldige API key in');
+            }
+          });
+        }
+        
+        const triggerCheckBtn = document.getElementById('btn-trigger-check');
+        if (triggerCheckBtn) {
+          triggerCheckBtn.addEventListener('click', function() {
+            showNotification('Controle gestart. Dit kan enkele minuten duren.');
+          });
+        }
+      }
+      
+      // Toon laden spinner
+      function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+        document.getElementById('content').style.display = show ? 'none' : 'block';
+      }
+      
+      // Toon notificatie
+      function showNotification(message) {
+        // Voeg notificatie element toe indien nog niet aanwezig
+        let notification = document.getElementById('notification');
+        if (!notification) {
+          notification = document.createElement('div');
+          notification.id = 'notification';
+          notification.className = 'notification';
+          document.body.appendChild(notification);
+        }
+        
+        notification.textContent = message;
+        notification.classList.add('show');
+        
+        setTimeout(function() {
+          notification.classList.remove('show');
+        }, 3000);
+      }
+      
+      // Toon foutmelding
+      function showError(message) {
+        const errorEl = document.getElementById('error');
+        const errorMessageEl = document.getElementById('error-message');
+        
+        errorMessageEl.textContent = message;
+        errorEl.style.display = 'block';
+        
+        setTimeout(function() {
+          errorEl.style.display = 'none';
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>

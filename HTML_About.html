@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <title>Over - Huisarts Check</title>
+    <?!= include('HTML_Styles'); ?>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Over de Huisarts Check</h2>
+      
+      <p>Huisarts Check is een applicatie die je helpt bij het vinden van een huisarts die nieuwe patiënten aanneemt.</p>
+      
+      <h3>Hoe werkt het?</h3>
+      <ul>
+        <li>Voeg websites van huisartsenpraktijken toe die je wilt monitoren.</li>
+        <li>Onze applicatie controleert deze websites regelmatig op veranderingen.</li>
+        <li>Als een huisarts van status verandert en weer nieuwe patiënten aanneemt, ontvang je een e-mailnotificatie.</li>
+      </ul>
+      
+      <h3>Privacy</h3>
+      <p>We verzamelen alleen de gegevens die nodig zijn om de dienst te leveren:</p>
+      <ul>
+        <li>Je e-mailadres voor inloggen en notificaties</li>
+        <li>De URLs van huisartsenpraktijken die je wilt monitoren</li>
+      </ul>
+      <p>Je gegevens worden nooit gedeeld met derden.</p>
+      
+      <div class="text-center mt-20">
+        <button onclick="window.location.href = '<?= ScriptApp.getService().getUrl(); ?>';">Terug naar dashboard</button>
+      </div>
+    </div>
+    
+    <?!= include('HTML_Scripts'); ?>
+  </body>
+</html>
