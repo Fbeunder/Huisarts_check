@@ -26,7 +26,7 @@
    - Maken van basis HTML-templates
    - Implementeren van gebruikersregistratie en inlogscherm
    - Dashboard voor beheren van huisartsenlijst
-   - STATUS: In ontwikkeling (Issue #7 aangemaakt, HTML templates geïmplementeerd in PR #2 en #6)
+   - STATUS: ✅ Voltooid (PR #8 open, HTML templates geïmplementeerd in PR #2 en #6)
 
 5. **OpenAI Web Search API integratie**
    - Implementeren van OpenAIService.gs
@@ -119,11 +119,25 @@
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
 - Bij de finale versie moet een volledige handleiding worden opgesteld.
 
-## Volgende stappen na Issue #7:
-Na het implementeren van de UI.gs module (Issue #7), zal de volgende stap zijn om de WebsiteChecker.gs en OpenAIService.gs modules te ontwikkelen. Deze modules zijn essentieel voor de kernfunctionaliteit van de applicatie, namelijk het controleren van huisartsenpraktijk websites om te bepalen of ze nieuwe patiënten aannemen.
+## Volgende stappen na PR #8:
+Na het implementeren van de UI.gs module (PR #8), zal de volgende stap zijn om zowel de OpenAIService.gs als de WebsiteChecker.gs modules te ontwikkelen. Dit zijn de kerncomponenten die verantwoordelijk zijn voor het daadwerkelijk controleren van de huisartsenpraktijk websites.
 
-De WebsiteChecker.gs module zal verantwoordelijk zijn voor het periodiek controleren van de websites en het detecteren van statusveranderingen. Deze module werkt nauw samen met de OpenAIService.gs module, die de OpenAI Web Search API zal gebruiken om de website-inhoud te analyseren en te bepalen of een praktijk nieuwe patiënten aanneemt.
+### Aanbevolen volgorde:
 
-Na de implementatie van deze modules zal de EmailService.gs module ontwikkeld worden om gebruikers te notificeren wanneer een huisarts van status verandert.
+1. **OpenAIService.gs implementeren**
+   - Ontwikkelen van de OpenAIService.gs module die verantwoordelijk is voor de integratie met de OpenAI Web Search API
+   - Implementeren van functies voor het analyseren van website-inhoud om te bepalen of praktijken nieuwe patiënten aannemen
+   - Veilig beheren van API-keys en optimaliseren van API-aanroepen voor kostenefficiëntie
 
-Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie. Zonder de website-controle functionaliteit en notificatiesysteem kan de applicatie zijn kerntaak niet vervullen.
+2. **WebsiteChecker.gs implementeren**
+   - Ontwikkelen van de WebsiteChecker.gs module die de controle van websites coördineert
+   - Implementeren van logica voor het periodiek controleren van websites
+   - Ontwikkelen van mechanismen voor het detecteren van statusveranderingen
+   - Integreren met de OpenAIService voor het analyseren van website-inhoud
+
+3. **EmailService.gs implementeren**
+   - Ontwikkelen van de EmailService.gs module voor het versturen van notificaties aan gebruikers
+   - Templates voor e-mails maken voor verschillende soorten notificaties
+   - Integreren met de DataLayer en WebsiteChecker om gebruikers te notificeren bij statusveranderingen
+
+Deze vervolgstappen zijn noodzakelijk voor de basiswerking van de applicatie, omdat ze de kerntaak uitvoeren: het controleren van huisartsenpraktijk websites en het notificeren van gebruikers wanneer hun status verandert. Deze functionaliteit is cruciaal voor het volledig benutten van de reeds geïmplementeerde authenticatie, datamodel en gebruikersinterface.
