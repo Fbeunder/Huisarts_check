@@ -31,48 +31,11 @@ function doGet() {
   try {
     Logger.info('Web app gestart door gebruiker');
     
-    // Controleer login status
-    const authStatus = AuthService.checkLoginStatus();
-    
-    if (!authStatus.loggedIn) {
-      // Gebruiker is niet ingelogd, toon login pagina
-      const template = HtmlService.createTemplateFromFile('HtmlTemplates/Login');
-      
-      // Geef auth URL door aan template
-      if (authStatus.authUrl) {
-        template.authUrl = authStatus.authUrl;
-      } else {
-        template.authUrl = AuthService.getLoginUrl();
-      }
-      
-      // Geef eventuele foutmelding door
-      template.errorMessage = authStatus.errorMessage || null;
-      
-      return template
-        .evaluate()
-        .setTitle('Inloggen - Huisarts Check')
-        .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl')
-        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-    }
-    
-    // Gebruiker is ingelogd, laad normale UI
-    const template = HtmlService.createTemplateFromFile('HtmlTemplates/Index');
-    
-    // Geef gebruikersgegevens door aan client
-    template.user = authStatus.user;
-    template.isAdmin = authStatus.isAdmin;
-    
-    return template
-      .evaluate()
-      .setTitle('Huisarts Check')
-      .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    // Gebruik de UI module om de juiste interface te renderen
+    return UI.renderHome();
   } catch (error) {
     Logger.error('Fout bij het starten van de web app: ' + error.toString());
-    return HtmlService.createHtmlOutput(
-      '<h1>Er is een fout opgetreden</h1>' +
-      '<p>Probeer het later opnieuw of neem contact op met de beheerder.</p>'
-    );
+    return UI.renderError('Er is een fout opgetreden bij het starten van de applicatie. Probeer het later opnieuw of neem contact op met de beheerder.');
   }
 }
 
@@ -80,8 +43,7 @@ function doGet() {
  * Toont het dashboard in een modaal venster
  */
 function showDashboard() {
-  const html = HtmlService.createTemplateFromFile('HtmlTemplates/Dashboard')
-      .evaluate()
+  const html = UI.renderDashboard()
       .setWidth(800)
       .setHeight(600);
   SpreadsheetApp.getUi().showModalDialog(html, 'Huisarts Check Dashboard');
@@ -91,8 +53,7 @@ function showDashboard() {
  * Toont de instellingenpagina in een modaal venster
  */
 function showSettings() {
-  const html = HtmlService.createTemplateFromFile('HtmlTemplates/Settings')
-      .evaluate()
+  const html = UI.renderSettings()
       .setWidth(600)
       .setHeight(400);
   SpreadsheetApp.getUi().showModalDialog(html, 'Instellingen');
@@ -102,8 +63,7 @@ function showSettings() {
  * Toont informatie over de applicatie
  */
 function showAbout() {
-  const html = HtmlService.createTemplateFromFile('HtmlTemplates/About')
-      .evaluate()
+  const html = UI.renderAbout()
       .setWidth(400)
       .setHeight(300);
   SpreadsheetApp.getUi().showModalDialog(html, 'Over Huisarts Check');
@@ -201,6 +161,57 @@ function deletePractice(practiceId) {
  */
 function getPracticesByUser(userId) {
   return DataLayer.getPracticesByUser(userId);
+}
+
+/**
+ * Werk een bestaande praktijk bij (voor client-side gebruik)
+ * 
+ * @param {string} practiceId - ID van de praktijk
+ * @param {Object} updates - De bij te werken velden
+ * @return {Object} Het bijgewerkte praktijkobject
+ */
+function updatePractice(practiceId, updates) {
+  return DataLayer.updatePractice(practiceId, updates);
+}
+
+/**
+ * Toon de lijst met huisartsenpraktijken (voor client-side gebruik)
+ * 
+ * @return {HtmlOutput} HTML voor de lijst met praktijken
+ */
+function showPracticeList() {
+  const user = AuthService.getCurrentUser();
+  if (!user) return UI.renderContentSection('<p>U moet ingelogd zijn om uw huisartsen te bekijken.</p>');
+  return UI.renderPracticeList(user.userId);
+}
+
+/**
+ * Toon het formulier voor het toevoegen van een praktijk (voor client-side gebruik)
+ * 
+ * @return {HtmlOutput} HTML voor het formulier
+ */
+function showAddPracticeForm() {
+  return UI.renderAddPracticeForm();
+}
+
+/**
+ * Toon het formulier voor het bewerken van een praktijk (voor client-side gebruik)
+ * 
+ * @param {string} practiceId - ID van de praktijk
+ * @return {HtmlOutput} HTML voor het formulier
+ */
+function showEditPracticeForm(practiceId) {
+  return UI.renderEditPracticeForm(practiceId);
+}
+
+/**
+ * Toon de details van een praktijk (voor client-side gebruik)
+ * 
+ * @param {string} practiceId - ID van de praktijk
+ * @return {HtmlOutput} HTML voor de praktijkdetails
+ */
+function showPracticeDetail(practiceId) {
+  return UI.renderPracticeDetail(practiceId);
 }
 
 /**
