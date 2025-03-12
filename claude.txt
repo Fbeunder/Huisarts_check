@@ -27,6 +27,9 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
    - Config.gs (Configuratie-instellingen)
    - Logger.gs (Logging functionaliteit)
 
+5. Documentatie
+   - README.md (Uitgebreide installatie- en configuratiegids)
+
 ## Per module details:
 
 ### Code.gs
@@ -72,7 +75,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### EmailService.gs
-- Status: Geïmplementeerd (PR #14 in review)
+- Status: Geïmplementeerd (PR #14 gemerged)
 - Bestandsnaam: EmailService.gs
 - Functionaliteit: Beheert het verzenden van e-mailnotificaties aan gebruikers bij statuswijzigingen, inclusief HTML-templates en gebruikersvoorkeuren
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
@@ -84,7 +87,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### Utilities.gs
-- Status: Niet gestart
+- Status: Niet gestart (gepland als nice-to-have)
 - Bestandsnaam: Utilities.gs
 - Functionaliteit: Bevat algemene hulpfuncties die door meerdere modules worden gebruikt
 - Afhankelijkheid: Geen
@@ -100,3 +103,9 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Bestandsnaam: Logger.gs
 - Functionaliteit: Voorziet in logging functionaliteit voor de applicatie
 - Afhankelijkheid: Config.gs
+
+### README.md
+- Status: Bijgewerkt (PR #16 in review)
+- Bestandsnaam: README.md
+- Functionaliteit: Bevat uitgebreide documentatie voor installatie, configuratie en gebruik van de applicatie
+- Afhankelijkheid: Geen
