@@ -8,6 +8,21 @@
  */
 
 /**
+ * Helper functie om HTML templates te laden.
+ * Apps Script ondersteunt geen mappenstructuur, daarom gebruiken we deze functie om HTML-bestanden
+ * consistent te benaderen.
+ * 
+ * @param {string} templateName - De naam van het HTML-template bestand (zonder prefix)
+ * @return {HtmlTemplate} Het HTML-template object
+ */
+function getHtmlTemplate(templateName) {
+  // In Apps Script worden bestanden in een platte structuur opgeslagen,
+  // we geven de bestanden een prefix om ze onderscheidend te maken
+  const htmlPrefix = 'HTML_';
+  return HtmlService.createTemplateFromFile(htmlPrefix + templateName);
+}
+
+/**
  * UI klasse voor het beheren van de gebruikersinterface
  */
 class UIClass {
@@ -36,7 +51,7 @@ class UIClass {
       }
       
       // Laad dashboard template
-      const template = HtmlService.createTemplateFromFile('HtmlTemplates/Dashboard');
+      const template = getHtmlTemplate('Dashboard');
       
       // Geef gebruiker en instellingen door
       template.user = authStatus.user;
@@ -72,7 +87,7 @@ class UIClass {
       }
       
       // Laad settings template
-      const template = HtmlService.createTemplateFromFile('HtmlTemplates/Settings');
+      const template = getHtmlTemplate('Settings');
       
       // Geef gebruiker en instellingen door
       template.user = authStatus.user;
@@ -99,7 +114,7 @@ class UIClass {
       Logger.info('Renderen van login pagina');
       
       // Laad login template
-      const template = HtmlService.createTemplateFromFile('HtmlTemplates/Login');
+      const template = getHtmlTemplate('Login');
       
       // Geef auth URL door
       template.authUrl = authUrl || AuthService.getLoginUrl();
@@ -134,7 +149,7 @@ class UIClass {
       }
       
       // Gebruiker is ingelogd, laad normale UI
-      const template = HtmlService.createTemplateFromFile('HtmlTemplates/Index');
+      const template = getHtmlTemplate('Index');
       
       // Geef gebruikersgegevens door aan client
       template.user = authStatus.user;
@@ -160,7 +175,7 @@ class UIClass {
       Logger.info('Renderen van Over pagina');
       
       // Laad about template
-      const template = HtmlService.createTemplateFromFile('HtmlTemplates/About');
+      const template = getHtmlTemplate('About');
       
       return template.evaluate()
         .setTitle('Over - Huisarts Check')
