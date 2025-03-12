@@ -30,11 +30,43 @@ function onOpen() {
 function doGet() {
   try {
     Logger.info('Web app gestart door gebruiker');
-    return HtmlService.createTemplateFromFile('HtmlTemplates/Index')
+    
+    // Controleer login status
+    const authStatus = AuthService.checkLoginStatus();
+    
+    if (!authStatus.loggedIn) {
+      // Gebruiker is niet ingelogd, toon login pagina
+      const template = HtmlService.createTemplateFromFile('HtmlTemplates/Login');
+      
+      // Geef auth URL door aan template
+      if (authStatus.authUrl) {
+        template.authUrl = authStatus.authUrl;
+      } else {
+        template.authUrl = AuthService.getLoginUrl();
+      }
+      
+      // Geef eventuele foutmelding door
+      template.errorMessage = authStatus.errorMessage || null;
+      
+      return template
         .evaluate()
-        .setTitle('Huisarts Check')
+        .setTitle('Inloggen - Huisarts Check')
         .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl')
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    }
+    
+    // Gebruiker is ingelogd, laad normale UI
+    const template = HtmlService.createTemplateFromFile('HtmlTemplates/Index');
+    
+    // Geef gebruikersgegevens door aan client
+    template.user = authStatus.user;
+    template.isAdmin = authStatus.isAdmin;
+    
+    return template
+      .evaluate()
+      .setTitle('Huisarts Check')
+      .setFaviconUrl('https://www.google.com/s2/favicons?domain=huisarts.nl')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   } catch (error) {
     Logger.error('Fout bij het starten van de web app: ' + error.toString());
     return HtmlService.createHtmlOutput(
@@ -111,4 +143,72 @@ function setupTriggers() {
       .create();
       
   Logger.info('Triggers succesvol ingesteld');
+}
+
+/**
+ * Krijg de huidige gebruiker (voor client-side gebruik)
+ * 
+ * @return {Object} Het gebruikersobject van de ingelogde gebruiker of null
+ */
+function getCurrentUser() {
+  return AuthService.getCurrentUser();
+}
+
+/**
+ * Controleer de login status (voor client-side gebruik)
+ * 
+ * @return {Object} Object met login status, gebruiker en/of auth URL
+ */
+function checkLoginStatus() {
+  return AuthService.checkLoginStatus();
+}
+
+/**
+ * Update de instellingen van de huidige gebruiker (voor client-side gebruik)
+ * 
+ * @param {Object} settings - De nieuwe instellingen voor de gebruiker
+ * @return {Object} Het bijgewerkte gebruikersobject
+ */
+function updateCurrentUserSettings(settings) {
+  return AuthService.updateCurrentUserSettings(settings);
+}
+
+/**
+ * Maak een nieuwe huisartsenpraktijk aan (voor client-side gebruik)
+ * 
+ * @param {Object} practiceInfo - Informatie over de praktijk
+ * @return {Object} Het aangemaakte praktijkobject
+ */
+function createPractice(practiceInfo) {
+  return DataLayer.createPractice(practiceInfo);
+}
+
+/**
+ * Verwijder een huisartsenpraktijk (voor client-side gebruik)
+ * 
+ * @param {string} practiceId - ID van de praktijk
+ * @return {boolean} true als verwijderen is gelukt, anders false
+ */
+function deletePractice(practiceId) {
+  return DataLayer.deletePractice(practiceId);
+}
+
+/**
+ * Haal alle praktijken van een gebruiker op (voor client-side gebruik)
+ * 
+ * @param {string} userId - ID van de gebruiker
+ * @return {Array} Array met praktijkobjecten
+ */
+function getPracticesByUser(userId) {
+  return DataLayer.getPracticesByUser(userId);
+}
+
+/**
+ * Hulpfunctie voor het insluiten van HTML-bestanden
+ * 
+ * @param {string} filename - Bestandsnaam om in te sluiten
+ * @return {string} De inhoud van het bestand
+ */
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
