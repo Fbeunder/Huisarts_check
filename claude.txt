@@ -42,7 +42,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### UI.gs
-- Status: Niet gestart
+- Status: In ontwikkeling (Issue #7 aangemaakt)
 - Bestandsnaam: UI.gs
 - Functionaliteit: Beheert de webinterface en gebruikersinteractie
 - Afhankelijkheid: HtmlTemplates/, AuthService.gs, DataLayer.gs
@@ -78,7 +78,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: DataLayer.gs, Config.gs
 
 ### AuthService.gs
-- Status: Implementatie gereed (PR #6 wacht op goedkeuring)
+- Status: Geïmplementeerd (PR #6 gemerged)
 - Bestandsnaam: AuthService.gs
 - Functionaliteit: Handelt Google authenticatie en gebruikersbeheer af, inclusief login/logout en het bijwerken van gebruikersinstellingen
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
