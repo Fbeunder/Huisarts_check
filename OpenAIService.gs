@@ -1,13 +1,13 @@
 /**
- * OpenAIService.gs - Integratie met OpenAI API voor het analyseren van huisartsenpraktijk websites
+ * OpenAIService.gs - Integratie met OpenAI Web Search API voor het analyseren van huisartsenpraktijk websites
  * 
- * Deze module verzorgt de integratie met de OpenAI API voor het analyseren van huisartsenpraktijk
- * websites om te bepalen of ze nieuwe patiënten aannemen. Het biedt functies voor het ophalen
- * van website-inhoud, het analyseren hiervan, en het classificeren van de status.
+ * Deze module verzorgt de integratie met de OpenAI Web Search API voor het analyseren van huisartsenpraktijk
+ * websites om te bepalen of ze nieuwe patiënten aannemen. Het biedt functionaliteit om de API te bevragen
+ * en de resultaten te verwerken voor gebruik in de applicatie.
  */
 
 /**
- * OpenAIService klasse voor het analyseren van huisartsenpraktijk websites
+ * OpenAIService klasse voor het analyseren van huisartsenpraktijk websites via Web Search API
  */
 class OpenAIServiceClass {
   /**
@@ -26,38 +26,29 @@ class OpenAIServiceClass {
    */
   analyzeWebsite(url) {
     try {
-      Logger.info(`Analyseren van website: ${url}`);
+      Logger.info(`Analyseren van website via Web Search API: ${url}`);
       
-      // Website inhoud ophalen
-      const content = this.getWebsiteContent(url);
+      // Roep de OpenAI Web Search API aan om de website te analyseren
+      const response = this._callWebSearchAPI(url);
       
-      // Als geen inhoud kon worden opgehaald, return onbekende status
-      if (!content) {
-        Logger.warning(`Geen inhoud kunnen ophalen van: ${url}`);
+      // Als er geen resultaat is, geef onbekende status terug
+      if (!response || !response.length) {
+        Logger.warning(`Geen resultaat van Web Search API voor: ${url}`);
         return {
           status: 'UNKNOWN',
-          message: 'Geen website-inhoud kunnen ophalen',
+          message: 'Geen resultaat van Web Search API',
           url: url,
           timestamp: new Date().toISOString()
         };
       }
       
-      // Verwerk de inhoud en bepaal de status
-      const processedContent = this.processContent(content);
-      const classification = this.classifyPatientStatus(processedContent);
-      const relevantInfo = this.extractRelevantInformation(processedContent);
+      // Verwerk en interpreteer het antwoord van de API
+      const classificationResult = this._interpretSearchResults(response, url);
       
       // Log resultaat
-      Logger.info(`Website analyse resultaat voor ${url}: ${classification.status}`);
+      Logger.info(`Website analyse resultaat voor ${url}: ${classificationResult.status}`);
       
-      // Return resultaat
-      return {
-        status: classification.status,
-        confidence: classification.confidence,
-        details: relevantInfo,
-        url: url,
-        timestamp: new Date().toISOString()
-      };
+      return classificationResult;
     } catch (error) {
       Logger.error(`Fout bij analyseren van website ${url}: ${error.toString()}`);
       throw new Error(`Fout bij analyseren van website: ${error.toString()}`);
@@ -65,231 +56,35 @@ class OpenAIServiceClass {
   }
   
   /**
-   * Haal de inhoud van een website op
+   * Roep de OpenAI Web Search API aan om een website te analyseren
    * 
-   * @param {string} url - De URL van de website
-   * @return {string} - De HTML inhoud van de website
-   */
-  getWebsiteContent(url) {
-    try {
-      Logger.info(`Ophalen van website inhoud: ${url}`);
-      
-      // HTTP opties
-      const options = {
-        'muteHttpExceptions': true,
-        'followRedirects': true,
-        'contentType': 'text/html;charset=utf-8'
-      };
-      
-      // Probeer de website op te halen
-      const response = UrlFetchApp.fetch(url, options);
-      
-      // Controleer of de request succesvol was
-      if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-        const content = response.getContentText();
-        return content;
-      } else {
-        Logger.warning(`HTTP foutcode ${response.getResponseCode()} bij ophalen van ${url}`);
-        return null;
-      }
-    } catch (error) {
-      Logger.error(`Fout bij ophalen van website ${url}: ${error.toString()}`);
-      return null;
-    }
-  }
-  
-  /**
-   * Verwerk de ruwe website-inhoud voor analyse
-   * 
-   * @param {string} content - De ruwe HTML inhoud van de website
-   * @return {string} - Verwerkte inhoud klaar voor analyse
-   */
-  processContent(content) {
-    try {
-      // Verwijder HTML tags en behoud alleen de tekst
-      let processedContent = content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ');
-      processedContent = processedContent.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ');
-      processedContent = processedContent.replace(/<[^>]+>/g, ' ');
-      
-      // Decodeer HTML entiteiten
-      processedContent = processedContent.replace(/&nbsp;/g, ' ');
-      processedContent = processedContent.replace(/&amp;/g, '&');
-      processedContent = processedContent.replace(/&lt;/g, '<');
-      processedContent = processedContent.replace(/&gt;/g, '>');
-      
-      // Normaliseer witruimte
-      processedContent = processedContent.replace(/\s+/g, ' ').trim();
-      
-      // Beperk de lengte om API kosten te beheersen
-      // Geef voorrang aan de eerste 8000 tekens, aangezien dat meestal het belangrijkste deel van de pagina is
-      if (processedContent.length > 8000) {
-        processedContent = processedContent.substring(0, 8000);
-        Logger.info('Inhoud ingekort tot 8000 tekens om API-kosten te beperken');
-      }
-      
-      return processedContent;
-    } catch (error) {
-      Logger.error(`Fout bij verwerken van website inhoud: ${error.toString()}`);
-      return content;
-    }
-  }
-  
-  /**
-   * Classificeer de website-inhoud om te bepalen of de praktijk nieuwe patiënten aanneemt
-   * 
-   * @param {string} content - De verwerkte website-inhoud
-   * @return {Object} - Object met status en confidence level
-   */
-  classifyPatientStatus(content) {
-    try {
-      // Gebruik de OpenAI API om de status te bepalen
-      const prompt = this._buildClassificationPrompt(content);
-      const response = this._callOpenAI(prompt);
-      
-      // Verwerk het resultaat
-      return this._parseClassificationResponse(response);
-    } catch (error) {
-      Logger.error(`Fout bij classificeren van patiëntstatus: ${error.toString()}`);
-      return {
-        status: 'UNKNOWN',
-        confidence: 0
-      };
-    }
-  }
-  
-  /**
-   * Extraheer relevante informatie uit de website-inhoud
-   * 
-   * @param {string} content - De verwerkte website-inhoud
-   * @return {Object} - Object met geëxtraheerde informatie
-   */
-  extractRelevantInformation(content) {
-    try {
-      // Gebruik de OpenAI API om relevante informatie te extraheren
-      const prompt = this._buildExtractionPrompt(content);
-      const response = this._callOpenAI(prompt);
-      
-      // Verwerk het resultaat
-      return this._parseExtractionResponse(response);
-    } catch (error) {
-      Logger.error(`Fout bij extraheren van relevante informatie: ${error.toString()}`);
-      return {
-        waitingList: false,
-        conditions: [],
-        waitingTime: null,
-        contactInfo: null,
-        lastUpdated: null
-      };
-    }
-  }
-  
-  /**
-   * Bouw de prompt voor het classificeren van de patiëntstatus
-   * 
-   * @param {string} content - De verwerkte website-inhoud
-   * @return {Array<Object>} - Array van message objects voor OpenAI API
+   * @param {string} url - De URL van de website om te analyseren
+   * @return {Object} - Het resultaat van de API-aanroep
    * @private
    */
-  _buildClassificationPrompt(content) {
-    const systemPrompt = {
-      role: "system",
-      content: `Je bent een AI die gespecialiseerd is in het analyseren van huisartsenpraktijk websites in Nederland. 
-Je taak is om te bepalen of een praktijk nieuwe patiënten aanneemt gebaseerd op de website inhoud.
-
-Classificeer de status als één van de volgende:
-- "ACCEPTING" - De praktijk neemt actief nieuwe patiënten aan
-- "NOT_ACCEPTING" - De praktijk neemt momenteel geen nieuwe patiënten aan of heeft een wachtlijst
-- "UNKNOWN" - Het is niet duidelijk uit de inhoud of de praktijk nieuwe patiënten aanneemt
-
-Geef je antwoord in het volgende JSON formaat:
-{
-  "status": "ACCEPTING|NOT_ACCEPTING|UNKNOWN",
-  "confidence": 0-100,
-  "reasoning": "Beknopte uitleg van je beslissing"
-}
-
-Hier zijn voorbeelden van formuleringen die aangeven dat een praktijk nieuwe patiënten AANNEEMT:
-- "U kunt zich aanmelden als nieuwe patiënt"
-- "Nieuwe patiënten zijn welkom"
-- "Inschrijven kan via het formulier"
-- "Voor het inschrijven als nieuwe patiënt kunt u..."
-
-Voorbeelden van formuleringen die aangeven dat een praktijk GEEN nieuwe patiënten aanneemt:
-- "Momenteel nemen wij geen nieuwe patiënten aan"
-- "Onze praktijk heeft een patiëntenstop"
-- "Er is een wachtlijst voor nieuwe patiënten"
-- "Wij hebben helaas een inschrijvingsstop"
-- "Onze praktijk zit vol"`
-    };
-    
-    const userPrompt = {
-      role: "user",
-      content: `Analyseer de volgende website inhoud van een huisartsenpraktijk en bepaal of ze nieuwe patiënten aannemen:
-
-${content}`
-    };
-    
-    return [systemPrompt, userPrompt];
-  }
-  
-  /**
-   * Bouw de prompt voor het extraheren van relevante informatie
-   * 
-   * @param {string} content - De verwerkte website-inhoud
-   * @return {Array<Object>} - Array van message objects voor OpenAI API
-   * @private
-   */
-  _buildExtractionPrompt(content) {
-    const systemPrompt = {
-      role: "system",
-      content: `Je bent een AI die gespecialiseerd is in het analyseren van huisartsenpraktijk websites in Nederland.
-Je taak is om relevante informatie te extraheren over het aannamebeleid van nieuwe patiënten.
-
-Extract de volgende informatie uit de inhoud en geef je antwoord in het volgende JSON formaat:
-{
-  "waitingList": true|false|null,
-  "conditions": ["voorwaarde1", "voorwaarde2", ...],
-  "waitingTime": "geschatte wachttijd als tekst"|null,
-  "contactInfo": "contactinformatie voor inschrijving"|null,
-  "lastUpdated": "datum van laatste update als vermeld"|null
-}
-
-- "waitingList": Geeft aan of er een wachtlijst is (true), zeker geen wachtlijst is (false), of onbekend (null)
-- "conditions": Array van voorwaarden voor inschrijving, zoals woongebied of andere vereisten
-- "waitingTime": Geschatte wachttijd voor nieuwe patiënten als vermeld op de website
-- "contactInfo": Specifieke contactinformatie voor inschrijving als nieuwe patiënt
-- "lastUpdated": Datum van laatste update van deze informatie als vermeld op de website`
-    };
-    
-    const userPrompt = {
-      role: "user",
-      content: `Extraheer relevante informatie over het aannamebeleid voor nieuwe patiënten uit de volgende website inhoud:
-
-${content}`
-    };
-    
-    return [systemPrompt, userPrompt];
-  }
-  
-  /**
-   * Roep de OpenAI API aan
-   * 
-   * @param {Array<Object>} messages - Array van messages voor de API
-   * @return {Object} - Het resultaat van de API aanroep
-   * @private
-   */
-  _callOpenAI(messages) {
+  _callWebSearchAPI(url) {
     try {
       // Valideer de API key
       this._validateAPIKey();
       
-      // Bouw request payload
+      // Bouw de prompt voor het analyseren van de huisartsenpraktijk website
+      const input = this._buildWebSearchPrompt(url);
+      
+      // Bouw payload voor de API-aanroep
       const payload = {
         model: CONFIG.OPENAI_API.MODEL,
-        messages: messages,
-        temperature: CONFIG.OPENAI_API.TEMPERATURE,
+        tools: [{
+          type: "web_search_preview",
+          search_context_size: CONFIG.OPENAI_API.SEARCH_CONTEXT_SIZE,
+          user_location: {
+            type: "approximate",
+            country: CONFIG.OPENAI_API.COUNTRY_CODE
+          }
+        }],
+        tool_choice: { type: "web_search_preview" }, // Forceer gebruik van web search
+        input: input,
         max_tokens: CONFIG.OPENAI_API.MAX_TOKENS,
-        n: 1
+        temperature: CONFIG.OPENAI_API.TEMPERATURE
       };
       
       // HTTP opties
@@ -345,90 +140,283 @@ ${content}`
       const jsonResponse = JSON.parse(response.getContentText());
       return jsonResponse;
     } catch (error) {
-      Logger.error(`Fout bij aanroepen van OpenAI API: ${error.toString()}`);
-      throw new Error(`Fout bij aanroepen van OpenAI API: ${error.toString()}`);
+      Logger.error(`Fout bij aanroepen van OpenAI Web Search API: ${error.toString()}`);
+      throw new Error(`Fout bij aanroepen van OpenAI Web Search API: ${error.toString()}`);
     }
   }
   
   /**
-   * Parse de response van de OpenAI API voor classificatie
+   * Bouw de prompt voor de Web Search API om een huisartsenpraktijk website te analyseren
    * 
-   * @param {Object} response - De response van de OpenAI API
-   * @return {Object} - Geparseerde classificatie
+   * @param {string} url - De URL van de website om te analyseren
+   * @return {string} - De prompt voor de Web Search API
    * @private
    */
-  _parseClassificationResponse(response) {
+  _buildWebSearchPrompt(url) {
+    return `Bezoek en analyseer de huisartsenpraktijk website ${url} om te bepalen of ze nieuwe patiënten aannemen. 
+    
+Zoek naar specifieke informatie over het aannamebeleid, zoals:
+1. Of ze expliciet vermelden dat ze nieuwe patiënten aannemen of juist niet
+2. Of er een patiëntenstop, inschrijvingsstop of wachtlijst is
+3. Voorwaarden voor inschrijving (zoals woongebied, etc.)
+4. Hoe lang eventuele wachttijden zijn
+5. Contactinformatie specifiek voor nieuwe patiënten
+
+Geef je antwoord in JSON-formaat:
+{
+  "status": "ACCEPTING", "NOT_ACCEPTING", of "UNKNOWN",
+  "confidence": [0-100],
+  "details": {
+    "waitingList": true/false/null,
+    "conditions": ["voorwaarde1", "voorwaarde2", ...],
+    "waitingTime": "geschatte wachttijd als vermeld" of null,
+    "contactInfo": "contactinformatie voor inschrijving" of null,
+    "lastUpdated": "datum van laatste update" of null
+  },
+  "reasoning": "korte uitleg van je beslissing",
+  "url": "${url}",
+  "timestamp": "huidige datum en tijd"
+}
+
+Formats zoals "Nieuwe patiënten zijn welkom", "U kunt zich aanmelden", "Voor het inschrijven" duiden op ACCEPTING.
+Formats zoals "Momenteel nemen wij geen nieuwe patiënten aan", "Patiëntenstop", "Inschrijvingsstop", "Wachtlijst" duiden op NOT_ACCEPTING.
+Bij onduidelijkheid, kies UNKNOWN.`;
+  }
+  
+  /**
+   * Interpreteer de resultaten van de Web Search API aanroep
+   * 
+   * @param {Object} response - De respons van de Web Search API
+   * @param {string} url - De URL van de geanalyseerde website
+   * @return {Object} - Geïnterpreteerde resultaten in gestructureerd formaat
+   * @private
+   */
+  _interpretSearchResults(response, url) {
     try {
-      // Haal het antwoord uit de response
-      const content = response.choices[0].message.content;
+      // Zoek het message item in de respons
+      const messageItem = response.find(item => item.type === 'message');
       
-      // Probeer JSON te parsen
-      const parsedContent = JSON.parse(content);
-      
-      // Valideer de response
-      if (!parsedContent.status || !['ACCEPTING', 'NOT_ACCEPTING', 'UNKNOWN'].includes(parsedContent.status)) {
-        Logger.warning(`Ongeldige status in OpenAI response: ${parsedContent.status}`);
+      if (!messageItem || !messageItem.content || !messageItem.content.length) {
+        Logger.warning(`Geen message inhoud gevonden in Web Search API respons voor ${url}`);
         return {
           status: 'UNKNOWN',
           confidence: 0,
-          reasoning: 'Ongeldige response van model'
+          details: {
+            waitingList: null,
+            conditions: [],
+            waitingTime: null,
+            contactInfo: null,
+            lastUpdated: null
+          },
+          reasoning: 'Geen geldige respons van Web Search API',
+          url: url,
+          timestamp: new Date().toISOString()
         };
       }
       
-      // Normaliseer confidence tussen 0-100
-      let confidence = parsedContent.confidence;
-      if (typeof confidence !== 'number' || confidence < 0 || confidence > 100) {
-        confidence = 50; // Default waarde als confidence ongeldig is
+      // Haal de tekstinhoud op
+      const textContent = messageItem.content.find(content => content.type === 'output_text');
+      
+      if (!textContent || !textContent.text) {
+        Logger.warning(`Geen tekstinhoud gevonden in Web Search API respons voor ${url}`);
+        return {
+          status: 'UNKNOWN',
+          confidence: 0,
+          details: {
+            waitingList: null,
+            conditions: [],
+            waitingTime: null,
+            contactInfo: null,
+            lastUpdated: null
+          },
+          reasoning: 'Geen tekstinhoud in respons van Web Search API',
+          url: url,
+          timestamp: new Date().toISOString()
+        };
       }
       
-      return {
-        status: parsedContent.status,
-        confidence: confidence,
-        reasoning: parsedContent.reasoning || 'Geen redenering opgegeven'
-      };
+      // Probeer JSON te extraheren uit de tekstinhoud
+      // Tekst kan ook andere informatie bevatten, dus we zoeken naar JSON-blokken
+      const jsonMatch = textContent.text.match(/\{[\s\S]*?\}/);
+      if (jsonMatch) {
+        try {
+          // Probeer de gevonden JSON te parsen
+          const parsedJson = JSON.parse(jsonMatch[0]);
+          
+          // Valideer en normaliseer de JSON-output
+          const result = this._normalizeJsonOutput(parsedJson, url);
+          
+          // Citaties uit annotaties extraheren indien beschikbaar
+          if (textContent.annotations && textContent.annotations.length) {
+            result.citations = textContent.annotations
+              .filter(anno => anno.type === 'url_citation')
+              .map(anno => ({
+                url: anno.url,
+                title: anno.title
+              }));
+          }
+          
+          return result;
+        } catch (e) {
+          Logger.warning(`Fout bij parsen van JSON in Web Search API respons voor ${url}: ${e}`);
+        }
+      }
+      
+      // Als JSON-extractie niet lukt, probeer handmatig de status te bepalen
+      return this._fallbackInterpretation(textContent.text, url);
     } catch (error) {
-      Logger.error(`Fout bij parsen van classificatie response: ${error.toString()}`);
+      Logger.error(`Fout bij interpreteren van Web Search resultaten: ${error.toString()}`);
       return {
         status: 'UNKNOWN',
         confidence: 0,
-        reasoning: 'Fout bij parsen van response'
+        details: {
+          waitingList: null,
+          conditions: [],
+          waitingTime: null,
+          contactInfo: null,
+          lastUpdated: null
+        },
+        reasoning: `Fout bij interpreteren van resultaten: ${error.toString()}`,
+        url: url,
+        timestamp: new Date().toISOString()
       };
     }
   }
   
   /**
-   * Parse de response van de OpenAI API voor informatie extractie
+   * Normaliseer de JSON-output van de Web Search API
    * 
-   * @param {Object} response - De response van de OpenAI API
-   * @return {Object} - Geparseerde informatie
+   * @param {Object} json - De geparseerde JSON uit de API-respons
+   * @param {string} url - De URL van de geanalyseerde website
+   * @return {Object} - Genormaliseerde JSON-structuur
    * @private
    */
-  _parseExtractionResponse(response) {
-    try {
-      // Haal het antwoord uit de response
-      const content = response.choices[0].message.content;
-      
-      // Probeer JSON te parsen
-      const parsedContent = JSON.parse(content);
-      
-      // Valideer en normaliseer de velden
-      return {
-        waitingList: typeof parsedContent.waitingList === 'boolean' ? parsedContent.waitingList : null,
-        conditions: Array.isArray(parsedContent.conditions) ? parsedContent.conditions : [],
-        waitingTime: typeof parsedContent.waitingTime === 'string' ? parsedContent.waitingTime : null,
-        contactInfo: typeof parsedContent.contactInfo === 'string' ? parsedContent.contactInfo : null,
-        lastUpdated: typeof parsedContent.lastUpdated === 'string' ? parsedContent.lastUpdated : null
-      };
-    } catch (error) {
-      Logger.error(`Fout bij parsen van extractie response: ${error.toString()}`);
-      return {
-        waitingList: null,
+  _normalizeJsonOutput(json, url) {
+    // Zorg ervoor dat alle vereiste velden aanwezig zijn
+    const normalizedOutput = {
+      status: json.status && ['ACCEPTING', 'NOT_ACCEPTING', 'UNKNOWN'].includes(json.status) 
+        ? json.status 
+        : 'UNKNOWN',
+      confidence: typeof json.confidence === 'number' && json.confidence >= 0 && json.confidence <= 100
+        ? json.confidence
+        : 50,
+      details: {
+        waitingList: typeof json.details?.waitingList === 'boolean'
+          ? json.details.waitingList
+          : null,
+        conditions: Array.isArray(json.details?.conditions)
+          ? json.details.conditions
+          : [],
+        waitingTime: typeof json.details?.waitingTime === 'string'
+          ? json.details.waitingTime
+          : null,
+        contactInfo: typeof json.details?.contactInfo === 'string'
+          ? json.details.contactInfo
+          : null,
+        lastUpdated: typeof json.details?.lastUpdated === 'string'
+          ? json.details.lastUpdated
+          : null
+      },
+      reasoning: typeof json.reasoning === 'string'
+        ? json.reasoning
+        : 'Geen redenering opgegeven',
+      url: url,
+      timestamp: new Date().toISOString()
+    };
+    
+    return normalizedOutput;
+  }
+  
+  /**
+   * Fallback interpretatie voor het geval JSON-extractie niet lukt
+   * 
+   * @param {string} text - De tekstinhoud van de API-respons
+   * @param {string} url - De URL van de geanalyseerde website
+   * @return {Object} - Geïnterpreteerde resultaten
+   * @private
+   */
+  _fallbackInterpretation(text, url) {
+    // Controleer op sleutelwoorden die duiden op het aannemen van nieuwe patiënten
+    const acceptingKeywords = [
+      'nieuwe patiënten zijn welkom', 
+      'kunt zich aanmelden', 
+      'nieuwe patiënten aannemen',
+      'aanmelden als nieuwe patiënt',
+      'inschrijven als nieuwe patiënt',
+      'inschrijven als patiënt',
+      'nieuwe patiënten kunnen zich',
+      'nieuwe inschrijvingen',
+      'aanmeldformulier',
+      'inschrijfformulier'
+    ];
+    
+    // Controleer op sleutelwoorden die duiden op het niet aannemen van nieuwe patiënten
+    const notAcceptingKeywords = [
+      'geen nieuwe patiënten', 
+      'patiëntenstop', 
+      'wachtlijst',
+      'inschrijvingsstop',
+      'praktijk zit vol',
+      'niet open voor nieuwe patiënten',
+      'momenteel gesloten voor nieuwe patiënten',
+      'tijdelijk geen nieuwe patiënten',
+      'niet meer mogelijk om in te schrijven',
+      'nemen niet meer aan'
+    ];
+    
+    const textLower = text.toLowerCase();
+    
+    // Zoek naar accepterende en niet-accepterende sleutelwoorden
+    const foundAccepting = acceptingKeywords.some(keyword => textLower.includes(keyword.toLowerCase()));
+    const foundNotAccepting = notAcceptingKeywords.some(keyword => textLower.includes(keyword.toLowerCase()));
+    
+    let status, confidence, reasoning;
+    
+    if (foundAccepting && !foundNotAccepting) {
+      status = 'ACCEPTING';
+      confidence = 80;
+      reasoning = 'Website bevat duidelijke indicaties dat nieuwe patiënten worden aangenomen';
+    } else if (foundNotAccepting && !foundAccepting) {
+      status = 'NOT_ACCEPTING';
+      confidence = 80;
+      reasoning = 'Website bevat duidelijke indicaties dat nieuwe patiënten niet worden aangenomen';
+    } else if (foundAccepting && foundNotAccepting) {
+      status = 'UNKNOWN';
+      confidence = 50;
+      reasoning = 'Website bevat tegenstrijdige informatie over het aannemen van nieuwe patiënten';
+    } else {
+      status = 'UNKNOWN';
+      confidence = 30;
+      reasoning = 'Geen duidelijke informatie gevonden over het aannemen van nieuwe patiënten';
+    }
+    
+    // Probeer wachtlijstinformatie te extraheren
+    let waitingList = null;
+    if (textLower.includes('wachtlijst')) {
+      waitingList = true;
+    }
+    
+    // Probeer contactinformatie te extraheren (eenvoudige benadering)
+    let contactInfo = null;
+    const contactMatches = text.match(/([^\s@]+@[^\s@]+\.[^\s@]+)/); // Eenvoudige e-mail regex
+    if (contactMatches) {
+      contactInfo = contactMatches[0];
+    }
+    
+    return {
+      status: status,
+      confidence: confidence,
+      details: {
+        waitingList: waitingList,
         conditions: [],
         waitingTime: null,
-        contactInfo: null,
+        contactInfo: contactInfo,
         lastUpdated: null
-      };
-    }
+      },
+      reasoning: reasoning,
+      url: url,
+      timestamp: new Date().toISOString()
+    };
   }
   
   /**
