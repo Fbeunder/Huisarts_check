@@ -45,13 +45,13 @@
    - Ontwikkelen van EmailService.gs
    - Templates voor notificatie emails
    - Systeem voor het verzenden van notificaties bij statuswijzigingen
-   - STATUS: ✅ Geïmplementeerd (PR #14 in review)
+   - STATUS: ✅ Voltooid (PR #14 gemerged)
 
 8. **Logging en error handling**
    - Implementeren van Logger.gs
    - Foutafhandeling in alle modules
    - Gebruikersgerichte foutmeldingen in UI
-   - STATUS: Logger.gs geïmplementeerd (PR #2 gemerged), integratie in overige modules voltooid
+   - STATUS: ✅ Voltooid (Logger.gs geïmplementeerd in PR #2, integratie in alle modules voltooid)
 
 9. **Triggers en scheduling**
    - Instellen van periodieke controles via triggers
@@ -59,7 +59,13 @@
    - Balanceren van API-aanroepen voor kostenefficiëntie
    - STATUS: ✅ Voltooid (Geïmplementeerd in WebsiteChecker.gs en bijgewerkt in Code.gs)
 
-10. **Testen en bugfixing**
+10. **Documentatie en handleidingen**
+    - Opstellen van een README.md met installatie-instructies
+    - Maken van gebruikershandleiding
+    - Documenteren van de benodigde omgeving en vereisten
+    - STATUS: ✅ In behandeling (PR #16)
+
+11. **Testen en bugfixing**
     - End-to-end testen van de applicatie
     - Foutscenario's testen
     - Oplossen van bugs
@@ -67,42 +73,42 @@
 
 ## Nice-to-haves
 
-1. **Geavanceerde gebruikersinstellingen**
+1. **Utilities.gs implementeren**
+   - Ontwikkelen van de Utilities.gs module voor herbruikbare functionaliteit
+   - Refactoren van bestaande code om duplicatie te verminderen
+   - Toevoegen van hulpfuncties voor veelvoorkomende taken
+
+2. **Geavanceerde gebruikersinstellingen**
    - Aanpasbare controlefrequentie per website
    - Prioriteiten voor websites instellen
    - Mogelijkheid voor gebruikers om notificatie-instellingen aan te passen
 
-2. **Dashboard met statistieken**
+3. **Dashboard met statistieken**
    - Visualisatie van controlegeschiedenis
    - Statistieken over statusveranderingen
    - Trends in beschikbaarheid van huisartsen
 
-3. **Verbeterde context-analyse**
+4. **Verbeterde context-analyse**
    - Meer gedetailleerde informatie uit websites halen
    - Beter begrijpen van specifieke inschrijvingsvoorwaarden
    - Detectie van wachtlijsten en geschatte wachttijden
 
-4. **Multi-taal ondersteuning**
+5. **Multi-taal ondersteuning**
    - Nederlands en Engels als ondersteunde talen
    - Vertalingen voor gebruikersinterface en notificaties
 
-5. **Admin-dashboard**
+6. **Admin-dashboard**
    - Overzicht van alle gebruikers en gemonitorde websites
    - Mogelijkheid om systeeminstellingen aan te passen
    - Monitoring van API-gebruik en kosten
 
-6. **Export-functionaliteit**
+7. **Export-functionaliteit**
    - Exporteren van resultaten naar CSV/Excel
    - Rapporten genereren over beschikbaarheid
 
-7. **Mobile-friendly interface**
+8. **Mobile-friendly interface**
    - Responsieve design voor de webinterface
    - Optimalisatie voor mobiele apparaten
-
-8. **Documentatie**
-   - Gebruikershandleiding
-   - Installatie-instructies voor beheerders
-   - API-documentatie
 
 9. **Integratie met andere systemen**
    - Webhooks voor integratie met andere applicaties
@@ -117,10 +123,10 @@
 - Script ID is nog niet bekend, dit moet opgevraagd worden nadat het Apps Script project is aangemaakt.
 - Voor het gebruik van de OpenAI Web Search API is een API key nodig, die veilig moet worden opgeslagen.
 - Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
-- Bij de finale versie moet een volledige handleiding worden opgesteld.
+- De nieuwe README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
 
-## Volgende stappen na EmailService.gs implementatie:
-Nu dat de EmailService.gs module is geïmplementeerd, zijn de belangrijkste basismodules voor de functionaliteit van de applicatie voltooid. De volgende stappen zijn gericht op het testen en verbeteren van de applicatie.
+## Volgende stappen na README.md implementatie:
+Nu dat de README.md is bijgewerkt met gedetailleerde installatie- en configuratiestappen, is er nog één belangrijk onderdeel over voordat de basisapplicatie volledig is afgerond: het testen en bugfixing proces.
 
 ### Aanbevolen volgorde:
 
@@ -136,19 +142,9 @@ Nu dat de EmailService.gs module is geïmplementeerd, zijn de belangrijkste basi
    - Verbeteren van gebruikerservaring voor het beheren van huisartsenpraktijken
    - Implementeren van notificatie-instellingen in de gebruikersinterface
 
-3. **Documentatie en handleidingen**
-   - Opstellen van een readme.md met installatie-instructies
-   - Maken van gebruikershandleiding
-   - Documenteren van de benodigde omgeving en vereisten
-   - Verzamelen van requirements en afhankelijkheden
+3. **Utilities.gs implementeren**
+   - Als nice-to-have voor code-optimalisatie
+   - Verplaatsen van herbruikbare functies naar deze module
+   - Verbeteren van code-kwaliteit en onderhoudbaarheid
 
-4. **Utilities.gs implementeren**
-   - Ontwikkelen van de Utilities.gs module voor herbruikbare functionaliteit
-   - Refactoren van bestaande code om duplicatie te verminderen
-   - Toevoegen van hulpfuncties voor veelvoorkomende taken
-
-De eerste twee stappen (end-to-end testen en UI verbeteringen) zijn essentieel voor de stabiliteit en gebruiksvriendelijkheid van de applicatie, maar zijn niet strikt noodzakelijk voor de basisfunctionaliteit die nu al is geïmplementeerd. De applicatie kan in zijn huidige vorm al gebruikt worden, maar deze verbeteringen zullen de gebruikerservaring en betrouwbaarheid significant verbeteren.
-
-De documentatie en Utilities.gs-stappen zijn nice-to-haves die de code beter onderhoudbaar maken en nieuwe gebruikers helpen bij het installeren en gebruiken van de applicatie.
-
-De vervolgstappen zijn niet noodzakelijk voor de basiswerking van de applicatie, aangezien alle kernfunctionaliteit nu is geïmplementeerd. De applicatie kan in zijn huidige vorm al worden gebruikt door eindgebruikers. De voorgestelde vervolgstappen zijn gericht op het verbeteren van de gebruikerservaring, betrouwbaarheid en onderhoudbaarheid van de code.
+De vervolgstap voor end-to-end testen is noodzakelijk voor de basiswerking van de applicatie om te garanderen dat alle onderdelen correct samenwerken. De andere vervolgstappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking van de applicatie, maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
