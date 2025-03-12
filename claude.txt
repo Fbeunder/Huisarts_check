@@ -61,11 +61,12 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### HTML_Scripts.html
-- Status: Geïmplementeerd, verbeterd met bugfixes voor console errors (PR #31 in behandeling)
+- Status: Geïmplementeerd, verbeterd met bugfixes voor console errors (PR #31 gemerged, PR #33 in behandeling)
 - Bestandsnaam: HTML_Scripts.html
 - Functionaliteit: Bevat client-side JavaScript voor interactie met de gebruiker
 - Verbeteringen in PR #29 (gemerged): Volledige herstructurering voor robuustere werking, gefaseerde initialisatie, uitgebreide logging en foutafhandeling, verbeterde DOM-manipulatie
-- Bugfixes in PR #31 (in behandeling): MutationObserver fix, verbeterde authenticatie foutafhandeling, betere gebruikersfeedback
+- Bugfixes in PR #31 (gemerged): MutationObserver fix, verbeterde authenticatie foutafhandeling, betere gebruikersfeedback
+- Bugfixes in PR #33 (in behandeling): Verdere authenticatiefoutafhandeling verbeteringen, robuustere afhandeling van null/undefined waarden, automatische vernieuwing bij fouten
 - Afhankelijkheid: HTML-templates
 
 ### HTML_Index.html
