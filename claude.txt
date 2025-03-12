@@ -30,7 +30,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 ## Per module details:
 
 ### Code.gs
-- Status: Geïmplementeerd (PR #2 gemerged)
+- Status: Geïmplementeerd (PR #2 gemerged, bijgewerkt in PR #6)
 - Bestandsnaam: Code.gs
 - Functionaliteit: Bevat de hoofdentry points voor de applicatie, inclusief het starten van de UI en het instellen van triggers voor periodieke controles
 - Afhankelijkheid: Alle andere modules
@@ -48,13 +48,13 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: HtmlTemplates/, AuthService.gs, DataLayer.gs
 
 ### HtmlTemplates/
-- Status: Geïmplementeerd (PR #2 gemerged)
+- Status: Geïmplementeerd (PR #2 gemerged, bijgewerkt in PR #6)
 - Bestandsnaam: Meerdere .html bestanden
-- Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface
+- Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface, inclusief login en dashboard
 - Afhankelijkheid: Geen
 
 ### DataLayer.gs
-- Status: Geïmplementeerd (PR #4 wacht op goedkeuring)
+- Status: Geïmplementeerd (PR #4 gemerged)
 - Bestandsnaam: DataLayer.gs
 - Functionaliteit: Handelt database interacties af met Google Spreadsheet als dataopslag, biedt CRUD-operaties voor gebruikers, huisartsenpraktijken en controles
 - Afhankelijkheid: Config.gs, Logger.gs
@@ -78,10 +78,10 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: DataLayer.gs, Config.gs
 
 ### AuthService.gs
-- Status: Niet gestart
+- Status: Implementatie gereed (PR #6 wacht op goedkeuring)
 - Bestandsnaam: AuthService.gs
-- Functionaliteit: Handelt Google authenticatie en gebruikersbeheer af
-- Afhankelijkheid: DataLayer.gs, Config.gs
+- Functionaliteit: Handelt Google authenticatie en gebruikersbeheer af, inclusief login/logout en het bijwerken van gebruikersinstellingen
+- Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### Utilities.gs
 - Status: Niet gestart
