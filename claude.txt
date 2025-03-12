@@ -53,16 +53,18 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: HTML-templates, AuthService.gs, DataLayer.gs, Logger.gs
 
 ### HTML-templates
-- Status: Geïmplementeerd (PR #2 gemerged, bijgewerkt in PR #6, aangepast in PR #18)
+- Status: Geïmplementeerd en aangepast (PR #20 gemerged)
 - Bestandsnaam: HTML-bestanden met prefix HTML_
 - Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface, inclusief login en dashboard
 - Naamgevingsconventie: HTML-bestanden hebben prefix HTML_ voor betere integratie met Apps Script
 - Afhankelijkheid: Geen
 
 ### DataLayer.gs
-- Status: Geïmplementeerd (PR #4 gemerged)
+- Status: Geïmplementeerd en verbeterd (PR #4 gemerged, bugfix in PR #22)
 - Bestandsnaam: DataLayer.gs
 - Functionaliteit: Handelt database interacties af met Google Spreadsheet als dataopslag, biedt CRUD-operaties voor gebruikers, huisartsenpraktijken en controles
+- Verbeterde database-initialisatie en foutafhandeling toegevoegd
+- Voorziet in automatische controle en reparatie van database tabbladen/headers
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### WebsiteChecker.gs
@@ -84,9 +86,11 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### AuthService.gs
-- Status: Geïmplementeerd (PR #6 gemerged)
+- Status: Geïmplementeerd en verbeterd (PR #6 gemerged, bugfix in PR #22)
 - Bestandsnaam: AuthService.gs
 - Functionaliteit: Handelt Google authenticatie en gebruikersbeheer af, inclusief login/logout en het bijwerken van gebruikersinstellingen
+- Verbeterde foutafhandeling en robuustere gebruikersregistratie toegevoegd
+- Toegevoegd: createEmergencyAdmin() functie voor eenvoudige eerste setup
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### Utilities.gs
@@ -96,9 +100,11 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### Config.gs
-- Status: Geïmplementeerd (PR #2 gemerged)
+- Status: Geïmplementeerd en verbeterd (PR #2 gemerged, bugfix in PR #22)
 - Bestandsnaam: Config.gs
 - Functionaliteit: Bevat configuratie-instellingen voor de applicatie
+- Verbeterd: Automatische creatie van database spreadsheet bij eerste gebruik
+- Toegevoegd: createDatabaseSpreadsheet() functie voor het aanmaken van een nieuwe spreadsheet
 - Afhankelijkheid: Geen
 
 ### Logger.gs
@@ -114,7 +120,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### HTML_BESTANDENINFO.md
-- Status: Geïmplementeerd (PR #18 gepland)
+- Status: Geïmplementeerd (PR #20 gemerged)
 - Bestandsnaam: HTML_BESTANDENINFO.md
 - Functionaliteit: Documenteert de naamgevingsconventie en het gebruik van HTML-templates in Apps Script
 - Afhankelijkheid: Geen
