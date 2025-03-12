@@ -82,17 +82,25 @@
     - Verwijderen van niet-ondersteunde favicon URL referenties
     - STATUS: ✅ Voltooid (PR #24 gemerged)
 
-14. **Bugfix: Leeg scherm na authenticatie**
+14. **Bugfix: Leeg scherm na authenticatie (eerste poging)**
     - Oplossen van probleem waarbij scherm leeg blijft na inloggen
     - Verbeteren van de loadDashboard() functie in HTML_Scripts.html
     - Correcte DOM-manipulatie implementeren
-    - STATUS: ⏳ In behandeling (PR #26)
+    - STATUS: ✅ Voltooid (PR #26 gemerged)
 
-15. **Testen en bugfixing**
-    - End-to-end testen van de applicatie
-    - Foutscenario's testen
-    - Oplossen van bugs
-    - STATUS: ⏳ Gepland (Na voltooiing van PR #26)
+15. **Bugfix: Leeg scherm na authenticatie (verbeterde versie)**
+    - Verder verbeteren van probleem waarbij scherm nog steeds leeg blijft na inloggen
+    - Uitgebreide logging toevoegen voor betere diagnose
+    - Verbeterde DOM-manipulatie en element controles
+    - Verbeterde foutafhandeling en structuur van HTML_Index.html
+    - STATUS: ⏳ In behandeling (PR #28)
+
+16. **Volledige end-to-end testen**
+    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
+    - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
+    - Foutscenario's testen en verbeteren van error handling
+    - Opstellen van testscenario's en testcases
+    - STATUS: ⏳ Gepland (Na voltooiing van PR #28)
 
 ## Nice-to-haves
 
@@ -149,10 +157,11 @@
 - De README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
 
 ## Volgende stappen:
-1. **Voltooien van bugfix voor leeg scherm na inloggen (PR #26)**
-   - Verbeteren van de loadDashboard() functie in HTML_Scripts.html
-   - Toevoegen van correcte DOM-manipulatie
-   - Verbeterde foutafhandeling
+1. **Voltooien van verbeterde bugfix voor leeg scherm na inloggen (PR #28)**
+   - Uitgebreide logging toevoegen voor betere diagnose
+   - Verbeterde volgorde van DOM-manipulaties in HTML_Scripts.html
+   - Controles toevoegen voor DOM-elementen
+   - Verbeterde foutafhandeling en containerstructuur
    - Deze aanpassing is noodzakelijk voor de basiswerking van de applicatie omdat het een blokkerende fout oplost die verhindert dat gebruikers de applicatie kunnen gebruiken.
 
 2. **Volledige end-to-end testen**
@@ -175,4 +184,4 @@
    - Verbeteren van code-kwaliteit en onderhoudbaarheid
    - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de onderhoudbaarheid van de code.
 
-De bugfix voor leeg scherm na inloggen (PR #26) en end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie omdat deze kritieke fouten oplossen die verhinderen dat gebruikers de applicatie correct kunnen gebruiken. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
+De bugfix voor leeg scherm na inloggen (PR #28) en end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie omdat deze kritieke fouten oplossen die verhinderen dat gebruikers de applicatie correct kunnen gebruiken. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
