@@ -71,7 +71,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### HTML_Scripts.html
-- Status: Geïmplementeerd, meerdere bugfixes (PR #31, #33, #35 gemerged, volledig herschreven in PR #37, bugfix in PR #41, #43)
+- Status: Geïmplementeerd, meerdere bugfixes (PR #31, #33, #35 gemerged, volledig herschreven in PR #37, bugfix in PR #41, #43, verbeterd in PR #46)
 - Bestandsnaam: HTML_Scripts.html
 - Functionaliteit: Bevat client-side JavaScript voor interactie met de gebruiker
 - Volledige herstructurering in PR #29: Gefaseerde initialisatie, uitgebreide logging, verbeterde DOM-manipulatie
@@ -81,6 +81,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Volledige herschrijving in PR #37: Drastisch vereenvoudigde code, directe DOM-manipulatie, betere foutafhandeling
 - Bugfix in PR #41: Robuuste type-detectie en veilige string conversie in showError() functie
 - Bugfix in PR #43: Volledig herschreven showError() functie voor betere afhandeling van verschillende fouttypen
+- Bugfix in PR #46: Verbeterde foutafhandeling voor null-waarden, nooit meer "null" als foutmelding, toevoeging van stack traces, betere formattering van foutmeldingen
 - Afhankelijkheid: HTML-templates
 
 ### HTML_Index.html
