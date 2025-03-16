@@ -53,24 +53,31 @@
    - Geoptimaliseerde HTML templates
    - STATUS: Voltooid (PR #37)
 
-## Huidige Must-haves
-
-1. **Bugfix: DataLayer is not defined error** ⏳
+8. **Bugfix: DataLayer is not defined error** ✅
    - Oplossen van ReferenceError in AuthService.gs bij het laden
    - Verbeteren van module initialisatie en afhankelijkheidsmanagement
    - Toevoegen van robuustere controles op het bestaan van objecten
    - Nieuwe initializeDependencies() functie in Code.gs
    - Verbeterde diagnostische functies voor troubleshooting
-   - STATUS: In behandeling (PR #39)
+   - STATUS: Voltooid (PR #39)
 
-2. **Volledige end-to-end testen** 🔄
+9. **Bugfix: Foutmelding weergave en laadschermprobleem** ⏳
+   - Verbeterde foutafhandeling in showError() functie
+   - Robuuste type-detectie voor verschillende soorten foutobjecten
+   - Veiligere template variabelen initialisatie en diagnostische logging
+   - Specifieke afhandeling voor HTML elementen om correcte foutmeldingen te tonen
+   - STATUS: In behandeling (PR #41)
+
+## Huidige Must-haves
+
+1. **Volledige end-to-end testen** 🔄
    - Testen van de gehele workflow van website controle tot notificaties
    - Testen van verschillende scenario's en statusveranderingen
    - Foutscenario's testen en verbeteren van error handling
    - Opstellen van testscenario's en testcases
-   - STATUS: Gepland (Na voltooiing van PR #39)
+   - STATUS: Gepland (Na goedkeuring van PR #41)
 
-3. **Implementeren van handmatige controle functionaliteit** 🔄
+2. **Implementeren van handmatige controle functionaliteit** 🔄
    - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
    - Koppelen van de knop aan de WebsiteChecker module
    - Tonen van voortgang en resultaten in de gebruikersinterface
@@ -106,21 +113,21 @@
 - De README.md bevat een gedetailleerde handleiding voor installatie en configuratie.
 
 ## Volgende stappen:
-1. **Voltooien van DataLayer reference error bugfix (PR #39)**
-   - Voltooien en mergen van de verbeterde module initialisatie
-   - Verifiëren dat de applicatie stabiel werkt zonder ReferenceErrors
-   - Deze stap is noodzakelijk voor de basiswerking van de applicatie omdat gebruikers anders de applicatie niet kunnen gebruiken vanwege een blokkerende fout.
+1. **Review en merge van PR #41 (Bugfix: Foutmelding weergave en laadschermprobleem)**
+   - Controleer of de verbeteringen in de foutafhandeling het probleem correct oplossen
+   - Review en merge de aanpassingen in HTML_Scripts.html en HTML_Index.html
+   - Deze stap is noodzakelijk voor de basiswerking van de applicatie omdat gebruikers anders mogelijk op een laadscherm blijven hangen
 
 2. **Volledige end-to-end testen**
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
    - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
    - Foutscenario's testen en verbeteren van error handling
-   - Deze stap is noodzakelijk voor de basiswerking van de applicatie om te zorgen dat alle functionaliteit correct werkt.
+   - Deze stap is noodzakelijk voor de basiswerking van de applicatie om te zorgen dat alle functionaliteit correct werkt
 
 3. **Implementeren van handmatige controle functionaliteit**
    - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
    - Koppelen van de knop aan de WebsiteChecker module
    - Tonen van voortgang en resultaten in de gebruikersinterface
-   - Deze stap is noodzakelijk voor een volledige gebruikerservaring.
+   - Deze stap is noodzakelijk voor een volledige gebruikerservaring
 
-De huidige bugfix voor DataLayer reference error (PR #39) en de end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie. De implementatie van de handmatige controlefunctionaliteit is ook noodzakelijk voor een complete gebruikerservaring. De nice-to-have items zijn niet essentieel voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid verbeteren.
+De huidige bugfix voor de foutmelding weergave (PR #41), de end-to-end testen en de implementatie van handmatige controle functionaliteit zijn noodzakelijk voor de basiswerking van de applicatie. De nice-to-have items zijn niet essentieel voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid verbeteren.
