@@ -484,7 +484,7 @@
             
             // Praktijk toevoegen
             listHtml += `
-              <div class="practice-card">
+              <div class="practice-card" id="practice-${practice.practiceId}">
                 <h4>${practice.naam}</h4>
                 <div class="practice-status ${statusClass}">
                   <span>${statusText}</span>
@@ -496,6 +496,10 @@
                   <button class="btn-check" data-id="${practice.practiceId}">Controleren</button>
                   <button class="btn-edit" data-id="${practice.practiceId}">Bewerken</button>
                   <button class="btn-delete" data-id="${practice.practiceId}">Verwijderen</button>
+                </div>
+                <div class="check-status" id="check-status-${practice.practiceId}" style="display: none;">
+                  <div class="spinner"></div>
+                  <span>Bezig met controleren...</span>
                 </div>
               </div>
             `;
@@ -704,32 +708,182 @@
   
   /**
    * Handler voor het controleren van een praktijk
+   * Verbeterde versie met visuele feedback en status updates
    */
   function handleCheckPractice(practiceId) {
     console.log("Controleren praktijk: " + practiceId);
     
-    showNotification("Controle starten voor praktijk...");
+    // Verkrijg referenties naar relevante DOM elementen
+    const practiceCard = document.getElementById(`practice-${practiceId}`);
+    const checkButton = practiceCard.querySelector('.btn-check');
+    const checkStatus = document.getElementById(`check-status-${practiceId}`);
+    
+    // Schakel de controleren knop uit en toon status indicator
+    if (checkButton) {
+      checkButton.disabled = true;
+      checkButton.textContent = 'Bezig...';
+    }
+    
+    // Toon status indicator
+    if (checkStatus) {
+      checkStatus.style.display = 'block';
+      checkStatus.innerHTML = '<div class="spinner"></div><span>Website wordt gecontroleerd...</span>';
+    }
+    
+    // Toon notificatie voor gebruiker
+    showNotification("Controle gestart voor deze praktijk...");
     
     try {
       google.script.run
         .withSuccessHandler(function(result) {
           console.log("Controleresultaat ontvangen", result);
           
+          // Schakel de knop weer in
+          if (checkButton) {
+            checkButton.disabled = false;
+            checkButton.textContent = 'Controleren';
+          }
+          
+          // Verwerk resultaat en toon feedbackmelding aan gebruiker
           if (result && result.success) {
-            showNotification("Controle voltooid: " + (result.message || "Status bijgewerkt"));
-            loadPracticesList();
+            // Toon succes bericht in status indicator
+            if (checkStatus) {
+              checkStatus.className = 'check-status success';
+              
+              // Maak een informatiever bericht op basis van statusverandering
+              let statusMessage = '';
+              if (result.result && result.result.statusChanged) {
+                statusMessage = `Status gewijzigd van "${getStatusLabel(result.result.oldStatus)}" naar "${getStatusLabel(result.result.newStatus)}"`;
+              } else {
+                statusMessage = `Status is nog steeds "${getStatusLabel(result.result?.newStatus || 'unknown')}"`;
+              }
+              
+              checkStatus.innerHTML = `
+                <div class="check-result">
+                  <span class="success-icon">✓</span>
+                  <span>Controle voltooid: ${statusMessage}</span>
+                </div>`;
+                
+              // Laat de status message tijdelijk zien
+              setTimeout(() => {
+                checkStatus.style.display = 'none';
+              }, 5000);
+            }
+            
+            // Toon notificatie
+            showNotification("Controle voltooid: " + 
+              (result.result && result.result.statusChanged 
+                ? "Status is veranderd!" 
+                : "Geen verandering in status"));
+            
+            // Als de status is veranderd, update de weergave van de praktijkkaart direct
+            if (result.result && result.result.statusChanged) {
+              // Haal de status container op
+              const statusContainer = practiceCard.querySelector('.practice-status');
+              if (statusContainer) {
+                // Verwijder bestaande status classes
+                statusContainer.classList.remove('status-unknown', 'status-accepting', 'status-not-accepting');
+                
+                // Bepaal nieuwe status class
+                let newStatusClass = 'status-unknown';
+                let newStatusText = 'Onbekend';
+                
+                if (result.result.newStatus === 'accepting') {
+                  newStatusClass = 'status-accepting';
+                  newStatusText = 'Neemt patiënten aan';
+                } else if (result.result.newStatus === 'not_accepting') {
+                  newStatusClass = 'status-not-accepting';
+                  newStatusText = 'Neemt geen patiënten aan';
+                }
+                
+                // Pas de statusweergave aan
+                statusContainer.classList.add(newStatusClass);
+                statusContainer.innerHTML = `<span>${newStatusText}</span>`;
+                
+                // Voeg een highlight effect toe om de verandering te benadrukken
+                statusContainer.classList.add('highlight');
+                setTimeout(() => {
+                  statusContainer.classList.remove('highlight');
+                }, 2000);
+              }
+            }
           } else {
+            // Toon foutmelding in status indicator
+            if (checkStatus) {
+              checkStatus.className = 'check-status error';
+              checkStatus.innerHTML = `
+                <div class="check-result">
+                  <span class="error-icon">×</span>
+                  <span>Controle mislukt: ${result && result.message ? result.message : "Onbekende fout"}</span>
+                </div>`;
+                
+              // Laat de status message tijdelijk zien
+              setTimeout(() => {
+                checkStatus.style.display = 'none';
+              }, 5000);
+            }
+            
+            // Toon foutmelding
             showError("Controle mislukt: " + (result && result.message ? result.message : "Onbekende fout"));
           }
         })
         .withFailureHandler(function(error) {
           console.error("Fout bij controleren praktijk: ", error);
+          
+          // Schakel de knop weer in
+          if (checkButton) {
+            checkButton.disabled = false;
+            checkButton.textContent = 'Controleren';
+          }
+          
+          // Toon foutmelding in status indicator
+          if (checkStatus) {
+            checkStatus.className = 'check-status error';
+            checkStatus.innerHTML = `
+              <div class="check-result">
+                <span class="error-icon">×</span>
+                <span>Controle mislukt: ${error}</span>
+              </div>`;
+              
+            // Laat de foutmelding tijdelijk zien
+            setTimeout(() => {
+              checkStatus.style.display = 'none';
+            }, 5000);
+          }
+          
+          // Toon algemene foutmelding
           showError("Fout bij controleren: " + error);
         })
         .checkPracticeNow(practiceId);
     } catch (error) {
       console.error("Fout bij aanroepen checkPracticeNow: ", error);
+      
+      // Schakel de knop weer in
+      if (checkButton) {
+        checkButton.disabled = false;
+        checkButton.textContent = 'Controleren';
+      }
+      
+      // Verberg status indicator
+      if (checkStatus) {
+        checkStatus.style.display = 'none';
+      }
+      
+      // Toon foutmelding
       showError("Fout bij controleren: " + error);
+    }
+  }
+  
+  /**
+   * Geeft een gebruiksvriendelijke label voor de status waarde
+   */
+  function getStatusLabel(status) {
+    if (status === 'accepting') {
+      return "Neemt patiënten aan";
+    } else if (status === 'not_accepting') {
+      return "Neemt geen patiënten aan";
+    } else {
+      return "Onbekend";
     }
   }
   
