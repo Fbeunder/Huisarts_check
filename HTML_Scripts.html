@@ -4,20 +4,63 @@
    * Huisarts Check - Client-side JavaScript
    * 
    * Dit bestand bevat alle client-side functionaliteit voor de Huisarts Check applicatie.
-   * Vereenvoudigde versie voor betere compatibiliteit met Apps Script.
+   * Vereenvoudigde en verbeterde versie voor robuustere authenticatie en pagina-laden.
    */
 
   // Globale variabelen
   let currentUser = null;
   let isAdmin = false;
+  let authenticationInProgress = false;
+  let authenticationAttempts = 0;
+  const MAX_AUTH_ATTEMPTS = 3;
   
   /**
    * Bij laden van de pagina
    */
   document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM geladen, applicatie initialiseren");
+    
+    // Voeg een monitoring functie toe voor het debuggen van de laadstatus
+    monitorLoadingState();
+    
+    // Start applicatie
     initApp();
   });
+  
+  /**
+   * Monitor voor het debuggen van de laadstatus
+   */
+  function monitorLoadingState() {
+    console.log("Loading state monitoring gestart");
+    
+    // Check elke 5 seconden of de pagina nog steeds in de laadstatus is
+    const loadingInterval = setInterval(function() {
+      const loading = document.getElementById('loading');
+      const content = document.getElementById('content');
+      const error = document.getElementById('error');
+      
+      if (loading && loading.style.display === 'block' && 
+          content && content.style.display === 'none' && 
+          error && error.style.display === 'none') {
+        
+        console.warn("Pagina is al 5 seconden in laadstatus...");
+        
+        // Controleer authenticatie status bij vastlopen
+        if (!authenticationInProgress && !currentUser && authenticationAttempts < MAX_AUTH_ATTEMPTS) {
+          console.log("Automatische herstelpoging gestart voor authenticatie");
+          authenticationAttempts++;
+          checkAuthentication();
+        } else if (authenticationAttempts >= MAX_AUTH_ATTEMPTS) {
+          console.error("Maximum aantal herstelpogingen bereikt");
+          showError("De pagina reageert niet. Probeer de pagina te vernieuwen of neem contact op met de beheerder.");
+          clearInterval(loadingInterval);
+        }
+      } else {
+        // Als de pagina niet meer in laadstatus is, stop de monitoring
+        clearInterval(loadingInterval);
+      }
+    }, 5000);
+  }
   
   /**
    * Applicatie-initialisatie
@@ -28,33 +71,87 @@
     // Toon loading indicator
     showLoading(true);
     
+    // Zorg dat we niet in een eindloze lus terecht komen
+    authenticationAttempts = 0;
+    
+    // Controleer eerst of eventuele foutmelding is ingesteld in de template
+    if (typeof errorMessage !== 'undefined' && errorMessage) {
+      console.error("Template foutmelding gevonden: " + errorMessage);
+      showError(errorMessage);
+      showLoading(false);
+      return;
+    }
+    
     // Controleer of gebruiker gegevens al in template zijn ingesteld
     if (typeof user !== 'undefined' && user) {
       console.log("Gebruiker gevonden in template data");
       currentUser = user;
       isAdmin = !!isAdmin;
-      initializeUserInterface();
+      
+      // Valideer dat gebruikersobject alle benodigde velden heeft
+      if (validateUserObject(currentUser)) {
+        console.log("Gebruikersobject is geldig, UI initialiseren");
+        initializeUserInterface();
+      } else {
+        console.error("Ongeldig gebruikersobject in template data");
+        showError("Gebruikersgegevens zijn ongeldig. Probeer opnieuw in te loggen.");
+        // Reset en probeer authenticatie
+        currentUser = null;
+        checkAuthentication();
+      }
     } else {
       console.log("Geen gebruiker in template, authenticatie controleren");
-      checkAuthentication();
+      
+      // Controleer of er een directe auth URL is in de template
+      if (typeof authUrl !== 'undefined' && authUrl) {
+        console.log("Auth URL gevonden in template, toon login knop");
+        showLoginButton(authUrl);
+      } else {
+        console.log("Geen directe auth URL, authenticatie controleren via server");
+        checkAuthentication();
+      }
     }
+  }
+  
+  /**
+   * Valideert dat het gebruikersobject alle benodigde velden heeft
+   */
+  function validateUserObject(user) {
+    if (!user) return false;
+    
+    // Essentiële velden die aanwezig moeten zijn
+    return (
+      user.userId && 
+      user.email && 
+      typeof user.isActive !== 'undefined'
+    );
   }
   
   /**
    * Controleert de authenticatiestatus
    */
   function checkAuthentication() {
-    console.log("Authenticatie controleren");
+    console.log("Authenticatie controleren (poging " + (authenticationAttempts + 1) + ")");
     showLoading(true);
+    
+    // Voorkom meerdere parallelle authenticatieverzoeken
+    if (authenticationInProgress) {
+      console.warn("Authenticatie is al bezig, verzoek genegeerd");
+      return;
+    }
+    
+    authenticationInProgress = true;
     
     try {
       google.script.run
         .withSuccessHandler(function(authStatus) {
           console.log("Authenticatieresultaat ontvangen", authStatus);
+          authenticationInProgress = false;
           
           if (!authStatus) {
             console.error("Authenticatiestatus is null of undefined");
             showError("Authenticatiestatus is null of undefined. Probeer de pagina te vernieuwen of log opnieuw in.");
+            showLoading(false);
             return;
           }
           
@@ -62,27 +159,77 @@
             console.log("Gebruiker is ingelogd");
             currentUser = authStatus.user;
             isAdmin = !!authStatus.isAdmin;
-            initializeUserInterface();
+            
+            // Valideer dat alle benodigde gebruikersvelden aanwezig zijn
+            if (validateUserObject(currentUser)) {
+              initializeUserInterface();
+            } else {
+              console.error("Ongeldig gebruikersobject ontvangen van server");
+              showError("Gebruikersgegevens zijn ongeldig. Probeer opnieuw in te loggen.");
+              showLoading(false);
+            }
           } else if (authStatus.authUrl) {
-            console.log("Gebruiker niet ingelogd, doorverwijzen naar login");
-            window.top.location.href = authStatus.authUrl;
+            console.log("Gebruiker niet ingelogd, toon login knop");
+            showLoginButton(authStatus.authUrl);
           } else if (authStatus.errorMessage) {
             console.error("Authenticatiefout: " + authStatus.errorMessage);
             showError("Authenticatiefout: " + authStatus.errorMessage);
+            showLoading(false);
           } else {
             console.error("Onbekende authenticatiestatus");
             showError("Authenticatiefout: Onbekende status. Probeer de pagina te vernieuwen.");
+            showLoading(false);
           }
         })
         .withFailureHandler(function(error) {
           console.error("Authenticatie mislukt: ", error);
+          authenticationInProgress = false;
           showError("Authenticatiefout: " + error);
+          showLoading(false);
         })
         .checkLoginStatus();
     } catch (error) {
       console.error("Fout bij aanroepen authenticatie: ", error);
+      authenticationInProgress = false;
       showError("Kon niet verbinden met de server: " + error);
+      showLoading(false);
     }
+  }
+  
+  /**
+   * Toont een login knop met de gegeven auth URL
+   */
+  function showLoginButton(url) {
+    console.log("Login knop tonen voor URL: " + url);
+    
+    // Verberg loading indicator
+    showLoading(false);
+    
+    // Verkrijg referentie naar content container
+    const contentContainer = document.getElementById('content');
+    if (!contentContainer) {
+      console.error("Content container niet gevonden");
+      showError("Content container niet gevonden in DOM");
+      return;
+    }
+    
+    // Toon login container met knop
+    contentContainer.innerHTML = `
+      <div class="login-container">
+        <h2>Inloggen vereist</h2>
+        <p>Log in met uw Google-account om de Huisarts Check te gebruiken.</p>
+        <button onclick="handleLogin('${url}')">Inloggen met Google</button>
+      </div>
+    `;
+    contentContainer.style.display = 'block';
+  }
+  
+  /**
+   * Handler voor login knop
+   */
+  function handleLogin(url) {
+    console.log("Login knop geklikt, doorverwijzen naar: " + url);
+    window.top.location.href = url;
   }
   
   /**
@@ -95,6 +242,7 @@
       if (!currentUser) {
         console.error("Geen geldige gebruikersgegevens voor UI initialisatie");
         showError("Geen geldige gebruikersgegevens. Probeer opnieuw in te loggen.");
+        showLoading(false);
         return;
       }
       
@@ -106,6 +254,7 @@
     } catch (error) {
       console.error("Fout bij initialiseren UI: ", error);
       showError("Fout bij laden interface: " + error);
+      showLoading(false);
     }
   }
   
@@ -772,4 +921,42 @@
       notification.style.display = 'none';
     }, 3000);
   }
+  
+  /**
+   * Voeg een handler toe voor de vernieuw-knop
+   * Dit maakt het eenvoudiger om de pagina te vernieuwen als er iets misgaat
+   */
+  window.addEventListener('load', function() {
+    // Maak refresh button als die nog niet bestaat
+    if (!document.getElementById('refresh-button')) {
+      const refreshButton = document.createElement('button');
+      refreshButton.id = 'refresh-button';
+      refreshButton.textContent = 'Vernieuwen';
+      refreshButton.style.position = 'fixed';
+      refreshButton.style.bottom = '20px';
+      refreshButton.style.right = '20px';
+      refreshButton.style.padding = '10px 15px';
+      refreshButton.style.backgroundColor = '#3498db';
+      refreshButton.style.color = 'white';
+      refreshButton.style.border = 'none';
+      refreshButton.style.borderRadius = '5px';
+      refreshButton.style.cursor = 'pointer';
+      refreshButton.style.display = 'none';
+      refreshButton.style.zIndex = '1000';
+      
+      refreshButton.addEventListener('click', function() {
+        window.location.reload();
+      });
+      
+      document.body.appendChild(refreshButton);
+      
+      // Toon de knop na 15 seconden als er nog steeds wordt geladen
+      setTimeout(function() {
+        const loading = document.getElementById('loading');
+        if (loading && loading.style.display === 'block') {
+          refreshButton.style.display = 'block';
+        }
+      }, 15000);
+    }
+  });
 </script>
