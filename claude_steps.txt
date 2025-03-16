@@ -68,12 +68,20 @@
    - Specifieke afhandeling voor HTML elementen om correcte foutmeldingen te tonen
    - STATUS: Voltooid (PR #41)
 
-10. **Bugfix: Eindeloos laden en foutweergave probleem** ⏳
+10. **Bugfix: Eindeloos laden en foutweergave probleem** ✅
     - Volledig herschreven showError() functie in HTML_Scripts.html
     - Robuustere template variabelen initialisatie in HTML_Index.html
     - Verbeterde dependency management en foutafhandeling in Code.gs
     - Uitgebreide diagnostische logging voor troubleshooting
-    - STATUS: In behandeling (PR #43)
+    - STATUS: Voltooid (PR #43)
+
+11. **Bugfix: "null" foutmelding probleem** ⏳
+    - Verbeterde foutafhandeling voor null-waarden in showError() functie
+    - Extra controles en validatie voor verschillende fouttypen
+    - Uitgebreide console logging voor betere diagnostiek
+    - Toevoeging van stack traces voor beter traceren van null foutmeldingen
+    - Gebruiksvriendelijkere foutmeldingen die nooit alleen "null" tonen
+    - STATUS: In behandeling (PR #46)
 
 ## Huidige Must-haves
 
@@ -82,13 +90,13 @@
    - Testen van verschillende scenario's en statusveranderingen
    - Foutscenario's testen en verbeteren van error handling
    - Opstellen van testscenario's en testcases
-   - STATUS: Gepland (Na goedkeuring van PR #43)
+   - STATUS: Gepland (Na goedkeuring van PR #46)
 
 2. **Implementeren van handmatige controle functionaliteit** 🔄
    - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
    - Koppelen van de knop aan de WebsiteChecker module
    - Tonen van voortgang en resultaten in de gebruikersinterface
-   - STATUS: Gepland
+   - STATUS: Issue #44 aangemaakt, nog te implementeren
 
 ## Nice-to-haves
 
@@ -120,22 +128,22 @@
 - De README.md bevat een gedetailleerde handleiding voor installatie en configuratie.
 
 ## Volgende stappen:
-1. **Review en merge van PR #43 (Fix: Los probleem met eindeloos laden en foutweergave op)**
-   - Controleer of de verbeteringen in de foutafhandeling en template variabelen initialisatie het probleem oplossen
-   - Review en merge de aanpassingen in HTML_Scripts.html, HTML_Index.html en Code.gs
-   - Deze stap is noodzakelijk voor de basiswerking van de applicatie omdat gebruikers anders mogelijk op een laadscherm blijven hangen
+1. **Review en merge van PR #46 (Bugfix: "null" foutmelding probleem)**
+   - Controleer of de verbeteringen in de foutafhandeling het probleem oplossen waarbij "null" wordt getoond
+   - Review de verbeterde error handling in HTML_Scripts.html
+   - Deze stap is belangrijk voor de gebruikerservaring omdat gebruikers nu duidelijkere foutmeldingen krijgen
 
-2. **Volledige end-to-end testen**
-   - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
-   - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
-   - Foutscenario's testen en verbeteren van error handling
-   - Deze stap is noodzakelijk voor de basiswerking van de applicatie om te zorgen dat alle functionaliteit correct werkt
-
-3. **Implementeren van handmatige controle functionaliteit**
+2. **Implementeren van handmatige controle functionaliteit (Issue #44)**
    - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
    - Koppelen van de knop aan de WebsiteChecker module
    - Tonen van voortgang en resultaten in de gebruikersinterface
    - Deze stap is noodzakelijk voor een volledige gebruikerservaring
+
+3. **Volledige end-to-end testen**
+   - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
+   - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
+   - Foutscenario's testen en verbeteren van error handling
+   - Deze stap is noodzakelijk voor de basiswerking van de applicatie om te zorgen dat alle functionaliteit correct werkt
    
 4. **Bijwerken README.md met end-to-end testresultaten**
    - Documenteren van de testresultaten in de README.md
@@ -143,4 +151,4 @@
    - Toevoegen van instructies hoe de app te configureren en gebruiken
    - Toevoegen van informatie over Scripts ID en API key configuratie
 
-De huidige PR #43 voor het oplossen van het eindeloos laden en foutweergave probleem, de end-to-end testen, de implementatie van handmatige controle functionaliteit en het bijwerken van de documentatie zijn noodzakelijk voor de basiswerking van de applicatie. De nice-to-have items zijn niet essentieel voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid verbeteren.
+De huidige PR #46 voor het verbeteren van de foutmeldingen, de implementatie van handmatige controle functionaliteit (issue #44), de end-to-end testen en het bijwerken van de documentatie zijn noodzakelijk voor de basiswerking van de applicatie. De nice-to-have items zijn niet essentieel voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid verbeteren.
