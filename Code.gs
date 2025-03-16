@@ -24,12 +24,96 @@ function onOpen() {
 }
 
 /**
+ * Zorgt ervoor dat alle afhankelijkheden correct worden geïnitialiseerd
+ * Dit helpt om problemen met de volgorde van module inladen te voorkomen
+ */
+function initializeDependencies() {
+  try {
+    // Controleer of alle vereiste objecten bestaan
+    // en definieer een standaard tijdelijke vervanging als ze nog niet bestaan
+    if (typeof CONFIG === 'undefined') {
+      Logger.warning('CONFIG wordt opnieuw geïnitialiseerd');
+      CONFIG = {};
+    }
+    
+    if (typeof Logger === 'undefined') {
+      console.log('Logger wordt tijdelijk vervangen, dit is abnormaal');
+      Logger = {
+        info: function(msg) { console.info(msg); },
+        warning: function(msg) { console.warn(msg); },
+        error: function(msg) { console.error(msg); }
+      };
+    }
+    
+    // Zorg ervoor dat DataLayer bestaat, dit is een kritieke afhankelijkheid voor AuthService
+    if (typeof DataLayer === 'undefined' || DataLayer === null) {
+      Logger.warning('DataLayer is niet gedefinieerd, proberen opnieuw te initialiseren');
+      
+      try {
+        // Als de klasse bestaat maar niet het singleton object
+        if (typeof DataLayerClass !== 'undefined') {
+          DataLayer = new DataLayerClass();
+          Logger.info('DataLayer is opnieuw geïnitialiseerd');
+        } else {
+          Logger.error('DataLayerClass is niet beschikbaar, kan DataLayer niet initialiseren');
+        }
+      } catch (e) {
+        Logger.error('Fout bij initialiseren DataLayer: ' + e.toString());
+      }
+    }
+    
+    // Controleer of AuthService bestaat
+    if (typeof AuthService === 'undefined' || AuthService === null) {
+      Logger.warning('AuthService is niet gedefinieerd, proberen opnieuw te initialiseren');
+      
+      try {
+        if (typeof AuthServiceClass !== 'undefined') {
+          AuthService = new AuthServiceClass();
+          Logger.info('AuthService is opnieuw geïnitialiseerd');
+        } else {
+          Logger.error('AuthServiceClass is niet beschikbaar, kan AuthService niet initialiseren');
+        }
+      } catch (e) {
+        Logger.error('Fout bij initialiseren AuthService: ' + e.toString());
+      }
+    }
+    
+    // Controleer WebsiteChecker
+    if (typeof WebsiteChecker === 'undefined' || WebsiteChecker === null) {
+      Logger.warning('WebsiteChecker is niet gedefinieerd');
+    }
+    
+    // Als AuthService bestaat en ensureDatabaseStructure method is beschikbaar
+    if (typeof AuthService !== 'undefined' && AuthService !== null && 
+        typeof AuthService.ensureDatabaseStructure === 'function') {
+      
+      // Als DataLayer bestaat maar ensureDatabaseStructure method ontbreekt
+      if (typeof DataLayer !== 'undefined' && DataLayer !== null && 
+          typeof DataLayer.ensureDatabaseStructure !== 'function') {
+        
+        // Kopieer de functie van AuthService naar DataLayer
+        DataLayer.ensureDatabaseStructure = AuthService.ensureDatabaseStructure;
+        Logger.info('ensureDatabaseStructure functie toegevoegd aan DataLayer');
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Algemene fout bij initialiseren dependencies: ' + error.toString());
+    return false;
+  }
+}
+
+/**
  * Entry point voor web app
  * @return {HtmlOutput} De HTML van de web app
  */
 function doGet() {
   try {
     Logger.info('Web app gestart door gebruiker');
+    
+    // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+    initializeDependencies();
     
     // Gebruik de UI module om de juiste interface te renderen
     return UI.renderHome();
@@ -43,6 +127,9 @@ function doGet() {
  * Toont het dashboard in een modaal venster
  */
 function showDashboard() {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   const html = UI.renderDashboard()
       .setWidth(800)
       .setHeight(600);
@@ -53,6 +140,9 @@ function showDashboard() {
  * Toont de instellingenpagina in een modaal venster
  */
 function showSettings() {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   const html = UI.renderSettings()
       .setWidth(600)
       .setHeight(400);
@@ -76,6 +166,10 @@ function showAbout() {
 function runWebsiteChecks() {
   try {
     Logger.info('Gestart met periodieke website controles');
+    
+    // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+    initializeDependencies();
+    
     // WebsiteChecker aanroepen om de controles uit te voeren
     const results = WebsiteChecker.checkAllWebsites();
     Logger.info(`Periodieke website controles voltooid: ${results.totalChecked} websites gecontroleerd, ${results.statusChanges} statuswijzigingen`);
@@ -116,6 +210,9 @@ function setupTriggers() {
  * @return {Object} Het gebruikersobject van de ingelogde gebruiker of null
  */
 function getCurrentUser() {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   return AuthService.getCurrentUser();
 }
 
@@ -125,6 +222,9 @@ function getCurrentUser() {
  * @return {Object} Object met login status, gebruiker en/of auth URL
  */
 function checkLoginStatus() {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   return AuthService.checkLoginStatus();
 }
 
@@ -135,6 +235,9 @@ function checkLoginStatus() {
  * @return {Object} Het bijgewerkte gebruikersobject
  */
 function updateCurrentUserSettings(settings) {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   return AuthService.updateCurrentUserSettings(settings);
 }
 
@@ -145,6 +248,9 @@ function updateCurrentUserSettings(settings) {
  * @return {Object} Het aangemaakte praktijkobject
  */
 function createPractice(practiceInfo) {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   return DataLayer.createPractice(practiceInfo);
 }
 
@@ -155,6 +261,9 @@ function createPractice(practiceInfo) {
  * @return {boolean} true als verwijderen is gelukt, anders false
  */
 function deletePractice(practiceId) {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   return DataLayer.deletePractice(practiceId);
 }
 
@@ -165,6 +274,9 @@ function deletePractice(practiceId) {
  * @return {Array} Array met praktijkobjecten
  */
 function getPracticesByUser(userId) {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   return DataLayer.getPracticesByUser(userId);
 }
 
@@ -176,6 +288,9 @@ function getPracticesByUser(userId) {
  * @return {Object} Het bijgewerkte praktijkobject
  */
 function updatePractice(practiceId, updates) {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   return DataLayer.updatePractice(practiceId, updates);
 }
 
@@ -187,6 +302,9 @@ function updatePractice(practiceId, updates) {
  * @return {Object} Resultaat van de controle
  */
 function checkWebsiteManually(url, userId) {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   return WebsiteChecker.checkSingleWebsite(url, userId);
 }
 
@@ -199,6 +317,9 @@ function checkWebsiteManually(url, userId) {
 function checkAllUserWebsites(userId) {
   try {
     Logger.info(`Starten van handmatige controle voor alle websites van gebruiker ${userId}`);
+    
+    // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+    initializeDependencies();
     
     // Haal alle praktijken van de gebruiker op
     const practices = DataLayer.getPracticesByUser(userId);
@@ -246,6 +367,9 @@ function checkAllUserWebsites(userId) {
  * @return {HtmlOutput} HTML voor de lijst met praktijken
  */
 function showPracticeList() {
+  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+  initializeDependencies();
+  
   const user = AuthService.getCurrentUser();
   if (!user) return UI.renderContentSection('<p>U moet ingelogd zijn om uw huisartsen te bekijken.</p>');
   return UI.renderPracticeList(user.userId);
@@ -288,4 +412,66 @@ function showPracticeDetail(practiceId) {
  */
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+/**
+ * Geeft diagnostische informatie over de staat van de modules en afhankelijkheden
+ * Handig voor troubleshooting bij runtime problemen
+ * 
+ * @return {Object} Diagnostische informatie
+ */
+function getDiagnosticInfo() {
+  try {
+    const diagnostics = {
+      timestamp: new Date().toISOString(),
+      modules: {
+        CONFIG: typeof CONFIG !== 'undefined',
+        Logger: typeof Logger !== 'undefined',
+        DataLayer: typeof DataLayer !== 'undefined',
+        AuthService: typeof AuthService !== 'undefined',
+        WebsiteChecker: typeof WebsiteChecker !== 'undefined',
+        UI: typeof UI !== 'undefined'
+      },
+      classes: {
+        DataLayerClass: typeof DataLayerClass !== 'undefined',
+        AuthServiceClass: typeof AuthServiceClass !== 'undefined'
+      },
+      functions: {}
+    };
+    
+    // Check DataLayer functions
+    if (typeof DataLayer !== 'undefined' && DataLayer !== null) {
+      diagnostics.functions.DataLayer = {
+        checkConnection: typeof DataLayer.checkConnection === 'function',
+        initializeDatabase: typeof DataLayer.initializeDatabase === 'function',
+        getUserByEmail: typeof DataLayer.getUserByEmail === 'function',
+        ensureDatabaseStructure: typeof DataLayer.ensureDatabaseStructure === 'function'
+      };
+    }
+    
+    // Check AuthService functions
+    if (typeof AuthService !== 'undefined' && AuthService !== null) {
+      diagnostics.functions.AuthService = {
+        getCurrentUser: typeof AuthService.getCurrentUser === 'function',
+        checkLoginStatus: typeof AuthService.checkLoginStatus === 'function',
+        ensureDatabaseStructure: typeof AuthService.ensureDatabaseStructure === 'function'
+      };
+    }
+    
+    // Probeer database info op te halen
+    try {
+      if (typeof Config !== 'undefined' && Config !== null) {
+        diagnostics.spreadsheetId = Config.getSpreadsheetId() || '(niet ingesteld)';
+      }
+    } catch (e) {
+      diagnostics.configError = e.toString();
+    }
+    
+    return diagnostics;
+  } catch (error) {
+    return {
+      timestamp: new Date().toISOString(),
+      error: error.toString()
+    };
+  }
 }
