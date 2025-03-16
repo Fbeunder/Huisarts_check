@@ -290,32 +290,67 @@
     </div>
     
     <script>
-      // Globale variabelen voor template data
-      var user = <?= authStatus && authStatus.loggedIn && authStatus.user ? JSON.stringify(authStatus.user) : 'null' ?>;
-      var isAdmin = <?= authStatus && authStatus.isAdmin ? 'true' : 'false' ?>;
-      var authUrl = <?= authStatus && authStatus.authUrl ? '\"' + authStatus.authUrl + '\"' : 'null' ?>;
-      var errorMessage = <?= authStatus && authStatus.errorMessage ? '\"' + authStatus.errorMessage + '\"' : 'null' ?>;
+      /**
+       * Robuuste template variabelen initialisatie
+       * Verbeterde versie met controles op aanwezigheid en type
+       */
       
-      // Als er direct een foutmelding is, toon deze
+      // Helper om veilig template variabelen te initialiseren
+      function safeJsonParse(value, defaultValue) {
+        try {
+          // Als het een lege string of 'null' is, gebruik de standaardwaarde
+          if (value === '' || value === 'null' || value === undefined) {
+            return defaultValue;
+          }
+          return JSON.parse(value);
+        } catch (e) {
+          console.error("JSON parse fout:", e);
+          return defaultValue;
+        }
+      }
+      
+      // Voorzichtige initialisatie van globale variabelen met expliciete type-checking
+      var user = <?= (authStatus && authStatus.loggedIn === true && authStatus.user) ? JSON.stringify(authStatus.user) : 'null' ?>;
+      var isAdmin = <?= (authStatus && authStatus.isAdmin === true) ? 'true' : 'false' ?>;
+      var authUrl = <?= (authStatus && authStatus.authUrl) ? JSON.stringify(authStatus.authUrl) : 'null' ?>;
+      var errorMessage = <?= (authStatus && authStatus.errorMessage) ? JSON.stringify(authStatus.errorMessage) : 'null' ?>;
+      
+      // Controleer op potentiële initialisatieproblemen en log deze
+      console.log("Template variabelen initialisatie:");
+      console.log("- user:", user ? "aanwezig" : "niet aanwezig");
+      console.log("- isAdmin:", isAdmin);
+      console.log("- authUrl:", authUrl ? "aanwezig" : "niet aanwezig");
+      console.log("- errorMessage:", errorMessage ? errorMessage : "geen");
+      
+      // Als er direct een foutmelding is, toon deze op een veilige manier
       if (errorMessage) {
         document.addEventListener('DOMContentLoaded', function() {
+          console.log("Toon foutmelding uit template:", errorMessage);
           var errorDiv = document.getElementById('error');
           var errorMessageElem = document.getElementById('error-message');
+          
           if (errorDiv && errorMessageElem) {
+            // Zet de foutmelding in het element, voorkom XSS door textContent te gebruiken
             errorMessageElem.textContent = errorMessage;
             errorDiv.style.display = 'block';
+          } else {
+            console.error("Foutmelding elementen niet gevonden in DOM");
           }
         });
       }
       
-      // Als er direct een auth URL is, toon login knop
+      // Als er direct een auth URL is, toon login knop zodra DOM geladen is
       if (authUrl && !user) {
         document.addEventListener('DOMContentLoaded', function() {
+          console.log("Toon login knop voor URL:", authUrl);
           var content = document.getElementById('content');
           var loading = document.getElementById('loading');
           
           if (content && loading) {
+            // Verberg loading indicator
             loading.style.display = 'none';
+            
+            // Toon login container met knop
             content.innerHTML = `
               <div class="login-container">
                 <h2>Inloggen vereist</h2>
@@ -324,12 +359,14 @@
               </div>
             `;
             content.style.display = 'block';
+          } else {
+            console.error("Content of loading elementen niet gevonden in DOM");
           }
         });
       }
       
       // Diagnostische informatie loggen als beschikbaar
-      var diagnosticInfo = <?= typeof diagnosticInfo !== 'undefined' ? JSON.stringify(diagnosticInfo) : 'null' ?>;
+      var diagnosticInfo = <?= typeof diagnosticInfo !== 'undefined' && diagnosticInfo ? JSON.stringify(diagnosticInfo) : 'null' ?>;
       if (diagnosticInfo) {
         console.log('Diagnostische informatie:', diagnosticInfo);
       }

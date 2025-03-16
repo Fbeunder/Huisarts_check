@@ -26,17 +26,35 @@ function onOpen() {
 /**
  * Zorgt ervoor dat alle afhankelijkheden correct worden geïnitialiseerd
  * Dit helpt om problemen met de volgorde van module inladen te voorkomen
+ * Verbeterde versie met extra logging en betere volgorde waarborging
+ * 
+ * @return {boolean} true als de initialisatie succesvol was, anders false
  */
 function initializeDependencies() {
   try {
-    // Controleer of alle vereiste objecten bestaan
-    // en definieer een standaard tijdelijke vervanging als ze nog niet bestaan
-    if (typeof CONFIG === 'undefined') {
-      Logger.warning('CONFIG wordt opnieuw geïnitialiseerd');
-      CONFIG = {};
+    console.log('Start initialisatie van dependencies');
+    
+    // Lijst van vereiste modules in juiste volgorde
+    const requiredModules = ['Logger', 'Config', 'DataLayer', 'AuthService', 'WebsiteChecker', 'UI'];
+    const missingModules = [];
+    
+    // Controleer modules en hou de missende modules bij
+    requiredModules.forEach(moduleName => {
+      if (typeof global[moduleName] === 'undefined' || global[moduleName] === null) {
+        missingModules.push(moduleName);
+        console.log(`Module ${moduleName} is nog niet geladen`);
+      }
+    });
+    
+    if (missingModules.length === 0) {
+      console.log('Alle modules zijn beschikbaar');
+      return true;
     }
     
-    if (typeof Logger === 'undefined') {
+    console.log(`${missingModules.length} modules ontbreken: ${missingModules.join(', ')}`);
+    
+    // Controleer eerst of Logger bestaat, dit is heel belangrijk voor debugging
+    if (typeof Logger === 'undefined' || Logger === null) {
       console.log('Logger wordt tijdelijk vervangen, dit is abnormaal');
       Logger = {
         info: function(msg) { console.info(msg); },
@@ -45,7 +63,17 @@ function initializeDependencies() {
       };
     }
     
-    // Zorg ervoor dat DataLayer bestaat, dit is een kritieke afhankelijkheid voor AuthService
+    // Zorg dat Config bestaat
+    if (typeof Config === 'undefined' || Config === null) {
+      Logger.warning('Config wordt tijdelijk vervangen, dit is abnormaal');
+      Config = {
+        getSpreadsheetId: function() { return null; },
+        getOpenAIKey: function() { return null; }
+      };
+    }
+    
+    // Volgorde van initialisatie is belangrijk
+    // DataLayer moet eerst bestaan voordat AuthService gebruikt kan worden
     if (typeof DataLayer === 'undefined' || DataLayer === null) {
       Logger.warning('DataLayer is niet gedefinieerd, proberen opnieuw te initialiseren');
       
@@ -62,7 +90,28 @@ function initializeDependencies() {
       }
     }
     
-    // Controleer of AuthService bestaat
+    // Controleer opnieuw of DataLayer bestaat
+    const dataLayerExists = typeof DataLayer !== 'undefined' && DataLayer !== null;
+    if (!dataLayerExists) {
+      Logger.error('DataLayer kon niet worden geïnitialiseerd, dit is kritiek');
+    } else {
+      Logger.info('DataLayer is beschikbaar');
+      
+      // Probeer database initialisatie indien nodig
+      try {
+        if (typeof DataLayer.checkConnection === 'function') {
+          const connected = DataLayer.checkConnection();
+          if (!connected) {
+            Logger.info('Database wordt geïnitialiseerd tijdens dependency check');
+            DataLayer.initializeDatabase(true);
+          }
+        }
+      } catch (dbErr) {
+        Logger.warning('Kon database niet checken/initialiseren: ' + dbErr.toString());
+      }
+    }
+    
+    // Initialiseer AuthService als deze nog niet bestaat
     if (typeof AuthService === 'undefined' || AuthService === null) {
       Logger.warning('AuthService is niet gedefinieerd, proberen opnieuw te initialiseren');
       
@@ -78,16 +127,10 @@ function initializeDependencies() {
       }
     }
     
-    // Controleer WebsiteChecker
-    if (typeof WebsiteChecker === 'undefined' || WebsiteChecker === null) {
-      Logger.warning('WebsiteChecker is niet gedefinieerd');
-    }
-    
-    // Als AuthService bestaat en ensureDatabaseStructure method is beschikbaar
+    // Kopieer functionaliteit tussen modules indien nodig
     if (typeof AuthService !== 'undefined' && AuthService !== null && 
         typeof AuthService.ensureDatabaseStructure === 'function') {
       
-      // Als DataLayer bestaat maar ensureDatabaseStructure method ontbreekt
       if (typeof DataLayer !== 'undefined' && DataLayer !== null && 
           typeof DataLayer.ensureDatabaseStructure !== 'function') {
         
@@ -97,29 +140,124 @@ function initializeDependencies() {
       }
     }
     
-    return true;
+    // Controleer hoeveel modules nu beschikbaar zijn
+    let availableCount = 0;
+    requiredModules.forEach(moduleName => {
+      if (typeof global[moduleName] !== 'undefined' && global[moduleName] !== null) {
+        availableCount++;
+      }
+    });
+    
+    Logger.info(`Initialisatie voltooid: ${availableCount} van ${requiredModules.length} modules beschikbaar`);
+    
+    return availableCount === requiredModules.length;
   } catch (error) {
     console.error('Algemene fout bij initialiseren dependencies: ' + error.toString());
+    if (typeof Logger !== 'undefined' && Logger !== null) {
+      Logger.error('Algemene fout bij initialiseren dependencies: ' + error.toString());
+    }
     return false;
   }
 }
 
 /**
  * Entry point voor web app
+ * Verbeterde versie met uitgebreide foutafhandeling
+ * 
  * @return {HtmlOutput} De HTML van de web app
  */
 function doGet() {
+  // Gebruik eerst console.log omdat Logger mogelijk nog niet bestaat
+  console.log('Web app gestart, initialisatie beginnen');
+  
   try {
-    Logger.info('Web app gestart door gebruiker');
-    
     // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
-    initializeDependencies();
+    const initResult = initializeDependencies();
     
-    // Gebruik de UI module om de juiste interface te renderen
+    if (typeof Logger !== 'undefined' && Logger !== null) {
+      Logger.info(`Web app gestart door gebruiker (dependencies geladen: ${initResult})`);
+    }
+    
+    // We gaan door, zelfs als niet alle dependencies zijn geladen
+    // UI.renderHome zal een fallback tonen als er iets mis is
+    
+    if (typeof UI === 'undefined' || UI === null) {
+      console.error('UI module is niet beschikbaar, toon fallback error pagina');
+      
+      // Fallback error pagina zonder UI module
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <base target="_top">
+            <meta charset="utf-8">
+            <title>Fout - Huisarts Check</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+              .error-container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #dc3545; border-radius: 5px; background-color: #f8d7da; }
+              h2 { color: #dc3545; margin-top: 0; }
+              button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 5px; }
+              button:hover { background-color: #0069d9; }
+            </style>
+          </head>
+          <body>
+            <div class="error-container">
+              <h2>Er is een fout opgetreden bij het laden van de applicatie</h2>
+              <p>De applicatie kon niet correct worden geladen. Dit kan komen door een probleem met de server of met de scripts.</p>
+              <p>Probeer de pagina te vernieuwen of neem contact op met de beheerder.</p>
+              <button onclick="window.location.reload()">Probeer opnieuw</button>
+            </div>
+          </body>
+        </html>
+      `;
+      
+      return HtmlService.createHtmlOutput(html)
+        .setTitle('Fout - Huisarts Check');
+    }
+    
+    // Als UI wel beschikbaar is, gebruik deze om de interface te renderen
     return UI.renderHome();
   } catch (error) {
-    Logger.error('Fout bij het starten van de web app: ' + error.toString());
-    return UI.renderError('Er is een fout opgetreden bij het starten van de applicatie. Probeer het later opnieuw of neem contact op met de beheerder.');
+    console.error('Fout bij het starten van de web app: ' + error.toString());
+    
+    if (typeof Logger !== 'undefined' && Logger !== null) {
+      Logger.error('Fout bij het starten van de web app: ' + error.toString());
+    }
+    
+    if (typeof UI !== 'undefined' && UI !== null) {
+      return UI.renderError('Er is een fout opgetreden bij het starten van de applicatie: ' + error.toString());
+    } else {
+      // Fallback error pagina zonder UI module
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <base target="_top">
+            <meta charset="utf-8">
+            <title>Fout - Huisarts Check</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+              .error-container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #dc3545; border-radius: 5px; background-color: #f8d7da; }
+              h2 { color: #dc3545; margin-top: 0; }
+              p.error { font-family: monospace; background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-wrap: break-word; }
+              button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 5px; }
+              button:hover { background-color: #0069d9; }
+            </style>
+          </head>
+          <body>
+            <div class="error-container">
+              <h2>Er is een fout opgetreden</h2>
+              <p>De applicatie kon niet worden gestart door een onverwachte fout:</p>
+              <p class="error">${error.toString()}</p>
+              <button onclick="window.location.reload()">Probeer opnieuw</button>
+            </div>
+          </body>
+        </html>
+      `;
+      
+      return HtmlService.createHtmlOutput(html)
+        .setTitle('Fout - Huisarts Check');
+    }
   }
 }
 
@@ -425,8 +563,8 @@ function getDiagnosticInfo() {
     const diagnostics = {
       timestamp: new Date().toISOString(),
       modules: {
-        CONFIG: typeof CONFIG !== 'undefined',
         Logger: typeof Logger !== 'undefined',
+        Config: typeof Config !== 'undefined',
         DataLayer: typeof DataLayer !== 'undefined',
         AuthService: typeof AuthService !== 'undefined',
         WebsiteChecker: typeof WebsiteChecker !== 'undefined',
@@ -436,7 +574,11 @@ function getDiagnosticInfo() {
         DataLayerClass: typeof DataLayerClass !== 'undefined',
         AuthServiceClass: typeof AuthServiceClass !== 'undefined'
       },
-      functions: {}
+      functions: {},
+      scriptProperties: {
+        scriptId: ScriptApp.getScriptId(),
+        serviceUrl: ScriptApp.getService().getUrl()
+      }
     };
     
     // Check DataLayer functions
@@ -471,7 +613,64 @@ function getDiagnosticInfo() {
   } catch (error) {
     return {
       timestamp: new Date().toISOString(),
-      error: error.toString()
+      error: error.toString(),
+      scriptId: ScriptApp.getScriptId()
+    };
+  }
+}
+
+/**
+ * Handmatig controleren van een praktijk (voor client-side gebruik)
+ * 
+ * @param {string} practiceId - ID van de praktijk om te controleren
+ * @return {Object} Resultaat van de controle
+ */
+function checkPracticeNow(practiceId) {
+  try {
+    // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+    initializeDependencies();
+    
+    const practice = DataLayer.getPracticeById(practiceId);
+    if (!practice) {
+      return {
+        success: false,
+        message: 'Praktijk niet gevonden'
+      };
+    }
+    
+    // Controleer autorisatie
+    const authStatus = AuthService.checkLoginStatus();
+    if (!authStatus.loggedIn) {
+      return {
+        success: false,
+        message: 'U bent niet ingelogd'
+      };
+    }
+    
+    if (practice.userId !== authStatus.user.userId && !authStatus.isAdmin) {
+      return {
+        success: false,
+        message: 'U heeft geen toegang tot deze praktijk'
+      };
+    }
+    
+    // Controleer de praktijk website
+    const checkResult = WebsiteChecker.checkPractice(practice);
+    
+    // Haal de bijgewerkte praktijk op
+    const updatedPractice = DataLayer.getPracticeById(practiceId);
+    
+    return {
+      success: true,
+      practice: updatedPractice,
+      checkResult: checkResult,
+      message: 'Praktijk succesvol gecontroleerd'
+    };
+  } catch (error) {
+    Logger.error('Fout bij controleren praktijk: ' + error.toString());
+    return {
+      success: false,
+      message: 'Fout bij controleren praktijk: ' + error.toString()
     };
   }
 }
