@@ -35,6 +35,7 @@ function initializeDependencies() {
     console.log('Start initialisatie van dependencies');
     
     // Lijst van vereiste modules in juiste volgorde
+    // Voorkom conflicten door eerst modules zonder klasse-definities te laden
     const requiredModules = ['Logger', 'Config', 'DataLayer', 'AuthService', 'WebsiteChecker', 'UI'];
     const missingModules = [];
     
@@ -124,6 +125,22 @@ function initializeDependencies() {
         }
       } catch (e) {
         Logger.error('Fout bij initialiseren AuthService: ' + e.toString());
+      }
+    }
+    
+    // Controleer of WebsiteChecker bestaat en initialiseer indien nodig
+    if (typeof WebsiteChecker === 'undefined' || WebsiteChecker === null) {
+      Logger.warning('WebsiteChecker is niet gedefinieerd, proberen opnieuw te initialiseren');
+      
+      try {
+        if (typeof WebsiteCheckerClass !== 'undefined') {
+          global.WebsiteChecker = new WebsiteCheckerClass();
+          Logger.info('WebsiteChecker is opnieuw geïnitialiseerd');
+        } else {
+          Logger.error('WebsiteCheckerClass is niet beschikbaar, kan WebsiteChecker niet initialiseren');
+        }
+      } catch (e) {
+        Logger.error('Fout bij initialiseren WebsiteChecker: ' + e.toString());
       }
     }
     
@@ -630,7 +647,9 @@ function getDiagnosticInfo() {
       },
       classes: {
         DataLayerClass: typeof DataLayerClass !== 'undefined',
-        AuthServiceClass: typeof AuthServiceClass !== 'undefined'
+        AuthServiceClass: typeof AuthServiceClass !== 'undefined',
+        WebsiteCheckerClass: typeof WebsiteCheckerClass !== 'undefined',
+        UIClass: typeof UIClass !== 'undefined'
       },
       functions: {},
       scriptProperties: {
@@ -655,6 +674,14 @@ function getDiagnosticInfo() {
         getCurrentUser: typeof AuthService.getCurrentUser === 'function',
         checkLoginStatus: typeof AuthService.checkLoginStatus === 'function',
         ensureDatabaseStructure: typeof AuthService.ensureDatabaseStructure === 'function'
+      };
+    }
+    
+    // Check WebsiteChecker functions
+    if (typeof WebsiteChecker !== 'undefined' && WebsiteChecker !== null) {
+      diagnostics.functions.WebsiteChecker = {
+        checkPractice: typeof WebsiteChecker.checkPractice === 'function',
+        checkSingleWebsite: typeof WebsiteChecker.checkSingleWebsite === 'function'
       };
     }
     
@@ -734,18 +761,43 @@ function checkPracticeNow(practiceId) {
       };
     }
     
-    // Controleer de praktijk website
-    const checkResult = WebsiteChecker.checkPractice(practice);
-    
-    // Haal de bijgewerkte praktijk op
-    const updatedPractice = DataLayer.getPracticeById(practiceId);
-    
-    return {
-      success: true,
-      practice: updatedPractice,
-      checkResult: checkResult,
-      message: 'Praktijk succesvol gecontroleerd'
-    };
+    // Controleer of WebsiteChecker.checkPractice beschikbaar is, anders gebruik fallback
+    if (typeof WebsiteChecker !== 'undefined' && WebsiteChecker !== null) {
+      if (typeof WebsiteChecker.checkPractice === 'function') {
+        // Gebruik de nieuwe checkPractice functie
+        const result = WebsiteChecker.checkPractice(practice);
+        Logger.info(`Praktijk ${practiceId} succesvol gecontroleerd`);
+        
+        // Haal de bijgewerkte praktijk op
+        const updatedPractice = DataLayer.getPracticeById(practiceId);
+        
+        return {
+          success: true,
+          practice: updatedPractice,
+          result: result,
+          message: 'Praktijk succesvol gecontroleerd'
+        };
+      } else {
+        // Fallback naar checkSingleWebsite
+        Logger.warning('WebsiteChecker.checkPractice niet beschikbaar, gebruik checkSingleWebsite als fallback');
+        const result = WebsiteChecker.checkSingleWebsite(practice.websiteUrl, practice.userId, practice.practiceId);
+        
+        // Haal de bijgewerkte praktijk op
+        const updatedPractice = DataLayer.getPracticeById(practiceId);
+        
+        return {
+          success: true,
+          practice: updatedPractice,
+          result: result,
+          message: 'Praktijk succesvol gecontroleerd (fallback methode)'
+        };
+      }
+    } else {
+      return {
+        success: false,
+        message: 'WebsiteChecker module is niet beschikbaar'
+      };
+    }
   } catch (error) {
     Logger.error('Fout bij controleren praktijk: ' + error.toString());
     return {
