@@ -56,7 +56,7 @@ function initializeDependencies() {
     // Controleer eerst of Logger bestaat, dit is heel belangrijk voor debugging
     if (typeof Logger === 'undefined' || Logger === null) {
       console.log('Logger wordt tijdelijk vervangen, dit is abnormaal');
-      Logger = {
+      global.Logger = {
         info: function(msg) { console.info(msg); },
         warning: function(msg) { console.warn(msg); },
         error: function(msg) { console.error(msg); }
@@ -66,7 +66,7 @@ function initializeDependencies() {
     // Zorg dat Config bestaat
     if (typeof Config === 'undefined' || Config === null) {
       Logger.warning('Config wordt tijdelijk vervangen, dit is abnormaal');
-      Config = {
+      global.Config = {
         getSpreadsheetId: function() { return null; },
         getOpenAIKey: function() { return null; }
       };
@@ -80,7 +80,7 @@ function initializeDependencies() {
       try {
         // Als de klasse bestaat maar niet het singleton object
         if (typeof DataLayerClass !== 'undefined') {
-          DataLayer = new DataLayerClass();
+          global.DataLayer = new DataLayerClass();
           Logger.info('DataLayer is opnieuw geïnitialiseerd');
         } else {
           Logger.error('DataLayerClass is niet beschikbaar, kan DataLayer niet initialiseren');
@@ -117,7 +117,7 @@ function initializeDependencies() {
       
       try {
         if (typeof AuthServiceClass !== 'undefined') {
-          AuthService = new AuthServiceClass();
+          global.AuthService = new AuthServiceClass();
           Logger.info('AuthService is opnieuw geïnitialiseerd');
         } else {
           Logger.error('AuthServiceClass is niet beschikbaar, kan AuthService niet initialiseren');
@@ -198,6 +198,7 @@ function doGet() {
               h2 { color: #dc3545; margin-top: 0; }
               button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 5px; }
               button:hover { background-color: #0069d9; }
+              .diagnostic { font-family: monospace; background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 20px; font-size: 12px; }
             </style>
           </head>
           <body>
@@ -206,13 +207,20 @@ function doGet() {
               <p>De applicatie kon niet correct worden geladen. Dit kan komen door een probleem met de server of met de scripts.</p>
               <p>Probeer de pagina te vernieuwen of neem contact op met de beheerder.</p>
               <button onclick="window.location.reload()">Probeer opnieuw</button>
+              <div class="diagnostic">
+                <p><strong>Diagnostische informatie:</strong></p>
+                <p>UI Module: Niet beschikbaar</p>
+                <p>Dependencies geladen: ${initResult}</p>
+                <p>Timestamp: ${new Date().toISOString()}</p>
+              </div>
             </div>
           </body>
         </html>
       `;
       
       return HtmlService.createHtmlOutput(html)
-        .setTitle('Fout - Huisarts Check');
+        .setTitle('Fout - Huisarts Check')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     }
     
     // Als UI wel beschikbaar is, gebruik deze om de interface te renderen
@@ -256,7 +264,8 @@ function doGet() {
       `;
       
       return HtmlService.createHtmlOutput(html)
-        .setTitle('Fout - Huisarts Check');
+        .setTitle('Fout - Huisarts Check')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     }
   }
 }
@@ -351,19 +360,68 @@ function getCurrentUser() {
   // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
   initializeDependencies();
   
-  return AuthService.getCurrentUser();
+  try {
+    return AuthService.getCurrentUser();
+  } catch (error) {
+    Logger.error('Fout bij ophalen huidige gebruiker: ' + error.toString());
+    return null;
+  }
 }
 
 /**
- * Controleer de login status (voor client-side gebruik)
+ * Controleert de login status (voor client-side gebruik)
+ * Verbeterde versie met extra foutafhandeling en logging
  * 
  * @return {Object} Object met login status, gebruiker en/of auth URL
  */
 function checkLoginStatus() {
-  // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
-  initializeDependencies();
+  console.log('checkLoginStatus aangeroepen vanuit client');
   
-  return AuthService.checkLoginStatus();
+  try {
+    // Initialiseer afhankelijkheden om te zorgen dat alles beschikbaar is
+    const initResult = initializeDependencies();
+    console.log(`Dependencies geïnitialiseerd: ${initResult}`);
+    
+    if (typeof AuthService === 'undefined' || AuthService === null) {
+      console.error('AuthService is niet beschikbaar');
+      return {
+        loggedIn: false,
+        authUrl: null,
+        errorMessage: 'AuthService is niet beschikbaar. Probeer de pagina te vernieuwen.'
+      };
+    }
+    
+    // Controleer login status via AuthService
+    const authStatus = AuthService.checkLoginStatus();
+    
+    // Voeg extra validatie toe om te zorgen dat de gebruiker alle benodigde velden heeft
+    if (authStatus.loggedIn && authStatus.user) {
+      console.log('Gebruiker is ingelogd, valideer gebruikersobject');
+      
+      // Controleer of gebruiker alle essentiële velden heeft
+      if (!authStatus.user.userId || !authStatus.user.email) {
+        console.error('Gebruikersobject is onvolledig');
+        Logger.error('Ongeldig gebruikersobject: ' + JSON.stringify(authStatus.user));
+        
+        return {
+          loggedIn: false,
+          authUrl: AuthService.getAuthorizationUrl(),
+          errorMessage: 'Gebruikersgegevens zijn onvolledig. Probeer opnieuw in te loggen.'
+        };
+      }
+    }
+    
+    return authStatus;
+  } catch (error) {
+    console.error('Fout bij controleren login status: ' + error.toString());
+    Logger.error('Fout bij controleren login status: ' + error.toString());
+    
+    return {
+      loggedIn: false,
+      authUrl: null,
+      errorMessage: 'Er is een onverwachte fout opgetreden bij het controleren van uw login status: ' + error.toString()
+    };
+  }
 }
 
 /**
@@ -607,6 +665,28 @@ function getDiagnosticInfo() {
       }
     } catch (e) {
       diagnostics.configError = e.toString();
+    }
+    
+    // Check authenticatie status
+    try {
+      if (typeof AuthService !== 'undefined' && AuthService !== null) {
+        const authStatus = AuthService.checkLoginStatus();
+        diagnostics.authStatus = {
+          loggedIn: authStatus.loggedIn,
+          hasAuthUrl: authStatus.authUrl !== null && authStatus.authUrl !== undefined,
+          hasErrorMessage: authStatus.errorMessage !== null && authStatus.errorMessage !== undefined
+        };
+        
+        if (authStatus.loggedIn && authStatus.user) {
+          diagnostics.authStatus.userInfo = {
+            hasUserId: !!authStatus.user.userId,
+            hasEmail: !!authStatus.user.email,
+            isActive: authStatus.user.isActive
+          };
+        }
+      }
+    } catch (e) {
+      diagnostics.authError = e.toString();
     }
     
     return diagnostics;
