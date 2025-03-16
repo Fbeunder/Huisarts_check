@@ -93,9 +93,9 @@
 
 13. **Bugfix: SyntaxError in WebsiteChecker.gs met duplicate UIClass** 🔄
     - Oplossen van SyntaxError: "Identifier 'UIClass' has already been declared"
-    - Fix van potentiële naamruimteconflicten bij laden van modules in Apps Script
+    - Fix van naamruimteconflict door hernoemen van de verkeerde klassenaam
     - Betere isolatie tussen modules
-    - STATUS: In behandeling (PR #50, Issue #49)
+    - STATUS: PR #53 aangemaakt voor Issue #52
 
 ## Huidige Must-haves
 
@@ -110,7 +110,7 @@
    - Testen van verschillende scenario's en statusveranderingen
    - Foutscenario's testen en verbeteren van error handling
    - Opstellen van testscenario's en testcases
-   - STATUS: Gepland (Na goedkeuring van PR #50)
+   - STATUS: Gepland (Na goedkeuring van PR #53)
 
 ## Nice-to-haves
 
@@ -142,7 +142,7 @@
 - De README.md bevat een gedetailleerde handleiding voor installatie en configuratie.
 
 ## Volgende stappen:
-1. **Review en merge van PR #50 (Bugfix: "Duplicate UIClass declaration")**
+1. **Review en merge van PR #53 (Bugfix: "Duplicate UIClass declaration")**
    - Controleer of de fix het probleem oplost waarbij de pagina niet opent door de SyntaxError
    - Deze stap is cruciaal omdat gebruikers momenteel een foutmelding krijgen bij het openen van de applicatie
 
