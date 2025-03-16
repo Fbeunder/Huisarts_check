@@ -49,6 +49,7 @@ class UIClass {
   /**
    * Rendert de hoofdpagina
    * Vereenvoudigde implementatie die direct de Index-template gebruikt
+   * Verbeterde versie met extra robuustheid
    * 
    * @return {HtmlOutput} HTML-uitvoer voor de hoofdpagina
    */
@@ -56,39 +57,175 @@ class UIClass {
     try {
       Logger.info('Renderen van hoofdpagina');
       
-      // Controleer login status
-      const authStatus = AuthService.checkLoginStatus();
-      
-      // Altijd de index template gebruiken, ongeacht login status
-      // De client-side code handelt de weergave af op basis van login status
-      const template = getHtmlTemplate('Index');
-      
-      // Geef auth en gebruikersgegevens door aan client
-      template.authStatus = authStatus;
-      if (authStatus.loggedIn) {
-        template.user = authStatus.user;
-        template.isAdmin = authStatus.isAdmin;
-      } else if (authStatus.authUrl) {
-        template.authUrl = authStatus.authUrl;
-      }
-      
-      // Diagnostische informatie meegeven als dat beschikbaar is
       try {
-        template.diagnosticInfo = AuthService.getDiagnosticInfo();
-      } catch (diagError) {
-        // Negeer fouten bij diagnostische info
-        Logger.warning('Kon diagnostische info niet ophalen: ' + diagError.toString());
+        // Controleer login status
+        const authStatus = AuthService.checkLoginStatus();
+        
+        // Log de status voor debugging
+        Logger.info(`Auth status: loggedIn=${authStatus.loggedIn}, authUrl=${authStatus.authUrl ? 'aanwezig' : 'afwezig'}, errorMessage=${authStatus.errorMessage || 'geen'}`);
+        
+        // Valideer de authStatus
+        if (authStatus.loggedIn && (!authStatus.user || !authStatus.user.userId)) {
+          Logger.warning('Authenticatiestatus geeft aan dat gebruiker is ingelogd, maar gebruikersobject is onvolledig');
+          // Laat de client-side code dit probleem afhandelen
+        }
+        
+        // Altijd de index template gebruiken, ongeacht login status
+        // De client-side code handelt de weergave af op basis van login status
+        const template = getHtmlTemplate('Index');
+        
+        // Geef auth en gebruikersgegevens door aan client
+        if (authStatus.loggedIn && authStatus.user) {
+          template.authStatus = {
+            loggedIn: true,
+            user: authStatus.user,
+            isAdmin: authStatus.isAdmin === true
+          };
+          
+          template.user = authStatus.user;
+          template.isAdmin = authStatus.isAdmin === true;
+        } else if (authStatus.authUrl) {
+          template.authStatus = {
+            loggedIn: false,
+            authUrl: authStatus.authUrl,
+            errorMessage: authStatus.errorMessage
+          };
+          
+          template.authUrl = authStatus.authUrl;
+        } else if (authStatus.errorMessage) {
+          template.authStatus = {
+            loggedIn: false,
+            errorMessage: authStatus.errorMessage
+          };
+          
+          template.errorMessage = authStatus.errorMessage;
+        } else {
+          // Fallback voor onvolledige authStatus
+          template.authStatus = {
+            loggedIn: false,
+            authUrl: ScriptApp.getService().getUrl(),
+            errorMessage: 'Kon authenticatie status niet bepalen, er is een probleem met de server.'
+          };
+        }
+        
+        // Diagnostische informatie meegeven als dat beschikbaar is
+        try {
+          const diagnosticInfo = this.getDiagnosticInfo();
+          template.diagnosticInfo = diagnosticInfo;
+          
+          // Log diagnostische info voor debugging
+          Logger.info('Diagnostische info toegevoegd aan template: ' + JSON.stringify(diagnosticInfo));
+        } catch (diagError) {
+          // Negeer fouten bij diagnostische info
+          Logger.warning('Kon diagnostische info niet ophalen: ' + diagError.toString());
+        }
+        
+        // Evalueer en return de template
+        const html = template.evaluate();
+        
+        return html
+          .setTitle('Huisarts Check')
+          .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+        
+      } catch (authError) {
+        Logger.error('Fout bij ophalen authenticatie status: ' + authError.toString());
+        
+        // Toon een error template met specifieke foutmelding over authenticatie
+        return this.renderError('Er is een fout opgetreden bij het controleren van uw login status: ' + authError.toString());
       }
-      
-      // Evalueer en return de template
-      const html = template.evaluate();
-      
-      return html
-        .setTitle('Huisarts Check')
-        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     } catch (error) {
       Logger.error('Fout bij renderen van hoofdpagina: ' + error.toString());
       return this.renderError('Er is een fout opgetreden bij het laden van de pagina: ' + error.toString());
+    }
+  }
+  
+  /**
+   * Haalt diagnostische informatie op voor troubleshooting
+   * 
+   * @return {Object} Diagnostische informatie
+   */
+  getDiagnosticInfo() {
+    try {
+      // Basis info
+      const info = {
+        timestamp: new Date().toISOString(),
+        ui: {
+          htmlTemplatesAvailable: true
+        },
+        auth: {
+          status: 'onbekend'
+        },
+        modules: {
+          AuthService: typeof AuthService !== 'undefined',
+          DataLayer: typeof DataLayer !== 'undefined',
+          Logger: typeof Logger !== 'undefined'
+        }
+      };
+      
+      // Test toegang tot templates
+      try {
+        const testTemplate = getHtmlTemplate('Index');
+        if (!testTemplate) {
+          info.ui.htmlTemplatesAvailable = false;
+        }
+      } catch (e) {
+        info.ui.htmlTemplatesAvailable = false;
+        info.ui.templateError = e.toString();
+      }
+      
+      // Controleer authenticatie indien mogelijk
+      if (typeof AuthService !== 'undefined' && AuthService !== null) {
+        try {
+          const isLoggedIn = AuthService.isUserLoggedIn();
+          info.auth.status = isLoggedIn ? 'ingelogd' : 'niet ingelogd';
+          
+          if (isLoggedIn) {
+            const userEmail = Session.getActiveUser().getEmail();
+            info.auth.userEmail = userEmail;
+            
+            try {
+              const user = AuthService.getCurrentUser();
+              info.auth.userInDatabase = !!user;
+              
+              if (user) {
+                info.auth.isAdmin = user.isAdmin === true;
+                info.auth.hasUserId = !!user.userId;
+              }
+            } catch (userError) {
+              info.auth.userError = userError.toString();
+            }
+          }
+        } catch (authError) {
+          info.auth.error = authError.toString();
+        }
+      }
+      
+      // Controleer database indien mogelijk
+      if (typeof DataLayer !== 'undefined' && DataLayer !== null) {
+        try {
+          info.database = {
+            connected: false
+          };
+          
+          const connected = DataLayer.checkConnection();
+          info.database.connected = connected;
+          
+          if (connected) {
+            info.database.spreadsheetId = Config.getSpreadsheetId();
+          }
+        } catch (dbError) {
+          info.database = {
+            error: dbError.toString()
+          };
+        }
+      }
+      
+      return info;
+    } catch (error) {
+      return {
+        timestamp: new Date().toISOString(),
+        error: error.toString()
+      };
     }
   }
   
@@ -110,12 +247,13 @@ class UIClass {
           <head>
             <base target="_top">
             <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Fout - Huisarts Check</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
               .error-container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #dc3545; border-radius: 5px; background-color: #f8d7da; }
               h2 { color: #dc3545; margin-top: 0; }
-              button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 5px; }
+              button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 5px; margin-right: 10px; }
               button:hover { background-color: #0069d9; }
             </style>
           </head>
@@ -125,17 +263,20 @@ class UIClass {
               <p>${errorMessage || 'Er is een onbekende fout opgetreden.'}</p>
               <button onclick="window.location.reload()">Probeer opnieuw</button>
               <button onclick="window.location.href='${ScriptApp.getService().getUrl()}'">Ga naar startpagina</button>
+              <button onclick="window.top.location.href='${ScriptApp.getService().getUrl()}'">Vernieuw hele pagina</button>
             </div>
           </body>
         </html>
       `;
       
       return HtmlService.createHtmlOutput(html)
-        .setTitle('Fout - Huisarts Check');
+        .setTitle('Fout - Huisarts Check')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     } catch (error) {
       Logger.error('Fout bij renderen van foutpagina: ' + error.toString());
       // Absolute minimale foutpagina als laatste redmiddel
-      return HtmlService.createHtmlOutput('<h2>Er is een fout opgetreden</h2><p>Details konden niet worden geladen.</p>');
+      return HtmlService.createHtmlOutput('<h2>Er is een fout opgetreden</h2><p>Details konden niet worden geladen.</p>')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     }
   }
   
@@ -272,6 +413,12 @@ function checkLoginStatus() {
  */
 function getPracticesByUser(userId) {
   try {
+    // Valideer user ID
+    if (!userId) {
+      Logger.error('Geen geldige userId opgegeven');
+      throw new Error('Geen geldige userId opgegeven');
+    }
+    
     return DataLayer.getPracticesByUser(userId);
   } catch (error) {
     Logger.error('Fout bij ophalen praktijken: ' + error.toString());
@@ -390,7 +537,7 @@ function deletePractice(practiceId) {
  */
 function getDiagnosticInfo() {
   try {
-    return AuthService.getDiagnosticInfo();
+    return UI.getDiagnosticInfo();
   } catch (error) {
     Logger.error('Fout bij ophalen diagnostische info: ' + error.toString());
     return {
