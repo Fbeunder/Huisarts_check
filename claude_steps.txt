@@ -131,14 +131,22 @@
     - Verbeteren van authenticatiesysteem voor robuustere werking
     - Vereenvoudigen van UI rendering en initialisatie
     - Verbeterde HTML templates voor betere gebruikerservaring
-    - STATUS: ⏳ In behandeling (PR #37)
+    - STATUS: ✅ Voltooid (PR #37 gemerged)
 
-21. **Volledige end-to-end testen**
+21. **Bugfix: DataLayer is not defined error**
+    - Oplossen van ReferenceError: DataLayer is not defined in AuthService.gs
+    - Verbeteren van module initialisatie en afhankelijkheidsmanagement
+    - Toevoegen van robuustere controles op het bestaan van objecten
+    - Nieuwe initializeDependencies() functie in Code.gs toevoegen
+    - Verbeterde diagnostische functies voor troubleshooting
+    - STATUS: ⏳ In behandeling (PR #39)
+
+22. **Volledige end-to-end testen**
     - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
     - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
     - Foutscenario's testen en verbeteren van error handling
     - Opstellen van testscenario's en testcases
-    - STATUS: ⏳ Gepland (Na voltooiing van PR #37)
+    - STATUS: ⏳ Gepland (Na voltooiing van PR #39)
 
 ## Nice-to-haves
 
@@ -195,10 +203,10 @@
 - De README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
 
 ## Volgende stappen:
-1. **Voltooien van paginaopstart bugfix (PR #37)**
-   - Voltooien en mergen van de verbeterde client-side scripts, authenticatie en UI rendering
-   - Verifiëren dat de pagina correct start zonder foutmeldingen
-   - Deze stap is noodzakelijk voor de basiswerking van de applicatie omdat gebruikers anders de applicatie niet kunnen gebruiken.
+1. **Voltooien van DataLayer reference error bugfix (PR #39)**
+   - Voltooien en mergen van de verbeterde module initialisatie
+   - Verifiëren dat de applicatie stabiel werkt zonder ReferenceErrors
+   - Deze stap is noodzakelijk voor de basiswerking van de applicatie omdat gebruikers anders de applicatie niet kunnen gebruiken vanwege een blokkerende fout.
 
 2. **Volledige end-to-end testen**
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
@@ -225,4 +233,4 @@
    - Verbeteren van code-kwaliteit en onderhoudbaarheid
    - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de onderhoudbaarheid van de code.
 
-De bugfix voor paginaopstart (PR #37) en de end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie omdat deze kritieke fouten oplossen en zorgen voor een betrouwbare werking. De implementatie van de handmatige controlefunctionaliteit is ook noodzakelijk voor een complete gebruikerservaring. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
+De bugfix voor DataLayer reference error (PR #39) en de end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie omdat deze kritieke fouten oplossen en zorgen voor een betrouwbare werking. De implementatie van de handmatige controlefunctionaliteit is ook noodzakelijk voor een complete gebruikerservaring. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
