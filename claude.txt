@@ -34,11 +34,13 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 ## Per module details:
 
 ### Code.gs
-- Status: Geïmplementeerd en verbeterd (PR #39)
+- Status: Geïmplementeerd en verbeterd (PR #39, #43)
 - Bestandsnaam: Code.gs
 - Functionaliteit: Bevat de hoofdentry points voor de applicatie, inclusief het starten van de UI en het instellen van triggers voor periodieke controles
 - Toegevoegd in PR #39: initializeDependencies() functie om correcte initialisatie van modules te garanderen
 - Toegevoegd in PR #39: getDiagnosticInfo() functie voor betere troubleshooting
+- Verbeterd in PR #43: Robuustere initialisatie van dependencies met uitgebreide logging
+- Verbeterd in PR #43: Betere foutafhandeling in doGet() met fallback HTML output
 - Afhankelijkheid: UI.gs, AuthService.gs, DataLayer.gs, Logger.gs, WebsiteChecker.gs
 
 ### appsscript.json
@@ -59,16 +61,17 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: HTML-templates, AuthService.gs, DataLayer.gs, Logger.gs
 
 ### HTML-templates
-- Status: Geïmplementeerd en aangepast (PR #20 gemerged, verbeterd in PR #37, bugfix in PR #41)
+- Status: Geïmplementeerd en aangepast (PR #20 gemerged, verbeterd in PR #37, bugfix in PR #41, #43)
 - Bestandsnaam: HTML-bestanden met prefix HTML_
 - Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface, inclusief login en dashboard
 - Naamgevingsconventie: HTML-bestanden hebben prefix HTML_ voor betere integratie met Apps Script
 - Volledig herzien in PR #37 voor betere werking in Apps Script omgeving
 - Bugfix in PR #41: Verbeterde foutafhandeling en template variabelen initialisatie
+- Bugfix in PR #43: Robuustere template variabelen initialisatie en verbeterde foutweergave
 - Afhankelijkheid: Geen
 
 ### HTML_Scripts.html
-- Status: Geïmplementeerd, meerdere bugfixes (PR #31, #33, #35 gemerged, volledig herschreven in PR #37, bugfix in PR #41)
+- Status: Geïmplementeerd, meerdere bugfixes (PR #31, #33, #35 gemerged, volledig herschreven in PR #37, bugfix in PR #41, #43)
 - Bestandsnaam: HTML_Scripts.html
 - Functionaliteit: Bevat client-side JavaScript voor interactie met de gebruiker
 - Volledige herstructurering in PR #29: Gefaseerde initialisatie, uitgebreide logging, verbeterde DOM-manipulatie
@@ -77,14 +80,16 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Bugfixes in PR #35: Automatische herstelpogingen, centrale foutafhandeling
 - Volledige herschrijving in PR #37: Drastisch vereenvoudigde code, directe DOM-manipulatie, betere foutafhandeling
 - Bugfix in PR #41: Robuuste type-detectie en veilige string conversie in showError() functie
+- Bugfix in PR #43: Volledig herschreven showError() functie voor betere afhandeling van verschillende fouttypen
 - Afhankelijkheid: HTML-templates
 
 ### HTML_Index.html
-- Status: Geïmplementeerd en verbeterd (PR #37, bugfix in PR #41)
+- Status: Geïmplementeerd en verbeterd (PR #37, bugfix in PR #41, #43)
 - Bestandsnaam: HTML_Index.html
 - Functionaliteit: Hoofdtemplate voor de web interface
 - Volledig herzien in PR #37 met inline CSS, directe login optie, verbeterde responsiveness
 - Bugfix in PR #41: Veiligere template variabelen initialisatie en diagnostische logging
+- Bugfix in PR #43: Robuustere template variabelen initialisatie met helper functies en uitgebreide logging
 - Afhankelijkheid: HTML_Scripts.html
 
 ### DataLayer.gs
