@@ -645,17 +645,22 @@
   /**
    * Toont een foutmelding
    * Verbeterde implementatie die beter omgaat met verschillende datatypes en HTML elementen
+   * Met speciale aandacht voor null-waarden en meer informatieve meldingen
    */
   function showError(message) {
     // Log de foutmelding inclusief type en ruwe waarde voor diagnostiek
-    console.error("Foutmelding:", message, "Type:", typeof message, "ToString:", message ? message.toString() : "null");
+    console.error("Foutmelding:", message, "Type:", typeof message, 
+                  "ToString:", message !== null && message !== undefined ? message.toString() : "null/undefined");
     
     const errorContainer = document.getElementById('error');
     const errorMessage = document.getElementById('error-message');
     
     if (!errorContainer || !errorMessage) {
       console.error("Error container of message element niet gevonden");
-      alert("Fout: " + (message && typeof message.toString === 'function' ? message.toString() : "Onbekende fout"));
+      // Toon alert als fallback, maar voorkom "null" melding
+      const alertMessage = message !== null && message !== undefined && typeof message.toString === 'function' ? 
+                           message.toString() : "Er is een onbekende fout opgetreden";
+      alert("Fout: " + alertMessage);
       return;
     }
     
@@ -664,13 +669,20 @@
     
     try {
       if (message === null || message === undefined) {
-        errorText = "Er is een onbekende fout opgetreden";
+        // Verbeterde afhandeling van null/undefined waarden
+        errorText = "Er is een onbekende fout opgetreden. Probeer de pagina te vernieuwen of probeer het later opnieuw.";
+        
+        // Voeg stack trace informatie toe voor debugging
+        console.debug("Stack trace voor null foutmelding:", new Error().stack);
       } else if (typeof message === 'string') {
-        // String direct gebruiken
-        errorText = message;
+        // String direct gebruiken, maar voorkom lege string
+        errorText = message.trim() === "" ? "Er is een fout opgetreden (geen details beschikbaar)" : message;
       } else if (message instanceof Error) {
         // Error object verwerken
         errorText = message.message || message.toString();
+        
+        // Voeg stack toe aan console voor debugging
+        console.debug("Stack trace:", message.stack);
       } else if (typeof message === 'object') {
         // Controleer eerst of het een DOM element is
         if (message.nodeType && message.nodeType === 1) {
@@ -683,25 +695,44 @@
           }
         } else if (message.message) {
           // Object met message property (zoals server response)
-          errorText = message.message;
+          errorText = message.message.trim() === "" ? 
+                      "Er is een fout opgetreden (geen details beschikbaar)" : message.message;
+          
+          // Als er een code of status property is, voeg dit toe voor meer context
+          if (message.code) {
+            errorText += ` (code: ${message.code})`;
+          } else if (message.status) {
+            errorText += ` (status: ${message.status})`;
+          }
         } else {
           // Ander type object
           try {
             // Probeer het object naar JSON te converteren als dat mogelijk is
-            errorText = JSON.stringify(message);
+            const jsonString = JSON.stringify(message);
+            errorText = jsonString && jsonString !== "{}" ? 
+                       jsonString : "Er is een fout opgetreden (leeg object)";
           } catch (e) {
-            // Als JSON stringify faalt, gebruik toString
-            errorText = message.toString();
+            // Als JSON stringify faalt, gebruik toString met extra controle
+            const toStringResult = message.toString();
+            errorText = toStringResult !== "[object Object]" ? 
+                       toStringResult : "Er is een fout opgetreden (geen details beschikbaar)";
           }
         }
       } else {
         // Voor alle andere datatypes, gebruik toString of cast naar string
-        errorText = String(message);
+        const primitiveString = String(message);
+        errorText = primitiveString.trim() !== "" ? 
+                   primitiveString : "Er is een fout opgetreden (geen details beschikbaar)";
       }
     } catch (e) {
       // Als er een fout optreedt bij het verwerken van de fout, gebruik een fallback
       console.error("Fout bij verwerken van foutmelding:", e);
       errorText = "Er is een fout opgetreden (foutdetails konden niet worden weergegeven)";
+    }
+    
+    // Zorg ervoor dat de foutmelding nooit leeg of alleen "null" is
+    if (!errorText || errorText.trim() === "" || errorText.trim().toLowerCase() === "null") {
+      errorText = "Er is een fout opgetreden. Probeer de pagina te vernieuwen of neem contact op met de beheerder.";
     }
     
     // Zet de foutmelding in het element
