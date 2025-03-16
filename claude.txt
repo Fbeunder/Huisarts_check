@@ -8,7 +8,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 
 ### Modulestructuur:
 1. Main Apps Script Project
-   - Code.gs (Hoofdbestand met onEntry points)
+   - Code.gs (Hoofdbestand met onEntry points en module initialisatie)
    - appsscript.json (Project manifest)
 
 2. Front-end Modules
@@ -34,9 +34,11 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 ## Per module details:
 
 ### Code.gs
-- Status: Geïmplementeerd en gemerged
+- Status: Geïmplementeerd en verbeterd (PR #39)
 - Bestandsnaam: Code.gs
 - Functionaliteit: Bevat de hoofdentry points voor de applicatie, inclusief het starten van de UI en het instellen van triggers voor periodieke controles
+- Toegevoegd in PR #39: initializeDependencies() functie om correcte initialisatie van modules te garanderen
+- Toegevoegd in PR #39: getDiagnosticInfo() functie voor betere troubleshooting
 - Afhankelijkheid: UI.gs, AuthService.gs, DataLayer.gs, Logger.gs, WebsiteChecker.gs
 
 ### appsscript.json
@@ -83,11 +85,12 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: HTML_Scripts.html
 
 ### DataLayer.gs
-- Status: Geïmplementeerd en verbeterd (PR #4 gemerged, bugfix in PR #22)
+- Status: Geïmplementeerd en verbeterd (PR #4 gemerged, bugfix in PR #22, robuuster gemaakt in PR #39)
 - Bestandsnaam: DataLayer.gs
 - Functionaliteit: Handelt database interacties af met Google Spreadsheet als dataopslag, biedt CRUD-operaties voor gebruikers, huisartsenpraktijken en controles
 - Verbeterde database-initialisatie en foutafhandeling toegevoegd
 - Voorziet in automatische controle en reparatie van database tabbladen/headers
+- PR #39: Robuustere integratie met andere modules
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### WebsiteChecker.gs
@@ -109,7 +112,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### AuthService.gs
-- Status: Geïmplementeerd en verbeterd (PR #6 gemerged, bugfix in PR #22, robuuster gemaakt in PR #37)
+- Status: Geïmplementeerd en verbeterd (PR #6 gemerged, bugfix in PR #22, robuuster gemaakt in PR #37, verbeterd in PR #39)
 - Bestandsnaam: AuthService.gs
 - Functionaliteit: Handelt Google authenticatie en gebruikersbeheer af, inclusief login/logout en het bijwerken van gebruikersinstellingen
 - Verbeterde foutafhandeling en robuustere gebruikersregistratie toegevoegd
@@ -119,6 +122,10 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
   - Meerdere fallback mechanismen bij database-initialisatie problemen
   - Nieuwe diagnosticInfo functie voor betere debugging
   - Toegevoegde ensureDatabaseStructure functie om database-integriteit te garanderen
+- Verbeteringen in PR #39:
+  - Robuustere controles op het bestaan van DataLayer voor beter omgaan met laadvolgorde
+  - Verbeterde ensureDatabaseStructure implementatie als methode binnen AuthService
+  - Uitgebreide diagnostische informatie over de staat van modules
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### Utilities.gs
