@@ -50,7 +50,7 @@
     try {
       google.script.run
         .withSuccessHandler(function(authStatus) {
-          console.log("Authenticatieresultaat ontvangen");
+          console.log("Authenticatieresultaat ontvangen", authStatus);
           
           if (!authStatus) {
             console.error("Authenticatiestatus is null of undefined");
@@ -75,12 +75,12 @@
           }
         })
         .withFailureHandler(function(error) {
-          console.error("Authenticatie mislukt: " + error);
+          console.error("Authenticatie mislukt: ", error);
           showError("Authenticatiefout: " + error);
         })
         .checkLoginStatus();
     } catch (error) {
-      console.error("Fout bij aanroepen authenticatie: " + error);
+      console.error("Fout bij aanroepen authenticatie: ", error);
       showError("Kon niet verbinden met de server: " + error);
     }
   }
@@ -104,7 +104,7 @@
       // Dashboard laden
       loadDashboard();
     } catch (error) {
-      console.error("Fout bij initialiseren UI: " + error);
+      console.error("Fout bij initialiseren UI: ", error);
       showError("Fout bij laden interface: " + error);
     }
   }
@@ -361,7 +361,7 @@
           setupPracticeActionHandlers();
         })
         .withFailureHandler(function(error) {
-          console.error("Fout bij laden praktijken: " + error);
+          console.error("Fout bij laden praktijken: ", error);
           
           practicesList.innerHTML = `
             <div class="error-state">
@@ -373,7 +373,7 @@
         })
         .getPracticesByUser(currentUser.userId);
     } catch (error) {
-      console.error("Fout bij aanroepen getPracticesByUser: " + error);
+      console.error("Fout bij aanroepen getPracticesByUser: ", error);
       practicesList.innerHTML = `
         <div class="error-state">
           <p>Kon geen verbinding maken met de server:</p>
@@ -463,7 +463,7 @@
           showNotification("Huisartsenpraktijk succesvol toegevoegd");
         })
         .withFailureHandler(function(error) {
-          console.error("Fout bij toevoegen praktijk: " + error);
+          console.error("Fout bij toevoegen praktijk: ", error);
           
           // Schakel submit knop weer in
           if (submitButton) {
@@ -476,7 +476,7 @@
         })
         .createPractice(formData);
     } catch (error) {
-      console.error("Fout bij aanroepen createPractice: " + error);
+      console.error("Fout bij aanroepen createPractice: ", error);
       // Schakel submit knop weer in
       if (submitButton) {
         submitButton.disabled = false;
@@ -528,7 +528,7 @@
           showNotification("Instellingen succesvol opgeslagen");
         })
         .withFailureHandler(function(error) {
-          console.error("Fout bij opslaan instellingen: " + error);
+          console.error("Fout bij opslaan instellingen: ", error);
           
           // Schakel submit knop weer in
           if (submitButton) {
@@ -541,7 +541,7 @@
         })
         .updateCurrentUserSettings(formData);
     } catch (error) {
-      console.error("Fout bij aanroepen updateCurrentUserSettings: " + error);
+      console.error("Fout bij aanroepen updateCurrentUserSettings: ", error);
       // Schakel submit knop weer in
       if (submitButton) {
         submitButton.disabled = false;
@@ -564,7 +564,7 @@
     try {
       google.script.run
         .withSuccessHandler(function(result) {
-          console.log("Controleresultaat ontvangen");
+          console.log("Controleresultaat ontvangen", result);
           
           if (result && result.success) {
             showNotification("Controle voltooid: " + (result.message || "Status bijgewerkt"));
@@ -574,12 +574,12 @@
           }
         })
         .withFailureHandler(function(error) {
-          console.error("Fout bij controleren praktijk: " + error);
+          console.error("Fout bij controleren praktijk: ", error);
           showError("Fout bij controleren: " + error);
         })
         .checkPracticeNow(practiceId);
     } catch (error) {
-      console.error("Fout bij aanroepen checkPracticeNow: " + error);
+      console.error("Fout bij aanroepen checkPracticeNow: ", error);
       showError("Fout bij controleren: " + error);
     }
   }
@@ -612,12 +612,12 @@
             }
           })
           .withFailureHandler(function(error) {
-            console.error("Fout bij verwijderen praktijk: " + error);
+            console.error("Fout bij verwijderen praktijk: ", error);
             showError("Fout bij verwijderen: " + error);
           })
           .deletePractice(practiceId);
       } catch (error) {
-        console.error("Fout bij aanroepen deletePractice: " + error);
+        console.error("Fout bij aanroepen deletePractice: ", error);
         showError("Fout bij verwijderen: " + error);
       }
     }
@@ -644,55 +644,71 @@
   
   /**
    * Toont een foutmelding
-   * VERBETERD: veiliger omgaan met verschillende foutobjecttypes
+   * Verbeterde implementatie die beter omgaat met verschillende datatypes en HTML elementen
    */
   function showError(message) {
-    console.error("Foutmelding: " + message);
+    // Log de foutmelding inclusief type en ruwe waarde voor diagnostiek
+    console.error("Foutmelding:", message, "Type:", typeof message, "ToString:", message ? message.toString() : "null");
     
     const errorContainer = document.getElementById('error');
     const errorMessage = document.getElementById('error-message');
     
     if (!errorContainer || !errorMessage) {
       console.error("Error container of message element niet gevonden");
-      alert("Fout: " + (message ? message.toString() : "Onbekende fout"));
+      alert("Fout: " + (message && typeof message.toString === 'function' ? message.toString() : "Onbekende fout"));
       return;
     }
     
     // Veilige string conversie voor verschillende foutobjecttypes
     let errorText = "Er is een fout opgetreden";
     
-    if (message) {
-      if (typeof message === 'string') {
+    try {
+      if (message === null || message === undefined) {
+        errorText = "Er is een onbekende fout opgetreden";
+      } else if (typeof message === 'string') {
+        // String direct gebruiken
         errorText = message;
       } else if (message instanceof Error) {
+        // Error object verwerken
         errorText = message.message || message.toString();
-      } else if (message instanceof HTMLElement) {
-        // Voorkom dat HTMLElement als [object HTMLElement] wordt weergegeven
-        errorText = "Fout in DOM element: " + message.tagName;
-        try {
-          // Probeer de innerText of textContent te gebruiken indien beschikbaar
-          const elementText = message.innerText || message.textContent;
-          if (elementText) {
-            errorText += " - " + elementText;
+      } else if (typeof message === 'object') {
+        // Controleer eerst of het een DOM element is
+        if (message.nodeType && message.nodeType === 1) {
+          // Het is een DOM element
+          errorText = "Fout met DOM element: " + (message.tagName || "onbekend element");
+          
+          // Probeer de tekstinhoud te gebruiken indien beschikbaar
+          if (message.innerText || message.textContent) {
+            errorText += " - " + (message.innerText || message.textContent);
           }
-        } catch (e) {
-          // Negeer fouten bij het ophalen van element tekst
+        } else if (message.message) {
+          // Object met message property (zoals server response)
+          errorText = message.message;
+        } else {
+          // Ander type object
+          try {
+            // Probeer het object naar JSON te converteren als dat mogelijk is
+            errorText = JSON.stringify(message);
+          } catch (e) {
+            // Als JSON stringify faalt, gebruik toString
+            errorText = message.toString();
+          }
         }
       } else {
-        // Probeer object naar string te converteren
-        try {
-          errorText = message.toString();
-        } catch (e) {
-          errorText = "Fout object kon niet worden weergeven";
-        }
+        // Voor alle andere datatypes, gebruik toString of cast naar string
+        errorText = String(message);
       }
+    } catch (e) {
+      // Als er een fout optreedt bij het verwerken van de fout, gebruik een fallback
+      console.error("Fout bij verwerken van foutmelding:", e);
+      errorText = "Er is een fout opgetreden (foutdetails konden niet worden weergegeven)";
     }
     
     // Zet de foutmelding in het element
     errorMessage.textContent = errorText;
     errorContainer.style.display = 'block';
     
-    // Verberg na 8 seconden
+    // Verberg na 8 seconden, tenzij het een kritieke fout is
     setTimeout(function() {
       errorContainer.style.display = 'none';
     }, 8000);
