@@ -91,26 +91,34 @@
     - Uitgebreide diagnostische informatie voor troubleshooting
     - STATUS: Voltooid (PR #48, Issue #47)
 
-13. **Bugfix: SyntaxError in WebsiteChecker.gs met duplicate UIClass** 🔄
+13. **Bugfix: SyntaxError in WebsiteChecker.gs met duplicate UIClass** ✅
     - Oplossen van SyntaxError: "Identifier 'UIClass' has already been declared"
     - Fix van naamruimteconflict door hernoemen van de verkeerde klassenaam
     - Betere isolatie tussen modules
-    - STATUS: PR #53 aangemaakt voor Issue #52
+    - STATUS: Voltooid (PR #55, Issue #52)
+
+14. **Implementeren van handmatige controle functionaliteit** ✅
+    - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
+    - Koppeling van de knop aan de WebsiteChecker module
+    - Tonen van voortgang en resultaten in de gebruikersinterface
+    - Visuele feedback voor verschillende statussen
+    - STATUS: Voltooid (PR #54, Issue #44)
 
 ## Huidige Must-haves
 
-1. **Implementeren van handmatige controle functionaliteit** 🔄
-   - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
-   - Koppelen van de knop aan de WebsiteChecker module
-   - Tonen van voortgang en resultaten in de gebruikersinterface
-   - STATUS: Issue #44 aangemaakt, nog te implementeren
-
-2. **Volledige end-to-end testen** 🔄
+1. **Volledige end-to-end testen** 🔄
    - Testen van de gehele workflow van website controle tot notificaties
    - Testen van verschillende scenario's en statusveranderingen
    - Foutscenario's testen en verbeteren van error handling
    - Opstellen van testscenario's en testcases
-   - STATUS: Gepland (Na goedkeuring van PR #53)
+   - STATUS: Te implementeren
+
+2. **Bijwerken README.md met end-to-end testresultaten** 🔄
+   - Documenteren van de testresultaten in de README.md
+   - Toevoegen van screenshot(s) van de werkende applicatie
+   - Toevoegen van instructies hoe de app te configureren en gebruiken
+   - Toevoegen van informatie over Scripts ID en API key configuratie
+   - STATUS: Te implementeren
 
 ## Nice-to-haves
 
@@ -142,26 +150,16 @@
 - De README.md bevat een gedetailleerde handleiding voor installatie en configuratie.
 
 ## Volgende stappen:
-1. **Review en merge van PR #53 (Bugfix: "Duplicate UIClass declaration")**
-   - Controleer of de fix het probleem oplost waarbij de pagina niet opent door de SyntaxError
-   - Deze stap is cruciaal omdat gebruikers momenteel een foutmelding krijgen bij het openen van de applicatie
-
-2. **Implementeren van handmatige controle functionaliteit (Issue #44)**
-   - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
-   - Koppelen van de knop aan de WebsiteChecker module
-   - Tonen van voortgang en resultaten in de gebruikersinterface
-   - Deze stap is noodzakelijk voor een volledige gebruikerservaring
-
-3. **Volledige end-to-end testen**
+1. **Volledige end-to-end testen**
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
    - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
    - Foutscenario's testen en verbeteren van error handling
    - Deze stap is noodzakelijk voor de basiswerking van de applicatie om te zorgen dat alle functionaliteit correct werkt
    
-4. **Bijwerken README.md met end-to-end testresultaten**
+2. **Bijwerken README.md met end-to-end testresultaten**
    - Documenteren van de testresultaten in de README.md
    - Toevoegen van screenshot(s) van de werkende applicatie
    - Toevoegen van instructies hoe de app te configureren en gebruiken
    - Toevoegen van informatie over Scripts ID en API key configuratie
 
-De implementatie van handmatige controle functionaliteit (issue #44), de end-to-end testen en het bijwerken van de documentatie zijn noodzakelijk voor de basiswerking van de applicatie. De nice-to-have items zijn niet essentieel voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid verbeteren.
+De end-to-end testen en het bijwerken van de documentatie zijn noodzakelijk voor de basiswerking van de applicatie. De nice-to-have items zijn niet essentieel voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid verbeteren.
