@@ -244,6 +244,70 @@
         gap: 10px;
       }
       
+      /* Login container */
+      .login-container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      
+      .login-container h2 {
+        margin-bottom: 20px;
+        color: #3498db;
+      }
+      
+      .login-container p {
+        margin-bottom: 25px;
+      }
+      
+      .login-container button {
+        padding: 12px 20px;
+        font-size: 16px;
+      }
+      
+      /* Diagnostic panel */
+      .diagnostic-panel {
+        margin-top: 30px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #e9ecef;
+        font-family: monospace;
+        font-size: 12px;
+      }
+      
+      .diagnostic-panel h4 {
+        margin-top: 0;
+        font-size: 14px;
+        color: #6c757d;
+      }
+      
+      .diagnostic-panel pre {
+        margin: 0;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+      
+      /* Manual reload button */
+      #refresh-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 15px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: none;
+        z-index: 1000;
+      }
+      
       /* Responsive aanpassingen */
       @media (max-width: 768px) {
         .practices-grid {
@@ -271,13 +335,11 @@
       <!-- Loading indicator, wordt getoond tijdens het laden -->
       <div id="loading">
         <div class="spinner"></div>
-        <p>Laden...</p>
+        <p>Applicatie laden...</p>
       </div>
       
       <!-- Hoofdinhoud container, wordt gevuld na authenticatie -->
-      <div id="content" style="display: none;">
-        <!-- Inhoud wordt hier dynamisch geladen -->
-      </div>
+      <div id="content" style="display: none;"></div>
       
       <!-- Error container voor foutmeldingen -->
       <div id="error" style="display: none;">
@@ -287,39 +349,85 @@
       
       <!-- Notifications container voor korte berichten -->
       <div id="notification" class="notification"></div>
+      
+      <!-- Handmatige refresh knop voor noodgevallen -->
+      <button id="refresh-button" style="display: none;" onclick="window.location.reload(true)">Pagina vernieuwen</button>
     </div>
     
     <script>
       /**
        * Robuuste template variabelen initialisatie
-       * Verbeterde versie met controles op aanwezigheid en type
+       * Verbeterde versie met uitgebreide controles op aanwezigheid en type
        */
       
-      // Helper om veilig template variabelen te initialiseren
+      // Helper functies voor het veilig initialiseren van variabelen
       function safeJsonParse(value, defaultValue) {
         try {
-          // Als het een lege string of 'null' is, gebruik de standaardwaarde
-          if (value === '' || value === 'null' || value === undefined) {
+          // Als het een lege string, 'null', 'undefined' of werkelijk undefined is, gebruik de standaardwaarde
+          if (value === '' || value === 'null' || value === 'undefined' || value === undefined) {
+            console.log("Lege waarde gedetecteerd, standaardwaarde gebruiken");
             return defaultValue;
           }
+          
+          // Als het al een object is (niet een string), geef het direct terug
+          if (typeof value === 'object') {
+            return value;
+          }
+          
           return JSON.parse(value);
         } catch (e) {
-          console.error("JSON parse fout:", e);
+          console.error("JSON parse fout:", e, "voor waarde:", value);
           return defaultValue;
         }
       }
       
-      // Voorzichtige initialisatie van globale variabelen met expliciete type-checking
-      var user = <?= (authStatus && authStatus.loggedIn === true && authStatus.user) ? JSON.stringify(authStatus.user) : 'null' ?>;
-      var isAdmin = <?= (authStatus && authStatus.isAdmin === true) ? 'true' : 'false' ?>;
-      var authUrl = <?= (authStatus && authStatus.authUrl) ? JSON.stringify(authStatus.authUrl) : 'null' ?>;
-      var errorMessage = <?= (authStatus && authStatus.errorMessage) ? JSON.stringify(authStatus.errorMessage) : 'null' ?>;
+      // Helper om te controleren of een object geldig is
+      function isValidObject(obj) {
+        return obj !== null && typeof obj === 'object' && !Array.isArray(obj);
+      }
+      
+      // Veilige initialisatie van authStatus
+      var authStatus = safeJsonParse(<?= typeof authStatus !== 'undefined' ? JSON.stringify(authStatus) : 'null' ?>, null);
+      console.log("authStatus initialisatie:", authStatus);
+      
+      // Veilige initialisatie van gebruiker
+      var user = null;
+      var isAdmin = false;
+      var authUrl = null;
+      var errorMessage = null;
+      
+      // Initialisatie gebaseerd op authStatus (indien aanwezig)
+      if (isValidObject(authStatus)) {
+        if (authStatus.loggedIn === true && isValidObject(authStatus.user)) {
+          user = authStatus.user;
+          isAdmin = !!authStatus.isAdmin;
+          console.log("Gebruiker geïnitialiseerd vanuit authStatus");
+        } else if (authStatus.authUrl) {
+          authUrl = authStatus.authUrl;
+          console.log("Auth URL geïnitialiseerd vanuit authStatus");
+        }
+        
+        if (authStatus.errorMessage) {
+          errorMessage = authStatus.errorMessage;
+          console.log("Foutmelding geïnitialiseerd vanuit authStatus");
+        }
+      } else {
+        // Legacy initialisatie indien authStatus niet aanwezig is
+        user = safeJsonParse(<?= (typeof user !== 'undefined') ? JSON.stringify(user) : 'null' ?>, null);
+        isAdmin = <?= (typeof isAdmin !== 'undefined' && isAdmin === true) ? 'true' : 'false' ?>;
+        authUrl = safeJsonParse(<?= (typeof authUrl !== 'undefined') ? JSON.stringify(authUrl) : 'null' ?>, null);
+        errorMessage = safeJsonParse(<?= (typeof errorMessage !== 'undefined') ? JSON.stringify(errorMessage) : 'null' ?>, null);
+        console.log("Variabelen geïnitialiseerd vanuit individuele templating tags");
+      }
+      
+      // Diagnostische informatie loggen
+      var diagnosticInfo = safeJsonParse(<?= typeof diagnosticInfo !== 'undefined' ? JSON.stringify(diagnosticInfo) : 'null' ?>, null);
       
       // Controleer op potentiële initialisatieproblemen en log deze
       console.log("Template variabelen initialisatie:");
-      console.log("- user:", user ? "aanwezig" : "niet aanwezig");
+      console.log("- user:", user ? "aanwezig" : "niet aanwezig", user);
       console.log("- isAdmin:", isAdmin);
-      console.log("- authUrl:", authUrl ? "aanwezig" : "niet aanwezig");
+      console.log("- authUrl:", authUrl ? "aanwezig" : "niet aanwezig", authUrl);
       console.log("- errorMessage:", errorMessage ? errorMessage : "geen");
       
       // Als er direct een foutmelding is, toon deze op een veilige manier
@@ -333,6 +441,12 @@
             // Zet de foutmelding in het element, voorkom XSS door textContent te gebruiken
             errorMessageElem.textContent = errorMessage;
             errorDiv.style.display = 'block';
+            
+            // Verberg loading indicator
+            var loading = document.getElementById('loading');
+            if (loading) {
+              loading.style.display = 'none';
+            }
           } else {
             console.error("Foutmelding elementen niet gevonden in DOM");
           }
@@ -355,7 +469,7 @@
               <div class="login-container">
                 <h2>Inloggen vereist</h2>
                 <p>Log in met uw Google-account om de Huisarts Check te gebruiken.</p>
-                <button onclick="window.location.href='${authUrl}'">Inloggen met Google</button>
+                <button onclick="handleLogin('${authUrl}')">Inloggen met Google</button>
               </div>
             `;
             content.style.display = 'block';
@@ -365,11 +479,39 @@
         });
       }
       
-      // Diagnostische informatie loggen als beschikbaar
-      var diagnosticInfo = <?= typeof diagnosticInfo !== 'undefined' && diagnosticInfo ? JSON.stringify(diagnosticInfo) : 'null' ?>;
-      if (diagnosticInfo) {
-        console.log('Diagnostische informatie:', diagnosticInfo);
+      // Helper functie voor login knop
+      function handleLogin(url) {
+        console.log("Login knop geklikt, doorverwijzen naar:", url);
+        window.top.location.href = url;
       }
+      
+      // Toon diagnostische informatie indien beschikbaar en in debug modus
+      if (diagnosticInfo && (window.location.search.includes('debug=true') || localStorage.getItem('huisartsDebug') === 'true')) {
+        document.addEventListener('DOMContentLoaded', function() {
+          var container = document.querySelector('.container');
+          
+          if (container) {
+            var diagnosticPanel = document.createElement('div');
+            diagnosticPanel.className = 'diagnostic-panel';
+            diagnosticPanel.innerHTML = `
+              <h4>Diagnostische Informatie</h4>
+              <pre>${JSON.stringify(diagnosticInfo, null, 2)}</pre>
+            `;
+            
+            container.appendChild(diagnosticPanel);
+          }
+        });
+      }
+      
+      // Toon refresh knop na 10 seconden als de pagina nog steeds aan het laden is
+      setTimeout(function() {
+        var loading = document.getElementById('loading');
+        var refreshButton = document.getElementById('refresh-button');
+        
+        if (loading && refreshButton && loading.style.display !== 'none') {
+          refreshButton.style.display = 'block';
+        }
+      }, 10000);
     </script>
     
     <?!= include('HTML_Scripts'); ?>
