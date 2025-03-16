@@ -75,6 +75,12 @@ class AuthServiceClass {
         return null;
       }
       
+      // Controleer of DataLayer beschikbaar is
+      if (typeof DataLayer === 'undefined' || DataLayer === null) {
+        Logger.error('DataLayer is niet gedefinieerd, kan gebruikersinfo niet ophalen');
+        return null;
+      }
+      
       // Zorg altijd dat de database geïnitialiseerd is
       try {
         if (!DataLayer.checkConnection()) {
@@ -142,7 +148,13 @@ class AuthServiceClass {
           // Als het aanmaken mislukt, probeer het nog een keer na database controle
           try {
             // Zorg dat de database correct is geïnitialiseerd
-            DataLayer.ensureDatabaseStructure();
+            if (typeof this.ensureDatabaseStructure === 'function') {
+              this.ensureDatabaseStructure();
+            } else if (typeof DataLayer.ensureDatabaseStructure === 'function') {
+              DataLayer.ensureDatabaseStructure();
+            } else {
+              Logger.warning('ensureDatabaseStructure functie niet beschikbaar');
+            }
             user = DataLayer.createUser(newUser);
             Logger.info('Nieuwe gebruiker aangemaakt na database controle: ' + userEmail);
           } catch (finalCreateError) {
@@ -256,6 +268,16 @@ class AuthServiceClass {
         // We gaan verder ondanks de fout, mogelijk kunnen we de gebruiker nog ophalen
       }
       
+      // Controleer of DataLayer beschikbaar is
+      if (typeof DataLayer === 'undefined' || DataLayer === null) {
+        Logger.error('DataLayer is niet gedefinieerd, kan login status niet controleren');
+        return {
+          loggedIn: false,
+          authUrl: null,
+          errorMessage: 'Er is een probleem met de data laag. Probeer het later nog eens of neem contact op met de beheerder.'
+        };
+      }
+      
       // Controleer of de database is geïnitialiseerd
       try {
         if (!DataLayer.checkConnection()) {
@@ -341,7 +363,9 @@ class AuthServiceClass {
       
       // Probeer database initialisatie als fallback
       try {
-        DataLayer.initializeDatabase(true);
+        if (typeof DataLayer !== 'undefined' && DataLayer !== null) {
+          DataLayer.initializeDatabase(true);
+        }
       } catch (dbError) {
         Logger.error('Kon database niet initialiseren: ' + dbError.toString());
       }
@@ -499,6 +523,12 @@ class AuthServiceClass {
         return false;
       }
       
+      // Controleer of DataLayer beschikbaar is
+      if (typeof DataLayer === 'undefined' || DataLayer === null) {
+        Logger.error('DataLayer is niet gedefinieerd, kan emergency admin niet aanmaken');
+        return false;
+      }
+      
       // Controleer of de database is geïnitialiseerd
       if (!DataLayer.checkConnection()) {
         Logger.info('Database initialiseren voor emergency admin');
@@ -579,6 +609,7 @@ class AuthServiceClass {
         hasUser: false,
         hasAdmin: false,
         databaseConnected: false,
+        dataLayerDefined: typeof DataLayer !== 'undefined' && DataLayer !== null,
         errors: []
       };
       
@@ -590,10 +621,14 @@ class AuthServiceClass {
       }
       
       // Database controle
-      try {
-        result.databaseConnected = DataLayer.checkConnection();
-      } catch (dbError) {
-        result.errors.push('Database error: ' + dbError.toString());
+      if (result.dataLayerDefined) {
+        try {
+          result.databaseConnected = DataLayer.checkConnection();
+        } catch (dbError) {
+          result.errors.push('Database error: ' + dbError.toString());
+        }
+      } else {
+        result.errors.push('DataLayer is not defined');
       }
       
       // Gebruiker controle
@@ -608,11 +643,13 @@ class AuthServiceClass {
       }
       
       // Admin gebruiker controle
-      try {
-        const allUsers = DataLayer.getAllUsers();
-        result.hasAdmin = allUsers.some(user => user.isAdmin === true);
-      } catch (adminError) {
-        result.errors.push('Admin check error: ' + adminError.toString());
+      if (result.dataLayerDefined) {
+        try {
+          const allUsers = DataLayer.getAllUsers();
+          result.hasAdmin = allUsers.some(user => user.isAdmin === true);
+        } catch (adminError) {
+          result.errors.push('Admin check error: ' + adminError.toString());
+        }
       }
       
       return result;
@@ -623,19 +660,22 @@ class AuthServiceClass {
       };
     }
   }
-}
-
-// Voeg een functie toe aan DataLayer voor database structuur validatie
-if (typeof DataLayer.ensureDatabaseStructure !== 'function') {
+  
   /**
    * Zorgt ervoor dat de database structuur correct is
    * Deze functie controleert en repareert indien nodig de database tabbladen en kolommen
    * 
    * @return {boolean} true als de database structuur correct is, anders false
    */
-  DataLayer.ensureDatabaseStructure = function() {
+  ensureDatabaseStructure() {
     try {
       Logger.info('Database structuur controleren en herstellen');
+      
+      // Controleer of Config gedefinieerd is
+      if (typeof Config === 'undefined' || Config === null) {
+        Logger.error('Config is niet gedefinieerd');
+        return false;
+      }
       
       // Controleer of er een spreadsheet ID is ingesteld
       const spreadsheetId = Config.getSpreadsheetId();
@@ -720,8 +760,25 @@ if (typeof DataLayer.ensureDatabaseStructure !== 'function') {
       Logger.error('Algemene fout bij controleren database structuur: ' + error.toString());
       return false;
     }
-  };
+  }
 }
 
 // Instantieer een global AuthService object
 const AuthService = new AuthServiceClass();
+
+// Maak ensure database structure functie beschikbaar op DataLayer als het beschikbaar is
+// Dit wordt aangeroepen na DataLayer is geïnitialiseerd
+function setupEnsureDatabaseStructure() {
+  try {
+    if (typeof DataLayer !== 'undefined' && DataLayer !== null && typeof DataLayer.ensureDatabaseStructure !== 'function') {
+      DataLayer.ensureDatabaseStructure = AuthService.ensureDatabaseStructure;
+      Logger.info('DataLayer.ensureDatabaseStructure functie succesvol geïnstalleerd');
+    }
+  } catch (error) {
+    Logger.error('Fout bij installeren van ensureDatabaseStructure functie: ' + error.toString());
+  }
+}
+
+// We roepen setupEnsureDatabaseStructure aan bij het laden van dit script
+// De functie zal alleen slagen als DataLayer al is gedefinieerd
+setupEnsureDatabaseStructure();
