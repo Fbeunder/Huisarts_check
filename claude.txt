@@ -46,35 +46,41 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### UI.gs
-- Status: Geïmplementeerd en bijgewerkt (PR #8 en #18 gemerged, bugfix in PR #24)
+- Status: Geïmplementeerd en bijgewerkt (PR #8, #18 gemerged, verbeterd in PR #37)
 - Bestandsnaam: UI.gs
 - Functionaliteit: Beheert de webinterface en gebruikersinteractie, rendert verschillende pagina's en afhandelt formulierverwerking
 - Bevat helper functie getHtmlTemplate() voor consistente toegang tot HTML-templates
-- Bevat bugfix voor favicon probleem wat pagina rendering verhinderde
+- Volledig vereenvoudigd in PR #37 voor betere compatibiliteit met Apps Script
+- Vereenvoudigde template rendering zonder ingewikkelde logica
+- Duidelijkere scheiding tussen server-side en client-side functionaliteit
+- Robuustere foutpagina's die geen complexe templates gebruiken
 - Afhankelijkheid: HTML-templates, AuthService.gs, DataLayer.gs, Logger.gs
 
 ### HTML-templates
-- Status: Geïmplementeerd en aangepast (PR #20 gemerged)
+- Status: Geïmplementeerd en aangepast (PR #20 gemerged, verbeterd in PR #37)
 - Bestandsnaam: HTML-bestanden met prefix HTML_
 - Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface, inclusief login en dashboard
 - Naamgevingsconventie: HTML-bestanden hebben prefix HTML_ voor betere integratie met Apps Script
+- Volledig herzien in PR #37 voor betere werking in Apps Script omgeving
 - Afhankelijkheid: Geen
 
 ### HTML_Scripts.html
-- Status: Geïmplementeerd, verbeterd met bugfixes voor console errors (PR #31 en #33 gemerged, PR #35 in behandeling)
+- Status: Geïmplementeerd, meerdere bugfixes (PR #31, #33, #35 gemerged, volledig herschreven in PR #37)
 - Bestandsnaam: HTML_Scripts.html
 - Functionaliteit: Bevat client-side JavaScript voor interactie met de gebruiker
-- Verbeteringen in PR #29 (gemerged): Volledige herstructurering voor robuustere werking, gefaseerde initialisatie, uitgebreide logging en foutafhandeling, verbeterde DOM-manipulatie
-- Bugfixes in PR #31 (gemerged): MutationObserver fix, verbeterde authenticatie foutafhandeling, betere gebruikersfeedback
-- Bugfixes in PR #33 (gemerged): Verdere authenticatiefoutafhandeling verbeteringen, robuustere afhandeling van null/undefined waarden, automatische vernieuwing bij fouten
-- Bugfixes in PR #35 (in behandeling): Oplossen van aanhoudende console errors, verbeterd systeem voor automatische herstelpogingen, centrale foutafhandeling voor authenticatie, detectie en onderschepping van fouten in externe scripts
+- Volledige herstructurering in PR #29: Gefaseerde initialisatie, uitgebreide logging, verbeterde DOM-manipulatie
+- Bugfixes in PR #31: MutationObserver fix, verbeterde authenticatie foutafhandeling
+- Bugfixes in PR #33: Verdere authenticatiefoutafhandeling verbeteringen
+- Bugfixes in PR #35: Automatische herstelpogingen, centrale foutafhandeling
+- Volledige herschrijving in PR #37: Drastisch vereenvoudigde code, directe DOM-manipulatie, betere foutafhandeling
 - Afhankelijkheid: HTML-templates
 
 ### HTML_Index.html
-- Status: Geïmplementeerd
+- Status: Geïmplementeerd en verbeterd (PR #37)
 - Bestandsnaam: HTML_Index.html
 - Functionaliteit: Hoofdtemplate voor de web interface
-- Afhankelijkheid: HTML_Scripts.html, HTML_Styles.html
+- Volledig herzien in PR #37 met inline CSS, directe login optie, verbeterde responsiveness
+- Afhankelijkheid: HTML_Scripts.html
 
 ### DataLayer.gs
 - Status: Geïmplementeerd en verbeterd (PR #4 gemerged, bugfix in PR #22)
@@ -103,11 +109,16 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### AuthService.gs
-- Status: Geïmplementeerd en verbeterd (PR #6 gemerged, bugfix in PR #22)
+- Status: Geïmplementeerd en verbeterd (PR #6 gemerged, bugfix in PR #22, robuuster gemaakt in PR #37)
 - Bestandsnaam: AuthService.gs
 - Functionaliteit: Handelt Google authenticatie en gebruikersbeheer af, inclusief login/logout en het bijwerken van gebruikersinstellingen
 - Verbeterde foutafhandeling en robuustere gebruikersregistratie toegevoegd
 - Toegevoegd: createEmergencyAdmin() functie voor eenvoudige eerste setup
+- Significante verbeteringen in PR #37:
+  - Extra controles en validaties op gebruikersgegevens
+  - Meerdere fallback mechanismen bij database-initialisatie problemen
+  - Nieuwe diagnosticInfo functie voor betere debugging
+  - Toegevoegde ensureDatabaseStructure functie om database-integriteit te garanderen
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### Utilities.gs
