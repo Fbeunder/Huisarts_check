@@ -83,13 +83,19 @@
     - Gebruiksvriendelijkere foutmeldingen die nooit alleen "null" tonen
     - STATUS: Voltooid (PR #46)
 
-12. **Bugfix: Pagina gaat niet verder laden na authenticatie** 🔄
+12. **Bugfix: Pagina gaat niet verder laden na authenticatie** ✅
     - Volledige herziening van de authenticatielogica met proactieve foutdetectie
     - Toegevoegde monitoring van laadstatus met automatische herstelpogingen
     - Implementatie van gebruikersvalidatie om onvolledige gebruikersobjecten te detecteren
     - Verbeterde template variabelen overdracht en initialisatie
     - Uitgebreide diagnostische informatie voor troubleshooting
-    - STATUS: In behandeling (PR #48, Issue #47)
+    - STATUS: Voltooid (PR #48, Issue #47)
+
+13. **Bugfix: SyntaxError in WebsiteChecker.gs met duplicate UIClass** 🔄
+    - Oplossen van SyntaxError: "Identifier 'UIClass' has already been declared"
+    - Fix van potentiële naamruimteconflicten bij laden van modules in Apps Script
+    - Betere isolatie tussen modules
+    - STATUS: In behandeling (PR #50, Issue #49)
 
 ## Huidige Must-haves
 
@@ -104,7 +110,7 @@
    - Testen van verschillende scenario's en statusveranderingen
    - Foutscenario's testen en verbeteren van error handling
    - Opstellen van testscenario's en testcases
-   - STATUS: Gepland (Na goedkeuring van PR #48)
+   - STATUS: Gepland (Na goedkeuring van PR #50)
 
 ## Nice-to-haves
 
@@ -136,10 +142,9 @@
 - De README.md bevat een gedetailleerde handleiding voor installatie en configuratie.
 
 ## Volgende stappen:
-1. **Review en merge van PR #48 (Bugfix: "Pagina gaat niet verder laden na authenticatie")**
-   - Controleer of de verbeteringen in de authenticatielogica het probleem oplossen waarbij de pagina vastloopt na authenticatie
-   - Review de verbeterde foutdetectie en automatische herstelmaatregelen
-   - Deze stap is cruciaal omdat gebruikers anders in een leeg scherm terecht kunnen komen en de applicatie niet kunnen gebruiken
+1. **Review en merge van PR #50 (Bugfix: "Duplicate UIClass declaration")**
+   - Controleer of de fix het probleem oplost waarbij de pagina niet opent door de SyntaxError
+   - Deze stap is cruciaal omdat gebruikers momenteel een foutmelding krijgen bij het openen van de applicatie
 
 2. **Implementeren van handmatige controle functionaliteit (Issue #44)**
    - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
