@@ -3,6 +3,8 @@
  * 
  * Deze module is verantwoordelijk voor het coördineren van het proces van het periodiek controleren 
  * van huisartsenpraktijk websites en het detecteren van statusveranderingen.
+ * 
+ * Belangrijk: Dit bestand vermijdt expliciete definities die conflicteren met andere modules zoals UI.gs
  */
 
 /**
@@ -134,6 +136,28 @@ class WebsiteCheckerClass {
         statusChanges: 0,
         errors: 1
       };
+    }
+  }
+  
+  /**
+   * Controleer een enkele praktijk
+   * 
+   * @param {Object} practice - Het praktijkobject
+   * @return {Object} Resultaat van de controle
+   */
+  checkPractice(practice) {
+    try {
+      if (!practice || !practice.websiteUrl || !practice.userId) {
+        throw new Error('Ongeldig praktijkobject');
+      }
+      
+      Logger.info(`Controleren van praktijk: ${practice.naam} (${practice.websiteUrl})`);
+      
+      // Gebruik checkSingleWebsite voor de controle
+      return this.checkSingleWebsite(practice.websiteUrl, practice.userId, practice.practiceId);
+    } catch (error) {
+      Logger.error(`Fout bij controleren van praktijk: ${error.toString()}`);
+      throw error;
     }
   }
   
