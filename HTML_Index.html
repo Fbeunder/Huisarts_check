@@ -291,18 +291,18 @@
     
     <script>
       // Globale variabelen voor template data
-      var user = <?= authStatus && authStatus.loggedIn ? JSON.stringify(user) : 'null' ?>;
+      var user = <?= authStatus && authStatus.loggedIn && authStatus.user ? JSON.stringify(authStatus.user) : 'null' ?>;
       var isAdmin = <?= authStatus && authStatus.isAdmin ? 'true' : 'false' ?>;
-      var authUrl = <?= authStatus && authStatus.authUrl ? '"' + authStatus.authUrl + '"' : 'null' ?>;
-      var errorMessage = <?= authStatus && authStatus.errorMessage ? '"' + authStatus.errorMessage + '"' : 'null' ?>;
+      var authUrl = <?= authStatus && authStatus.authUrl ? '\"' + authStatus.authUrl + '\"' : 'null' ?>;
+      var errorMessage = <?= authStatus && authStatus.errorMessage ? '\"' + authStatus.errorMessage + '\"' : 'null' ?>;
       
       // Als er direct een foutmelding is, toon deze
       if (errorMessage) {
         document.addEventListener('DOMContentLoaded', function() {
           var errorDiv = document.getElementById('error');
-          var errorMessage = document.getElementById('error-message');
-          if (errorDiv && errorMessage) {
-            errorMessage.textContent = errorMessage;
+          var errorMessageElem = document.getElementById('error-message');
+          if (errorDiv && errorMessageElem) {
+            errorMessageElem.textContent = errorMessage;
             errorDiv.style.display = 'block';
           }
         });
@@ -326,6 +326,12 @@
             content.style.display = 'block';
           }
         });
+      }
+      
+      // Diagnostische informatie loggen als beschikbaar
+      var diagnosticInfo = <?= typeof diagnosticInfo !== 'undefined' ? JSON.stringify(diagnosticInfo) : 'null' ?>;
+      if (diagnosticInfo) {
+        console.log('Diagnostische informatie:', diagnosticInfo);
       }
     </script>
     
