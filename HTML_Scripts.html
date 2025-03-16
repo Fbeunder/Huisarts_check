@@ -644,6 +644,7 @@
   
   /**
    * Toont een foutmelding
+   * VERBETERD: veiliger omgaan met verschillende foutobjecttypes
    */
   function showError(message) {
     console.error("Foutmelding: " + message);
@@ -653,11 +654,42 @@
     
     if (!errorContainer || !errorMessage) {
       console.error("Error container of message element niet gevonden");
-      alert("Fout: " + message);
+      alert("Fout: " + (message ? message.toString() : "Onbekende fout"));
       return;
     }
     
-    errorMessage.textContent = message;
+    // Veilige string conversie voor verschillende foutobjecttypes
+    let errorText = "Er is een fout opgetreden";
+    
+    if (message) {
+      if (typeof message === 'string') {
+        errorText = message;
+      } else if (message instanceof Error) {
+        errorText = message.message || message.toString();
+      } else if (message instanceof HTMLElement) {
+        // Voorkom dat HTMLElement als [object HTMLElement] wordt weergegeven
+        errorText = "Fout in DOM element: " + message.tagName;
+        try {
+          // Probeer de innerText of textContent te gebruiken indien beschikbaar
+          const elementText = message.innerText || message.textContent;
+          if (elementText) {
+            errorText += " - " + elementText;
+          }
+        } catch (e) {
+          // Negeer fouten bij het ophalen van element tekst
+        }
+      } else {
+        // Probeer object naar string te converteren
+        try {
+          errorText = message.toString();
+        } catch (e) {
+          errorText = "Fout object kon niet worden weergeven";
+        }
+      }
+    }
+    
+    // Zet de foutmelding in het element
+    errorMessage.textContent = errorText;
     errorContainer.style.display = 'block';
     
     // Verberg na 8 seconden
