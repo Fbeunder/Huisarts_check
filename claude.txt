@@ -125,10 +125,11 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### WebsiteChecker.gs
-- Status: Geïmplementeerd, bugfix (PR #53 gemerged)
+- Status: Geïmplementeerd, bugfix (PR #53, #55 gemerged)
 - Bestandsnaam: WebsiteChecker.gs
 - Functionaliteit: Beheert het proces van het controleren van websites, detecteert statusveranderingen en plant controles
 - Bugfix in PR #53: Opgelost probleem met klassenaam conflict (hernoemen van UIClass naar WebsiteCheckerClass)
+- Bugfix in PR #55: Opgelost probleem met duplicate klasse declaratie door hernoemen van klasse naar WebsiteCheckerClass
 - Afhankelijkheid: OpenAIService.gs, DataLayer.gs, Logger.gs, EmailService.gs
 
 ### OpenAIService.gs
