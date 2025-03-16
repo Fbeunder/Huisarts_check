@@ -55,6 +55,11 @@
         background-color: #2980b9;
       }
       
+      button:disabled {
+        background-color: #95a5a6;
+        cursor: not-allowed;
+      }
+      
       input, select, textarea {
         width: 100%;
         padding: 10px;
@@ -178,6 +183,7 @@
         border-radius: 5px;
         padding: 20px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        position: relative;
       }
       
       .practice-card h4 {
@@ -191,6 +197,12 @@
         border-radius: 15px;
         margin-bottom: 10px;
         font-size: 14px;
+        transition: all 0.3s ease;
+      }
+      
+      .practice-status.highlight {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
       }
       
       .status-accepting {
@@ -223,6 +235,54 @@
         flex: 1;
         font-size: 12px;
         padding: 8px;
+      }
+      
+      /* Controle status weergave */
+      .check-status {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .check-status .spinner {
+        width: 16px;
+        height: 16px;
+        border-width: 2px;
+        margin-right: 10px;
+        margin-bottom: 0;
+      }
+      
+      .check-status.success {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      
+      .check-status.error {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      
+      .check-result {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      
+      .success-icon {
+        color: #155724;
+        font-size: 18px;
+        margin-right: 10px;
+      }
+      
+      .error-icon {
+        color: #721c24;
+        font-size: 18px;
+        margin-right: 10px;
       }
       
       .empty-state {
