@@ -5,6 +5,8 @@
  * afhandelen van gebruikersinteractie voor de Huisarts Check applicatie.
  * Het integreert HTML-templates en client-side JavaScript om een naadloze
  * gebruikerservaring te bieden.
+ * 
+ * Vereenvoudigde versie voor betere compatibiliteit met Apps Script.
  */
 
 /**
@@ -45,102 +47,8 @@ class UIClass {
   }
   
   /**
-   * Rendert het dashboard voor ingelogde gebruikers
-   * 
-   * @return {HtmlOutput} HTML-uitvoer voor het dashboard
-   */
-  renderDashboard() {
-    try {
-      Logger.info('Renderen van dashboard');
-      
-      // Controleer login status
-      const authStatus = AuthService.checkLoginStatus();
-      
-      if (!authStatus.loggedIn) {
-        // Gebruiker is niet ingelogd, redirect naar login pagina
-        return this.renderLogin(authStatus.authUrl, authStatus.errorMessage);
-      }
-      
-      // Laad dashboard template
-      const template = getHtmlTemplate('Dashboard');
-      
-      // Geef gebruiker en instellingen door
-      template.user = authStatus.user;
-      template.isAdmin = authStatus.isAdmin;
-      
-      // Laad praktijken van de gebruiker
-      template.practices = DataLayer.getPracticesByUser(authStatus.user.userId);
-      
-      return template.evaluate()
-        .setTitle('Dashboard - Huisarts Check');
-    } catch (error) {
-      Logger.error('Fout bij renderen van dashboard: ' + error.toString());
-      return this.renderError('Er is een fout opgetreden bij het laden van het dashboard: ' + error.toString());
-    }
-  }
-  
-  /**
-   * Rendert de instellingenpagina
-   * 
-   * @return {HtmlOutput} HTML-uitvoer voor de instellingen
-   */
-  renderSettings() {
-    try {
-      Logger.info('Renderen van instellingenpagina');
-      
-      // Controleer login status
-      const authStatus = AuthService.checkLoginStatus();
-      
-      if (!authStatus.loggedIn) {
-        // Gebruiker is niet ingelogd, redirect naar login pagina
-        return this.renderLogin(authStatus.authUrl, authStatus.errorMessage);
-      }
-      
-      // Laad settings template
-      const template = getHtmlTemplate('Settings');
-      
-      // Geef gebruiker en instellingen door
-      template.user = authStatus.user;
-      template.isAdmin = authStatus.isAdmin;
-      
-      return template.evaluate()
-        .setTitle('Instellingen - Huisarts Check');
-    } catch (error) {
-      Logger.error('Fout bij renderen van instellingenpagina: ' + error.toString());
-      return this.renderError('Er is een fout opgetreden bij het laden van de instellingen: ' + error.toString());
-    }
-  }
-  
-  /**
-   * Rendert de login pagina
-   * 
-   * @param {string} authUrl - URL voor Google authenticatie
-   * @param {string} errorMessage - Optionele foutmelding
-   * @return {HtmlOutput} HTML-uitvoer voor de login pagina
-   */
-  renderLogin(authUrl, errorMessage = null) {
-    try {
-      Logger.info('Renderen van login pagina');
-      
-      // Laad login template
-      const template = getHtmlTemplate('Login');
-      
-      // Geef auth URL door
-      template.authUrl = authUrl || AuthService.getLoginUrl();
-      
-      // Geef eventuele foutmelding door
-      template.errorMessage = errorMessage;
-      
-      return template.evaluate()
-        .setTitle('Inloggen - Huisarts Check');
-    } catch (error) {
-      Logger.error('Fout bij renderen van login pagina: ' + error.toString());
-      return this.renderError('Er is een fout opgetreden bij het laden van de login pagina.');
-    }
-  }
-  
-  /**
    * Rendert de hoofdpagina
+   * Vereenvoudigde implementatie die direct de Index-template gebruikt
    * 
    * @return {HtmlOutput} HTML-uitvoer voor de hoofdpagina
    */
@@ -151,386 +59,42 @@ class UIClass {
       // Controleer login status
       const authStatus = AuthService.checkLoginStatus();
       
-      if (!authStatus.loggedIn) {
-        // Gebruiker is niet ingelogd, toon login pagina
-        return this.renderLogin(authStatus.authUrl, authStatus.errorMessage);
-      }
-      
-      // Gebruiker is ingelogd, laad normale UI
+      // Altijd de index template gebruiken, ongeacht login status
+      // De client-side code handelt de weergave af op basis van login status
       const template = getHtmlTemplate('Index');
       
-      // Geef gebruikersgegevens door aan client
-      template.user = authStatus.user;
-      template.isAdmin = authStatus.isAdmin;
+      // Geef auth en gebruikersgegevens door aan client
+      template.authStatus = authStatus;
+      if (authStatus.loggedIn) {
+        template.user = authStatus.user;
+        template.isAdmin = authStatus.isAdmin;
+      } else if (authStatus.authUrl) {
+        template.authUrl = authStatus.authUrl;
+      }
       
-      return template.evaluate()
+      // Diagnostische informatie meegeven als dat beschikbaar is
+      try {
+        template.diagnosticInfo = AuthService.getDiagnosticInfo();
+      } catch (diagError) {
+        // Negeer fouten bij diagnostische info
+        Logger.warning('Kon diagnostische info niet ophalen: ' + diagError.toString());
+      }
+      
+      // Evalueer en return de template
+      const html = template.evaluate();
+      
+      return html
         .setTitle('Huisarts Check')
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     } catch (error) {
       Logger.error('Fout bij renderen van hoofdpagina: ' + error.toString());
-      return this.renderError('Er is een fout opgetreden bij het laden van de pagina.');
-    }
-  }
-  
-  /**
-   * Rendert de 'Over' pagina
-   * 
-   * @return {HtmlOutput} HTML-uitvoer voor de over-pagina
-   */
-  renderAbout() {
-    try {
-      Logger.info('Renderen van Over pagina');
-      
-      // Laad about template
-      const template = getHtmlTemplate('About');
-      
-      return template.evaluate()
-        .setTitle('Over - Huisarts Check');
-    } catch (error) {
-      Logger.error('Fout bij renderen van Over pagina: ' + error.toString());
-      return this.renderError('Er is een fout opgetreden bij het laden van de pagina.');
-    }
-  }
-  
-  /**
-   * Rendert de lijst met huisartsenpraktijken
-   * 
-   * @param {string} userId - ID van de gebruiker
-   * @return {HtmlOutput} HTML-uitvoer voor de praktijkenlijst
-   */
-  renderPracticeList(userId) {
-    try {
-      Logger.info('Renderen van praktijkenlijst voor gebruiker ' + userId);
-      
-      // Controleer login status
-      const authStatus = AuthService.checkLoginStatus();
-      
-      if (!authStatus.loggedIn) {
-        // Gebruiker is niet ingelogd, return foutmelding
-        return this.renderContentSection('<p>U moet ingelogd zijn om uw huisartsen te bekijken.</p>');
-      }
-      
-      // Controleer of de gebruiker zijn eigen lijst bekijkt of een admin is
-      if (userId !== authStatus.user.userId && !authStatus.isAdmin) {
-        return this.renderContentSection('<p>U heeft geen toegang tot deze huisartsenlijst.</p>');
-      }
-      
-      // Haal praktijken op
-      const practices = DataLayer.getPracticesByUser(userId);
-      
-      // Als er geen praktijken zijn, toon lege state
-      if (!practices || practices.length === 0) {
-        return this.renderContentSection(`
-          <div class="empty-state">
-            <h3>Geen huisartsen gevonden</h3>
-            <p>U heeft nog geen huisartsenpraktijken toegevoegd om te monitoren.</p>
-            <button onclick="showAddPracticeForm()">Huisarts Toevoegen</button>
-          </div>
-        `);
-      }
-      
-      // Bouw de lijst op
-      let html = '<h3>Mijn Huisartsen</h3><div class="practices-grid">';
-      
-      practices.forEach(practice => {
-        // Status klasse bepalen
-        let statusClass = 'status-unknown';
-        let statusText = 'Onbekend';
-        
-        if (practice.currentStatus === 'ja') {
-          statusClass = 'status-accepting';
-          statusText = 'Neemt patiënten aan';
-        } else if (practice.currentStatus === 'nee') {
-          statusClass = 'status-not-accepting';
-          statusText = 'Neemt geen patiënten aan';
-        }
-        
-        // Bouw praktijk kaart
-        html += `
-          <div class="practice-card">
-            <h4>${practice.naam}</h4>
-            <div class="practice-status ${statusClass}">
-              <span>${statusText}</span>
-            </div>
-            <div class="practice-url">
-              <a href="${practice.websiteUrl}" target="_blank">${practice.websiteUrl}</a>
-            </div>
-            <div class="practice-updated">
-              Laatste update: ${this._formatDate(practice.updatedAt)}
-            </div>
-            <div class="practice-actions">
-              <button class="btn-check" onclick="checkPractice('${practice.practiceId}')">Controleren</button>
-              <button class="btn-edit" onclick="editPractice('${practice.practiceId}')">Bewerken</button>
-              <button class="btn-delete" onclick="deletePractice('${practice.practiceId}')">Verwijderen</button>
-            </div>
-          </div>
-        `;
-      });
-      
-      html += '</div>';
-      
-      return this.renderContentSection(html);
-    } catch (error) {
-      Logger.error('Fout bij renderen van praktijkenlijst: ' + error.toString());
-      return this.renderContentSection('<p>Er is een fout opgetreden bij het laden van de huisartsenlijst: ' + error.toString() + '</p>');
-    }
-  }
-  
-  /**
-   * Rendert het formulier voor het toevoegen van een praktijk
-   * 
-   * @return {HtmlOutput} HTML-uitvoer voor het formulier
-   */
-  renderAddPracticeForm() {
-    try {
-      Logger.info('Renderen van formulier voor toevoegen praktijk');
-      
-      // Controleer login status
-      const authStatus = AuthService.checkLoginStatus();
-      
-      if (!authStatus.loggedIn) {
-        // Gebruiker is niet ingelogd, return foutmelding
-        return this.renderContentSection('<p>U moet ingelogd zijn om een huisarts toe te voegen.</p>');
-      }
-      
-      // Bouw formulier
-      let html = `
-        <h3>Huisarts Toevoegen</h3>
-        <form id="add-practice-form" onsubmit="return submitAddPracticeForm();">
-          <div class="form-group">
-            <label for="practice-name">Naam van de praktijk:</label>
-            <input type="text" id="practice-name" name="naam" required>
-          </div>
-          <div class="form-group">
-            <label for="practice-url">Website URL:</label>
-            <input type="url" id="practice-url" name="websiteUrl" required placeholder="https://www.voorbeeld.nl">
-          </div>
-          <div class="form-group">
-            <label for="practice-notes">Notities:</label>
-            <textarea id="practice-notes" name="notes"></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn-primary">Toevoegen</button>
-            <button type="button" onclick="showPracticeList()">Annuleren</button>
-          </div>
-        </form>
-      `;
-      
-      return this.renderContentSection(html);
-    } catch (error) {
-      Logger.error('Fout bij renderen van formulier voor toevoegen praktijk: ' + error.toString());
-      return this.renderContentSection('<p>Er is een fout opgetreden bij het laden van het formulier: ' + error.toString() + '</p>');
-    }
-  }
-  
-  /**
-   * Rendert het formulier voor het bewerken van een praktijk
-   * 
-   * @param {string} practiceId - ID van de praktijk
-   * @return {HtmlOutput} HTML-uitvoer voor het formulier
-   */
-  renderEditPracticeForm(practiceId) {
-    try {
-      Logger.info('Renderen van formulier voor bewerken praktijk ' + practiceId);
-      
-      // Controleer login status
-      const authStatus = AuthService.checkLoginStatus();
-      
-      if (!authStatus.loggedIn) {
-        // Gebruiker is niet ingelogd, return foutmelding
-        return this.renderContentSection('<p>U moet ingelogd zijn om een huisarts te bewerken.</p>');
-      }
-      
-      // Haal praktijk op
-      const practice = DataLayer.getPracticeById(practiceId);
-      
-      if (!practice) {
-        return this.renderContentSection('<p>Huisartsenpraktijk niet gevonden.</p>');
-      }
-      
-      // Controleer of de gebruiker toegang heeft tot deze praktijk
-      if (practice.userId !== authStatus.user.userId && !authStatus.isAdmin) {
-        return this.renderContentSection('<p>U heeft geen toegang tot deze huisartsenpraktijk.</p>');
-      }
-      
-      // Bouw formulier
-      let html = `
-        <h3>Huisarts Bewerken</h3>
-        <form id="edit-practice-form" onsubmit="return submitEditPracticeForm('${practiceId}');">
-          <div class="form-group">
-            <label for="practice-name">Naam van de praktijk:</label>
-            <input type="text" id="practice-name" name="naam" value="${practice.naam}" required>
-          </div>
-          <div class="form-group">
-            <label for="practice-url">Website URL:</label>
-            <input type="url" id="practice-url" name="websiteUrl" value="${practice.websiteUrl}" required>
-          </div>
-          <div class="form-group">
-            <label for="practice-notes">Notities:</label>
-            <textarea id="practice-notes" name="notes">${practice.notes || ''}</textarea>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn-primary">Opslaan</button>
-            <button type="button" onclick="showPracticeList()">Annuleren</button>
-          </div>
-        </form>
-      `;
-      
-      return this.renderContentSection(html);
-    } catch (error) {
-      Logger.error('Fout bij renderen van formulier voor bewerken praktijk: ' + error.toString());
-      return this.renderContentSection('<p>Er is een fout opgetreden bij het laden van het formulier: ' + error.toString() + '</p>');
-    }
-  }
-  
-  /**
-   * Rendert gedetailleerde informatie over een praktijk
-   * 
-   * @param {string} practiceId - ID van de praktijk
-   * @return {HtmlOutput} HTML-uitvoer voor de praktijkdetails
-   */
-  renderPracticeDetail(practiceId) {
-    try {
-      Logger.info('Renderen van praktijkdetails voor ' + practiceId);
-      
-      // Controleer login status
-      const authStatus = AuthService.checkLoginStatus();
-      
-      if (!authStatus.loggedIn) {
-        // Gebruiker is niet ingelogd, return foutmelding
-        return this.renderContentSection('<p>U moet ingelogd zijn om huisartsendetails te bekijken.</p>');
-      }
-      
-      // Haal praktijk op
-      const practice = DataLayer.getPracticeById(practiceId);
-      
-      if (!practice) {
-        return this.renderContentSection('<p>Huisartsenpraktijk niet gevonden.</p>');
-      }
-      
-      // Controleer of de gebruiker toegang heeft tot deze praktijk
-      if (practice.userId !== authStatus.user.userId && !authStatus.isAdmin) {
-        return this.renderContentSection('<p>U heeft geen toegang tot deze huisartsenpraktijk.</p>');
-      }
-      
-      // Haal controlegeschiedenis op
-      const checks = DataLayer.getChecksByPractice(practiceId);
-      
-      // Status klasse bepalen
-      let statusClass = 'status-unknown';
-      let statusText = 'Onbekend';
-      
-      if (practice.currentStatus === 'ja') {
-        statusClass = 'status-accepting';
-        statusText = 'Neemt patiënten aan';
-      } else if (practice.currentStatus === 'nee') {
-        statusClass = 'status-not-accepting';
-        statusText = 'Neemt geen patiënten aan';
-      }
-      
-      // Bouw detailweergave
-      let html = `
-        <div class="practice-detail">
-          <h3>${practice.naam}</h3>
-          
-          <div class="practice-header">
-            <div class="practice-status ${statusClass}">
-              <span>${statusText}</span>
-            </div>
-            <div class="practice-actions">
-              <button class="btn-check" onclick="checkPractice('${practiceId}')">Controleren</button>
-              <button class="btn-edit" onclick="editPractice('${practiceId}')">Bewerken</button>
-              <button class="btn-delete" onclick="deletePractice('${practiceId}')">Verwijderen</button>
-              <button class="btn-back" onclick="showPracticeList()">Terug naar overzicht</button>
-            </div>
-          </div>
-          
-          <div class="practice-info">
-            <div class="info-group">
-              <label>Website:</label>
-              <a href="${practice.websiteUrl}" target="_blank">${practice.websiteUrl}</a>
-            </div>
-            
-            <div class="info-group">
-              <label>Laatste statuswijziging:</label>
-              <span>${this._formatDate(practice.lastStatusChange)}</span>
-            </div>
-            
-            <div class="info-group">
-              <label>Toegevoegd op:</label>
-              <span>${this._formatDate(practice.createdAt)}</span>
-            </div>
-            
-            <div class="info-group">
-              <label>Notities:</label>
-              <p>${practice.notes || 'Geen notities'}</p>
-            </div>
-          </div>
-      `;
-      
-      // Voeg controlegeschiedenis toe als die er is
-      if (checks && checks.length > 0) {
-        html += '<div class="practice-history"><h4>Controlegeschiedenis</h4><table class="history-table">';
-        html += '<tr><th>Datum</th><th>Status</th><th>Resultaat</th><th>Verandering</th></tr>';
-        
-        // Sorteer checks op timestamp (nieuwste eerst)
-        const sortedChecks = checks.sort((a, b) => {
-          const timeA = new Date(a.timestamp).getTime();
-          const timeB = new Date(b.timestamp).getTime();
-          return timeB - timeA;
-        });
-        
-        // Beperk tot de 10 meest recente controles
-        const recentChecks = sortedChecks.slice(0, 10);
-        
-        recentChecks.forEach(check => {
-          const changeClass = check.hasChanged ? 'changed' : '';
-          const changeIcon = check.hasChanged ? '✓' : '-';
-          
-          html += `
-            <tr class="${changeClass}">
-              <td>${this._formatDate(check.timestamp)}</td>
-              <td>${check.status}</td>
-              <td>${check.resultText || '-'}</td>
-              <td>${changeIcon}</td>
-            </tr>
-          `;
-        });
-        
-        html += '</table></div>';
-      } else {
-        html += '<div class="practice-history"><p>Nog geen controles uitgevoerd.</p></div>';
-      }
-      
-      html += '</div>';
-      
-      return this.renderContentSection(html);
-    } catch (error) {
-      Logger.error('Fout bij renderen van praktijkdetails: ' + error.toString());
-      return this.renderContentSection('<p>Er is een fout opgetreden bij het laden van de praktijkdetails: ' + error.toString() + '</p>');
-    }
-  }
-  
-  /**
-   * Rendert een sectie voor de inhoud
-   * 
-   * @param {string} html - HTML inhoud
-   * @return {HtmlOutput} HTML uitvoer
-   * @private
-   */
-  renderContentSection(html) {
-    try {
-      // Creëer een HTML uitvoer object
-      const output = HtmlService.createHtmlOutput(html);
-      return output;
-    } catch (error) {
-      Logger.error('Fout bij renderen van content sectie: ' + error.toString());
-      return HtmlService.createHtmlOutput('<p>Er is een fout opgetreden bij het laden van de content: ' + error.toString() + '</p>');
+      return this.renderError('Er is een fout opgetreden bij het laden van de pagina: ' + error.toString());
     }
   }
   
   /**
    * Rendert een foutpagina
+   * Vereenvoudigde implementatie voor betere fouttolerantie
    * 
    * @param {string} errorMessage - Foutmelding
    * @return {HtmlOutput} HTML-uitvoer voor de foutpagina
@@ -539,20 +103,88 @@ class UIClass {
     try {
       Logger.info('Renderen van foutpagina');
       
-      // Bouw foutpagina
+      // Eenvoudige foutpagina zonder template en zonder favicon
       const html = `
-        <div class="error-container">
-          <h2>Er is een fout opgetreden</h2>
-          <p>${errorMessage}</p>
-          <button onclick="window.location.reload()">Probeer opnieuw</button>
-        </div>
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <base target="_top">
+            <meta charset="utf-8">
+            <title>Fout - Huisarts Check</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+              .error-container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #dc3545; border-radius: 5px; background-color: #f8d7da; }
+              h2 { color: #dc3545; margin-top: 0; }
+              button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 5px; }
+              button:hover { background-color: #0069d9; }
+            </style>
+          </head>
+          <body>
+            <div class="error-container">
+              <h2>Er is een fout opgetreden</h2>
+              <p>${errorMessage || 'Er is een onbekende fout opgetreden.'}</p>
+              <button onclick="window.location.reload()">Probeer opnieuw</button>
+              <button onclick="window.location.href='${ScriptApp.getService().getUrl()}'">Ga naar startpagina</button>
+            </div>
+          </body>
+        </html>
       `;
       
       return HtmlService.createHtmlOutput(html)
         .setTitle('Fout - Huisarts Check');
     } catch (error) {
       Logger.error('Fout bij renderen van foutpagina: ' + error.toString());
+      // Absolute minimale foutpagina als laatste redmiddel
       return HtmlService.createHtmlOutput('<h2>Er is een fout opgetreden</h2><p>Details konden niet worden geladen.</p>');
+    }
+  }
+  
+  /**
+   * Rendert datastructuren voor client-side gebruik
+   * Deze functie wordt aangeroepen vanuit client-side JavaScript
+   * om data op te halen voor het dashboard
+   * 
+   * @param {string} userId - ID van de gebruiker
+   * @return {Object} Object met verschillende datastructuren
+   */
+  getDataForDashboard(userId) {
+    try {
+      Logger.info('Ophalen van dashboard data voor gebruiker ' + userId);
+      
+      // Controleer login status
+      const authStatus = AuthService.checkLoginStatus();
+      
+      if (!authStatus.loggedIn) {
+        return {
+          success: false,
+          error: 'U bent niet ingelogd'
+        };
+      }
+      
+      // Controleer of de gebruiker geautoriseerd is
+      if (userId !== authStatus.user.userId && !authStatus.isAdmin) {
+        return {
+          success: false,
+          error: 'U heeft geen toegang tot deze gegevens'
+        };
+      }
+      
+      // Haal praktijken op
+      const practices = DataLayer.getPracticesByUser(userId);
+      
+      // Return de data
+      return {
+        success: true,
+        user: authStatus.user,
+        isAdmin: authStatus.isAdmin,
+        practices: practices
+      };
+    } catch (error) {
+      Logger.error('Fout bij ophalen dashboard data: ' + error.toString());
+      return {
+        success: false,
+        error: 'Fout bij ophalen gegevens: ' + error.toString()
+      };
     }
   }
   
@@ -590,3 +222,179 @@ class UIClass {
 
 // Instantieer een global UI object
 const UI = new UIClass();
+
+/**
+ * Functies die worden blootgesteld aan de client-side code
+ */
+
+/**
+ * Entry point voor de web applicatie
+ * Deze functie wordt automatisch aangeroepen door Apps Script
+ * wanneer de web app wordt geopend
+ * 
+ * @return {HtmlOutput} De HTML uitvoer voor de web app
+ */
+function doGet() {
+  try {
+    Logger.info('Web app gestart door gebruiker');
+    return UI.renderHome();
+  } catch (error) {
+    Logger.error('Fout bij starten web app: ' + error.toString());
+    return UI.renderError('Er is een fout opgetreden bij het starten van de applicatie: ' + error.toString());
+  }
+}
+
+/**
+ * Controleert de login status van de gebruiker
+ * Deze functie wordt aangeroepen vanuit client-side JavaScript
+ * 
+ * @return {Object} Object met login status informatie
+ */
+function checkLoginStatus() {
+  try {
+    return AuthService.checkLoginStatus();
+  } catch (error) {
+    Logger.error('Fout bij controleren login status: ' + error.toString());
+    return {
+      loggedIn: false,
+      authUrl: null,
+      errorMessage: 'Fout bij controleren login status: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Haalt de praktijken op voor een gebruiker
+ * Deze functie wordt aangeroepen vanuit client-side JavaScript
+ * 
+ * @param {string} userId - ID van de gebruiker
+ * @return {Array} Array met praktijken
+ */
+function getPracticesByUser(userId) {
+  try {
+    return DataLayer.getPracticesByUser(userId);
+  } catch (error) {
+    Logger.error('Fout bij ophalen praktijken: ' + error.toString());
+    throw new Error('Fout bij ophalen praktijken: ' + error.toString());
+  }
+}
+
+/**
+ * Maakt een nieuwe praktijk aan
+ * Deze functie wordt aangeroepen vanuit client-side JavaScript
+ * 
+ * @param {Object} practiceData - Gegevens van de nieuwe praktijk
+ * @return {Object} De aangemaakte praktijk
+ */
+function createPractice(practiceData) {
+  try {
+    return DataLayer.createPractice(practiceData);
+  } catch (error) {
+    Logger.error('Fout bij aanmaken praktijk: ' + error.toString());
+    throw new Error('Fout bij aanmaken praktijk: ' + error.toString());
+  }
+}
+
+/**
+ * Werkt de instellingen van de huidige gebruiker bij
+ * Deze functie wordt aangeroepen vanuit client-side JavaScript
+ * 
+ * @param {Object} settings - De nieuwe instellingen
+ * @return {Object} De bijgewerkte gebruiker
+ */
+function updateCurrentUserSettings(settings) {
+  try {
+    return AuthService.updateCurrentUserSettings(settings);
+  } catch (error) {
+    Logger.error('Fout bij bijwerken instellingen: ' + error.toString());
+    throw new Error('Fout bij bijwerken instellingen: ' + error.toString());
+  }
+}
+
+/**
+ * Controleert een praktijk direct
+ * Deze functie wordt aangeroepen vanuit client-side JavaScript
+ * 
+ * @param {string} practiceId - ID van de praktijk
+ * @return {Object} Het resultaat van de controle
+ */
+function checkPracticeNow(practiceId) {
+  try {
+    const practice = DataLayer.getPracticeById(practiceId);
+    if (!practice) {
+      throw new Error('Praktijk niet gevonden');
+    }
+    
+    // Controleer of de gebruiker geautoriseerd is
+    const authStatus = AuthService.checkLoginStatus();
+    if (!authStatus.loggedIn) {
+      throw new Error('U bent niet ingelogd');
+    }
+    
+    if (practice.userId !== authStatus.user.userId && !authStatus.isAdmin) {
+      throw new Error('U heeft geen toegang tot deze praktijk');
+    }
+    
+    // Voer de controle uit
+    const result = WebsiteChecker.checkPractice(practice);
+    
+    return {
+      success: true,
+      practice: practice,
+      result: result,
+      message: 'Praktijk succesvol gecontroleerd'
+    };
+  } catch (error) {
+    Logger.error('Fout bij controleren praktijk: ' + error.toString());
+    throw new Error('Fout bij controleren praktijk: ' + error.toString());
+  }
+}
+
+/**
+ * Verwijdert een praktijk
+ * Deze functie wordt aangeroepen vanuit client-side JavaScript
+ * 
+ * @param {string} practiceId - ID van de praktijk
+ * @return {boolean} true als het verwijderen is gelukt, anders false
+ */
+function deletePractice(practiceId) {
+  try {
+    const practice = DataLayer.getPracticeById(practiceId);
+    if (!practice) {
+      throw new Error('Praktijk niet gevonden');
+    }
+    
+    // Controleer of de gebruiker geautoriseerd is
+    const authStatus = AuthService.checkLoginStatus();
+    if (!authStatus.loggedIn) {
+      throw new Error('U bent niet ingelogd');
+    }
+    
+    if (practice.userId !== authStatus.user.userId && !authStatus.isAdmin) {
+      throw new Error('U heeft geen toegang tot deze praktijk');
+    }
+    
+    // Verwijder de praktijk
+    return DataLayer.deletePractice(practiceId);
+  } catch (error) {
+    Logger.error('Fout bij verwijderen praktijk: ' + error.toString());
+    throw new Error('Fout bij verwijderen praktijk: ' + error.toString());
+  }
+}
+
+/**
+ * Haalt diagnostische informatie op
+ * Deze functie kan worden gebruikt voor debugging
+ * 
+ * @return {Object} Object met diagnostische informatie
+ */
+function getDiagnosticInfo() {
+  try {
+    return AuthService.getDiagnosticInfo();
+  } catch (error) {
+    Logger.error('Fout bij ophalen diagnostische info: ' + error.toString());
+    return {
+      error: 'Fout bij ophalen diagnostische info: ' + error.toString()
+    };
+  }
+}
