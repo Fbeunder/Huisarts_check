@@ -75,28 +75,36 @@
     - Uitgebreide diagnostische logging voor troubleshooting
     - STATUS: Voltooid (PR #43)
 
-11. **Bugfix: "null" foutmelding probleem** ⏳
+11. **Bugfix: "null" foutmelding probleem** ✅
     - Verbeterde foutafhandeling voor null-waarden in showError() functie
     - Extra controles en validatie voor verschillende fouttypen
     - Uitgebreide console logging voor betere diagnostiek
     - Toevoeging van stack traces voor beter traceren van null foutmeldingen
     - Gebruiksvriendelijkere foutmeldingen die nooit alleen "null" tonen
-    - STATUS: In behandeling (PR #46)
+    - STATUS: Voltooid (PR #46)
+
+12. **Bugfix: Pagina gaat niet verder laden na authenticatie** 🔄
+    - Volledige herziening van de authenticatielogica met proactieve foutdetectie
+    - Toegevoegde monitoring van laadstatus met automatische herstelpogingen
+    - Implementatie van gebruikersvalidatie om onvolledige gebruikersobjecten te detecteren
+    - Verbeterde template variabelen overdracht en initialisatie
+    - Uitgebreide diagnostische informatie voor troubleshooting
+    - STATUS: In behandeling (PR #48, Issue #47)
 
 ## Huidige Must-haves
 
-1. **Volledige end-to-end testen** 🔄
-   - Testen van de gehele workflow van website controle tot notificaties
-   - Testen van verschillende scenario's en statusveranderingen
-   - Foutscenario's testen en verbeteren van error handling
-   - Opstellen van testscenario's en testcases
-   - STATUS: Gepland (Na goedkeuring van PR #46)
-
-2. **Implementeren van handmatige controle functionaliteit** 🔄
+1. **Implementeren van handmatige controle functionaliteit** 🔄
    - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
    - Koppelen van de knop aan de WebsiteChecker module
    - Tonen van voortgang en resultaten in de gebruikersinterface
    - STATUS: Issue #44 aangemaakt, nog te implementeren
+
+2. **Volledige end-to-end testen** 🔄
+   - Testen van de gehele workflow van website controle tot notificaties
+   - Testen van verschillende scenario's en statusveranderingen
+   - Foutscenario's testen en verbeteren van error handling
+   - Opstellen van testscenario's en testcases
+   - STATUS: Gepland (Na goedkeuring van PR #48)
 
 ## Nice-to-haves
 
@@ -128,10 +136,10 @@
 - De README.md bevat een gedetailleerde handleiding voor installatie en configuratie.
 
 ## Volgende stappen:
-1. **Review en merge van PR #46 (Bugfix: "null" foutmelding probleem)**
-   - Controleer of de verbeteringen in de foutafhandeling het probleem oplossen waarbij "null" wordt getoond
-   - Review de verbeterde error handling in HTML_Scripts.html
-   - Deze stap is belangrijk voor de gebruikerservaring omdat gebruikers nu duidelijkere foutmeldingen krijgen
+1. **Review en merge van PR #48 (Bugfix: "Pagina gaat niet verder laden na authenticatie")**
+   - Controleer of de verbeteringen in de authenticatielogica het probleem oplossen waarbij de pagina vastloopt na authenticatie
+   - Review de verbeterde foutdetectie en automatische herstelmaatregelen
+   - Deze stap is cruciaal omdat gebruikers anders in een leeg scherm terecht kunnen komen en de applicatie niet kunnen gebruiken
 
 2. **Implementeren van handmatige controle functionaliteit (Issue #44)**
    - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
@@ -151,4 +159,4 @@
    - Toevoegen van instructies hoe de app te configureren en gebruiken
    - Toevoegen van informatie over Scripts ID en API key configuratie
 
-De huidige PR #46 voor het verbeteren van de foutmeldingen, de implementatie van handmatige controle functionaliteit (issue #44), de end-to-end testen en het bijwerken van de documentatie zijn noodzakelijk voor de basiswerking van de applicatie. De nice-to-have items zijn niet essentieel voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid verbeteren.
+De implementatie van handmatige controle functionaliteit (issue #44), de end-to-end testen en het bijwerken van de documentatie zijn noodzakelijk voor de basiswerking van de applicatie. De nice-to-have items zijn niet essentieel voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid verbeteren.
