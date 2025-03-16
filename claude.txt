@@ -68,7 +68,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: HTML-templates, AuthService.gs, DataLayer.gs, Logger.gs
 
 ### HTML-templates
-- Status: Geïmplementeerd en aangepast (PR #20, #37, #41, #43, #48 gemerged)
+- Status: Geïmplementeerd en aangepast (PR #20, #37, #41, #43, #48, #54 gemerged)
 - Bestandsnaam: HTML-bestanden met prefix HTML_
 - Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface, inclusief login en dashboard
 - Naamgevingsconventie: HTML-bestanden hebben prefix HTML_ voor betere integratie met Apps Script
@@ -77,10 +77,11 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Bugfix in PR #43: Robuustere template variabelen initialisatie en verbeterde foutweergave
 - Bugfix in PR #48: Nieuwe variabele initialisatie in HTML_Index.html voor betere support van authStatus object
 - Bugfix in PR #48: Verbeterde login container styling en automatische vernieuwknop
+- Verbeterd in PR #54: Uitgebreide CSS styling voor controle functionaliteit, inclusief status indicators en animaties
 - Afhankelijkheid: Geen
 
 ### HTML_Scripts.html
-- Status: Geïmplementeerd, meerdere bugfixes (PR #31, #33, #35, #37, #41, #43, #46, #48 gemerged)
+- Status: Geïmplementeerd, meerdere bugfixes (PR #31, #33, #35, #37, #41, #43, #46, #48, #54 gemerged)
 - Bestandsnaam: HTML_Scripts.html
 - Functionaliteit: Bevat client-side JavaScript voor interactie met de gebruiker
 - Volledige herstructurering in PR #29: Gefaseerde initialisatie, uitgebreide logging, verbeterde DOM-manipulatie
@@ -95,10 +96,13 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Bugfix in PR #48: Monitoring functie voor laadstatus met automatische herstelpogingen
 - Bugfix in PR #48: Gebruikersvalidatie om onvolledige gebruikersobjecten te detecteren
 - Bugfix in PR #48: Vernieuw-knop die na 15 seconden verschijnt als het laden vastloopt
+- Verbeterd in PR #54: Geïmplementeerde handleCheckPractice functie voor handmatige controle van huisartsenpraktijken
+- Verbeterd in PR #54: Real-time visuele feedback en statusupdates tijdens controleproces
+- Verbeterd in PR #54: Directe UI updates bij statusveranderingen van huisartsenpraktijken
 - Afhankelijkheid: HTML-templates
 
 ### HTML_Index.html
-- Status: Geïmplementeerd en verbeterd (PR #37, #41, #43, #48)
+- Status: Geïmplementeerd en verbeterd (PR #37, #41, #43, #48, #54)
 - Bestandsnaam: HTML_Index.html
 - Functionaliteit: Hoofdtemplate voor de web interface
 - Volledig herzien in PR #37 met inline CSS, directe login optie, verbeterde responsiveness
@@ -107,6 +111,8 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Bugfix in PR #48: Verbeterde ondersteuning voor authStatus object
 - Bugfix in PR #48: Uitgebreide helpers voor veilige JSON parsing en object validatie
 - Bugfix in PR #48: Verbeterde login container styling en automatische refresh-knop
+- Verbeterd in PR #54: Toegevoegde CSS styling voor controle functionaliteit, statusmeldingen en animaties
+- Verbeterd in PR #54: Verbeterde styling voor disabled buttons en interactie-elementen
 - Afhankelijkheid: HTML_Scripts.html
 
 ### DataLayer.gs
@@ -119,7 +125,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Config.gs, Logger.gs
 
 ### WebsiteChecker.gs
-- Status: Geïmplementeerd, bugfix (PR #53 in behandeling)
+- Status: Geïmplementeerd, bugfix (PR #53 gemerged)
 - Bestandsnaam: WebsiteChecker.gs
 - Functionaliteit: Beheert het proces van het controleren van websites, detecteert statusveranderingen en plant controles
 - Bugfix in PR #53: Opgelost probleem met klassenaam conflict (hernoemen van UIClass naar WebsiteCheckerClass)
