@@ -34,13 +34,16 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 ## Per module details:
 
 ### Code.gs
-- Status: Geïmplementeerd en verbeterd (PR #39, #43)
+- Status: Geïmplementeerd en verbeterd (PR #39, #43, #48)
 - Bestandsnaam: Code.gs
 - Functionaliteit: Bevat de hoofdentry points voor de applicatie, inclusief het starten van de UI en het instellen van triggers voor periodieke controles
 - Toegevoegd in PR #39: initializeDependencies() functie om correcte initialisatie van modules te garanderen
 - Toegevoegd in PR #39: getDiagnosticInfo() functie voor betere troubleshooting
 - Verbeterd in PR #43: Robuustere initialisatie van dependencies met uitgebreide logging
 - Verbeterd in PR #43: Betere foutafhandeling in doGet() met fallback HTML output
+- Verbeterd in PR #48: Verbeterde authentication check met extra validatie van gebruikersobjecten
+- Verbeterd in PR #48: Toegevoegde 'global' scope aanduiding voor betere object-instantiatie
+- Verbeterd in PR #48: Uitgebreide diagnostische informatie met authenticatie-status details
 - Afhankelijkheid: UI.gs, AuthService.gs, DataLayer.gs, Logger.gs, WebsiteChecker.gs
 
 ### appsscript.json
@@ -50,7 +53,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: Geen
 
 ### UI.gs
-- Status: Geïmplementeerd en bijgewerkt (PR #8, #18 gemerged, verbeterd in PR #37)
+- Status: Geïmplementeerd en bijgewerkt (PR #8, #18, #37, #48 gemerged)
 - Bestandsnaam: UI.gs
 - Functionaliteit: Beheert de webinterface en gebruikersinteractie, rendert verschillende pagina's en afhandelt formulierverwerking
 - Bevat helper functie getHtmlTemplate() voor consistente toegang tot HTML-templates
@@ -58,20 +61,26 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Vereenvoudigde template rendering zonder ingewikkelde logica
 - Duidelijkere scheiding tussen server-side en client-side functionaliteit
 - Robuustere foutpagina's die geen complexe templates gebruiken
+- Verbeterd in PR #48: Uitgebreide renderHome methode met betere template variabelen overdracht
+- Verbeterd in PR #48: Nieuwe uitgebreide getDiagnosticInfo methode voor troubleshooting
+- Verbeterd in PR #48: User ID validatie in getPracticesByUser functie
+- Verbeterd in PR #48: Verbeterde error pagina met extra refresh opties
 - Afhankelijkheid: HTML-templates, AuthService.gs, DataLayer.gs, Logger.gs
 
 ### HTML-templates
-- Status: Geïmplementeerd en aangepast (PR #20 gemerged, verbeterd in PR #37, bugfix in PR #41, #43)
+- Status: Geïmplementeerd en aangepast (PR #20, #37, #41, #43, #48 gemerged)
 - Bestandsnaam: HTML-bestanden met prefix HTML_
 - Functionaliteit: HTML-templates voor verschillende pagina's in de webinterface, inclusief login en dashboard
 - Naamgevingsconventie: HTML-bestanden hebben prefix HTML_ voor betere integratie met Apps Script
 - Volledig herzien in PR #37 voor betere werking in Apps Script omgeving
 - Bugfix in PR #41: Verbeterde foutafhandeling en template variabelen initialisatie
 - Bugfix in PR #43: Robuustere template variabelen initialisatie en verbeterde foutweergave
+- Bugfix in PR #48: Nieuwe variabele initialisatie in HTML_Index.html voor betere support van authStatus object
+- Bugfix in PR #48: Verbeterde login container styling en automatische vernieuwknop
 - Afhankelijkheid: Geen
 
 ### HTML_Scripts.html
-- Status: Geïmplementeerd, meerdere bugfixes (PR #31, #33, #35 gemerged, volledig herschreven in PR #37, bugfix in PR #41, #43, verbeterd in PR #46)
+- Status: Geïmplementeerd, meerdere bugfixes (PR #31, #33, #35, #37, #41, #43, #46, #48 gemerged)
 - Bestandsnaam: HTML_Scripts.html
 - Functionaliteit: Bevat client-side JavaScript voor interactie met de gebruiker
 - Volledige herstructurering in PR #29: Gefaseerde initialisatie, uitgebreide logging, verbeterde DOM-manipulatie
@@ -82,15 +91,22 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Bugfix in PR #41: Robuuste type-detectie en veilige string conversie in showError() functie
 - Bugfix in PR #43: Volledig herschreven showError() functie voor betere afhandeling van verschillende fouttypen
 - Bugfix in PR #46: Verbeterde foutafhandeling voor null-waarden, nooit meer "null" als foutmelding, toevoeging van stack traces, betere formattering van foutmeldingen
+- Bugfix in PR #48: Volledig nieuwe authenticatielogica met proactieve foutdetectie
+- Bugfix in PR #48: Monitoring functie voor laadstatus met automatische herstelpogingen
+- Bugfix in PR #48: Gebruikersvalidatie om onvolledige gebruikersobjecten te detecteren
+- Bugfix in PR #48: Vernieuw-knop die na 15 seconden verschijnt als het laden vastloopt
 - Afhankelijkheid: HTML-templates
 
 ### HTML_Index.html
-- Status: Geïmplementeerd en verbeterd (PR #37, bugfix in PR #41, #43)
+- Status: Geïmplementeerd en verbeterd (PR #37, #41, #43, #48)
 - Bestandsnaam: HTML_Index.html
 - Functionaliteit: Hoofdtemplate voor de web interface
 - Volledig herzien in PR #37 met inline CSS, directe login optie, verbeterde responsiveness
 - Bugfix in PR #41: Veiligere template variabelen initialisatie en diagnostische logging
 - Bugfix in PR #43: Robuustere template variabelen initialisatie met helper functies en uitgebreide logging
+- Bugfix in PR #48: Verbeterde ondersteuning voor authStatus object
+- Bugfix in PR #48: Uitgebreide helpers voor veilige JSON parsing en object validatie
+- Bugfix in PR #48: Verbeterde login container styling en automatische refresh-knop
 - Afhankelijkheid: HTML_Scripts.html
 
 ### DataLayer.gs
@@ -121,7 +137,7 @@ De applicatie is opgebouwd volgens een modulaire structuur voor Apps Script, waa
 - Afhankelijkheid: DataLayer.gs, Config.gs, Logger.gs
 
 ### AuthService.gs
-- Status: Geïmplementeerd en verbeterd (PR #6 gemerged, bugfix in PR #22, robuuster gemaakt in PR #37, verbeterd in PR #39)
+- Status: Geïmplementeerd en verbeterd (PR #6, #22, #37, #39 gemerged)
 - Bestandsnaam: AuthService.gs
 - Functionaliteit: Handelt Google authenticatie en gebruikersbeheer af, inclusief login/logout en het bijwerken van gebruikersinstellingen
 - Verbeterde foutafhandeling en robuustere gebruikersregistratie toegevoegd
