@@ -1,206 +1,109 @@
 # Ontwikkelstappen voor Huisarts open voor inschrijving
 
-## Must-haves
+## Voltooide Must-haves
 
-1. **Basisprojectstructuur opzetten**
-   - Aanmaken van het Apps Script project
-   - Instellen van het appsscript.json manifest
-   - Toevoegen van benodigde OAuth scopes
-   - Toevoegen van Config.gs met basis configuratie
-   - STATUS: ✅ Voltooid (PR #2 gemerged)
+1. **Basisstructuur en architectuur** ✅
+   - Setup project met appsscript.json, Config.gs, Logger.gs en basismodules
+   - Implementatie van Google Spreadsheet datamodel (DataLayer.gs)
+   - Google OAuth authenticatie (AuthService.gs)
+   - Web interface ontwikkeling (UI.gs en HTML-templates)
+   - Website monitoring systeem (WebsiteChecker.gs)
+   - OpenAI Web Search API integratie (OpenAIService.gs)
+   - Email notificatie systeem (EmailService.gs)
+   - Triggers en scheduling voor periodieke controles
+   - Documentatie en handleidingen (README.md)
+   - STATUS: Voltooid (PR #2, #4, #6, #8, #10, #12, #14, #16)
 
-2. **Google Spreadsheet datamodel opzetten**
-   - Opzetten van een Google Spreadsheet als database
-   - Tabellen voor gebruikers, huisartsen, en monitoring logs
-   - Implementeren van DataLayer.gs voor CRUD-operaties
-   - STATUS: ✅ Voltooid (PR #4 gemerged)
+2. **HTML-template structuur en fixes** ✅
+   - Herstructurering naar platte bestandsstructuur met HTML_ prefix
+   - Helper functies voor template-toegang
+   - Documentatie over HTML-gebruiksconventies
+   - STATUS: Voltooid (PR #20)
 
-3. **Authenticatie implementeren**
-   - Ontwikkelen van AuthService.gs
-   - Instellen van Google OAuth authenticatie
-   - Koppelen van gebruikersgegevens aan de datamodel
-   - STATUS: ✅ Voltooid (PR #6 gemerged)
+3. **Database initialisatie verbeteringen** ✅
+   - Robuustere database-initialisatie
+   - Automatische creatie van spreadsheet bij eerste gebruik
+   - Verbeterde foutafhandeling voor gebruikersregistratie
+   - STATUS: Voltooid (PR #22)
 
-4. **Web interface ontwikkelen**
-   - Ontwikkelen van UI.gs
-   - Maken van basis HTML-templates
-   - Implementeren van gebruikersregistratie en inlogscherm
-   - Dashboard voor beheren van huisartsenlijst
-   - STATUS: ✅ Voltooid (PR #8 gemerged)
+4. **UI en gebruikerservaring fixes** ✅
+   - Oplossen favicon fouten bij pagina rendering
+   - Verwijderen niet-ondersteunde URL-referenties
+   - STATUS: Voltooid (PR #24)
 
-5. **OpenAI Web Search API integratie**
-   - Implementeren van OpenAIService.gs
-   - API key management
-   - Functionaliteit voor het controleren van website inhoud
-   - STATUS: ✅ Voltooid (PR #10 gemerged, verbeterd in PR #12)
+5. **Client-side rendering en authenticatie fixes** ✅
+   - Oplossen leeg scherm na authenticatie (meerdere iteraties)
+   - Verbeterde DOM-manipulatie en element controles
+   - Gefaseerde initialisatie met betere foutafhandeling
+   - Herstructurering van HTML_Scripts.html
+   - STATUS: Voltooid (PR #26, #28, #29)
 
-6. **Website monitoring systeem**
-   - Ontwikkelen van WebsiteChecker.gs
-   - Logica voor het periodiek controleren van websites
-   - Detecteren van veranderingen in status
-   - Zorgen dat websites niet dubbel worden gecontroleerd
-   - STATUS: ✅ Voltooid (Direct gecommit naar main)
+6. **Console error en JavaScript fixes** ✅
+   - Oplossen van MutationObserver fouten
+   - Verbeterde authenticatiestatus afhandeling
+   - Automatische herstelpogingen en pagina-vernieuwing
+   - Centrale foutafhandeling voor authenticatieproblemen
+   - Detectie en afvangen van externe script fouten
+   - STATUS: Voltooid (PR #31, #33, #35)
 
-7. **Email notificatie systeem**
-   - Ontwikkelen van EmailService.gs
-   - Templates voor notificatie emails
-   - Systeem voor het verzenden van notificaties bij statuswijzigingen
-   - STATUS: ✅ Voltooid (PR #14 gemerged)
+7. **Volledige UI herstructurering voor betere Apps Script compatibiliteit** ✅
+   - Vereenvoudiging van client-side JavaScript
+   - Verbeterd authenticatiesysteem
+   - Vereenvoudigde UI rendering en initialisatie
+   - Geoptimaliseerde HTML templates
+   - STATUS: Voltooid (PR #37)
 
-8. **Logging en error handling**
-   - Implementeren van Logger.gs
-   - Foutafhandeling in alle modules
-   - Gebruikersgerichte foutmeldingen in UI
-   - STATUS: ✅ Voltooid (Logger.gs geïmplementeerd in PR #2, integratie in alle modules voltooid)
+## Huidige Must-haves
 
-9. **Triggers en scheduling**
-   - Instellen van periodieke controles via triggers
-   - Optimalisatie van controlefrequentie
-   - Balanceren van API-aanroepen voor kostenefficiëntie
-   - STATUS: ✅ Voltooid (Geïmplementeerd in WebsiteChecker.gs en bijgewerkt in Code.gs)
+1. **Bugfix: DataLayer is not defined error** ⏳
+   - Oplossen van ReferenceError in AuthService.gs bij het laden
+   - Verbeteren van module initialisatie en afhankelijkheidsmanagement
+   - Toevoegen van robuustere controles op het bestaan van objecten
+   - Nieuwe initializeDependencies() functie in Code.gs
+   - Verbeterde diagnostische functies voor troubleshooting
+   - STATUS: In behandeling (PR #39)
 
-10. **Documentatie en handleidingen**
-    - Opstellen van een README.md met installatie-instructies
-    - Maken van gebruikershandleiding
-    - Documenteren van de benodigde omgeving en vereisten
-    - STATUS: ✅ Voltooid (PR #16 gemerged)
+2. **Volledige end-to-end testen** 🔄
+   - Testen van de gehele workflow van website controle tot notificaties
+   - Testen van verschillende scenario's en statusveranderingen
+   - Foutscenario's testen en verbeteren van error handling
+   - Opstellen van testscenario's en testcases
+   - STATUS: Gepland (Na voltooiing van PR #39)
 
-11. **Fix HTML-templating structuur**
-    - Aanpassen UI.gs om te werken met de platte bestandenstructuur van Apps Script
-    - Helper functie voor HTML-templates toevoegen
-    - Documenteren van de naamgevingsconventie voor HTML-bestanden
-    - STATUS: ✅ Voltooid (PR #20 gemerged)
-
-12. **Bugfix: Database initialisatieproblemen**
-    - Robuustere database-initialisatie implementeren
-    - Automatische creatie van database spreadsheet bij eerste gebruik
-    - Verbeterde foutafhandeling voor gebruikersregistratie
-    - STATUS: ✅ Voltooid (PR #22 gemerged)
-
-13. **Bugfix: Favicon fout bij pagina rendering**
-    - Oplossen van fout "The favicon icon image type is not supported" 
-    - Verwijderen van niet-ondersteunde favicon URL referenties
-    - STATUS: ✅ Voltooid (PR #24 gemerged)
-
-14. **Bugfix: Leeg scherm na authenticatie (eerste poging)**
-    - Oplossen van probleem waarbij scherm leeg blijft na inloggen
-    - Verbeteren van de loadDashboard() functie in HTML_Scripts.html
-    - Correcte DOM-manipulatie implementeren
-    - STATUS: ✅ Voltooid (PR #26 gemerged)
-
-15. **Bugfix: Leeg scherm na authenticatie (verbeterde versie - tweede poging)**
-    - Verder verbeteren van probleem waarbij scherm nog steeds leeg blijft na inloggen
-    - Uitgebreide logging toevoegen voor betere diagnose
-    - Verbeterde DOM-manipulatie en element controles
-    - STATUS: ✅ Voltooid (PR #28 gemerged)
-
-16. **Bugfix: Leeg scherm na authenticatie (complete herstructurering)**
-    - Volledig herstructureren van HTML_Scripts.html
-    - Implementeren van gefaseerde initialisatie met betere foutafhandeling
-    - Duidelijk gescheiden verantwoordelijkheden in kleinere functies
-    - Uitgebreide logging met consistente format voor betere diagnose
-    - Expliciete controles op DOM-elementen voor veiligere DOM-manipulatie
-    - Betere controle over de volgorde van initialisatie om race conditions te voorkomen
-    - STATUS: ✅ Voltooid (PR #29 gemerged)
-
-17. **Bugfix: Console errors (3X)**
-    - Oplossen van MutationObserver fout bij het observeren van ongeldige DOM-elementen
-    - Verbeteren van foutafhandeling voor authenticatiestatus wanneer deze null is
-    - Verbeterde gebruikersfeedback bij authenticatieproblemen
-    - Toevoegen van patch voor MutationObserver.observe functie
-    - STATUS: ✅ Voltooid (PR #31 gemerged)
-
-18. **Bugfix: Console errors (2X)**
-    - Verdere verbetering van authenticatiestatus null/undefined afhandeling
-    - Extra try/catch blocks voor robuustere foutafhandeling
-    - Automatische pagina vernieuwing bij authenticatieproblemen
-    - Verbeterde gebruikersfeedback met duidelijkere instructies
-    - STATUS: ✅ Voltooid (PR #33 gemerged)
-
-19. **Bugfix: Aanhoudende console errors**
-    - Oplossen van resterende MutationObserver fouten uit externe scripts
-    - Verbeteren van authenticatie null/undefined status afhandeling
-    - Toevoegen van centrale authenticatie foutafhandelingsfunctie
-    - Implementeren van automatisch herprobeersysteem met exponentiële backoff
-    - Detecteren en afvangen van fouten in Google Cloud externe scripts
-    - STATUS: ✅ Voltooid (PR #35 gemerged)
-
-20. **Bugfix: Pagina start niet goed**
-    - Oplossen van problemen waarbij de pagina na het starten niet correct werkt
-    - Vereenvoudigen van client-side scripts voor betere compatibiliteit met Apps Script
-    - Verbeteren van authenticatiesysteem voor robuustere werking
-    - Vereenvoudigen van UI rendering en initialisatie
-    - Verbeterde HTML templates voor betere gebruikerservaring
-    - STATUS: ✅ Voltooid (PR #37 gemerged)
-
-21. **Bugfix: DataLayer is not defined error**
-    - Oplossen van ReferenceError: DataLayer is not defined in AuthService.gs
-    - Verbeteren van module initialisatie en afhankelijkheidsmanagement
-    - Toevoegen van robuustere controles op het bestaan van objecten
-    - Nieuwe initializeDependencies() functie in Code.gs toevoegen
-    - Verbeterde diagnostische functies voor troubleshooting
-    - STATUS: ⏳ In behandeling (PR #39)
-
-22. **Volledige end-to-end testen**
-    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
-    - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
-    - Foutscenario's testen en verbeteren van error handling
-    - Opstellen van testscenario's en testcases
-    - STATUS: ⏳ Gepland (Na voltooiing van PR #39)
+3. **Implementeren van handmatige controle functionaliteit** 🔄
+   - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
+   - Koppelen van de knop aan de WebsiteChecker module
+   - Tonen van voortgang en resultaten in de gebruikersinterface
+   - STATUS: Gepland
 
 ## Nice-to-haves
 
 1. **Utilities.gs implementeren**
-   - Ontwikkelen van de Utilities.gs module voor herbruikbare functionaliteit
-   - Refactoren van bestaande code om duplicatie te verminderen
-   - Toevoegen van hulpfuncties voor veelvoorkomende taken
+   - Herbruikbare functies centraliseren en refactoren van bestaande code
+   - Hulpfuncties voor veelvoorkomende taken
 
-2. **Geavanceerde gebruikersinstellingen**
-   - Aanpasbare controlefrequentie per website
-   - Prioriteiten voor websites instellen
-   - Mogelijkheid voor gebruikers om notificatie-instellingen aan te passen
+2. **Gebruikservaring verbeteringen**
+   - Gebruikersinterface uitbreiden met meer functionaliteit
+   - Weergeven van controleresultaten en geschiedenis
+   - Dashboard met statistieken en visualisaties
+   - Geavanceerde instellingen per website en gebruikersvoorkeuren
+   - Mobile-friendly interface
 
-3. **Dashboard met statistieken**
-   - Visualisatie van controlegeschiedenis
-   - Statistieken over statusveranderingen
-   - Trends in beschikbaarheid van huisartsen
+3. **Functionaliteit uitbreidingen**
+   - Verbeterde context-analyse van websites
+   - Multi-taal ondersteuning (Nederlands/Engels)
+   - Admin-dashboard voor systeembeheerders
+   - Exportfunctionaliteit naar CSV/Excel
+   - Integratie met andere systemen via webhooks/API
 
-4. **Verbeterde context-analyse**
-   - Meer gedetailleerde informatie uit websites halen
-   - Beter begrijpen van specifieke inschrijvingsvoorwaarden
-   - Detectie van wachtlijsten en geschatte wachttijden
-
-5. **Multi-taal ondersteuning**
-   - Nederlands en Engels als ondersteunde talen
-   - Vertalingen voor gebruikersinterface en notificaties
-
-6. **Admin-dashboard**
-   - Overzicht van alle gebruikers en gemonitorde websites
-   - Mogelijkheid om systeeminstellingen aan te passen
-   - Monitoring van API-gebruik en kosten
-
-7. **Export-functionaliteit**
-   - Exporteren van resultaten naar CSV/Excel
-   - Rapporten genereren over beschikbaarheid
-
-8. **Mobile-friendly interface**
-   - Responsieve design voor de webinterface
-   - Optimalisatie voor mobiele apparaten
-
-9. **Integratie met andere systemen**
-   - Webhooks voor integratie met andere applicaties
-   - API voor toegang tot de data
-
-10. **Performantie-optimalisaties**
-    - Caching van resultaten
-    - Optimalisatie van database-queries
-    - Efficiënter gebruik van API-calls
+4. **Performantie-optimalisaties**
+   - Caching en efficiënter API-gebruik
+   - Optimalisatie van database-queries
 
 ## Opmerkingen:
 - Script ID is nog niet bekend, dit moet opgevraagd worden nadat het Apps Script project is aangemaakt.
 - Voor het gebruik van de OpenAI Web Search API is een API key nodig, die veilig moet worden opgeslagen.
-- Nadat het eerste prototype werkt, moet er feedback verzameld worden voor verdere verbeteringen.
-- De README.md bevat nu een gedetailleerde handleiding voor het installeren en configureren van de applicatie.
+- De README.md bevat een gedetailleerde handleiding voor installatie en configuratie.
 
 ## Volgende stappen:
 1. **Voltooien van DataLayer reference error bugfix (PR #39)**
@@ -212,25 +115,12 @@
    - Testen van de gehele workflow: van het controleren van websites tot het versturen van notificaties
    - Testen van verschillende scenario's (nieuwe praktijk, statusverandering, geen verandering)
    - Foutscenario's testen en verbeteren van error handling
-   - Opstellen van testscenario's en testcases
    - Deze stap is noodzakelijk voor de basiswerking van de applicatie om te zorgen dat alle functionaliteit correct werkt.
 
 3. **Implementeren van handmatige controle functionaliteit**
    - Afwerken van de 'Controleren' knop functionaliteit in het dashboard
    - Koppelen van de knop aan de WebsiteChecker module
    - Tonen van voortgang en resultaten in de gebruikersinterface
-   - Deze stap is noodzakelijk voor een volledige gebruikerservaring en om gebruikers de mogelijkheid te geven om direct feedback te krijgen.
+   - Deze stap is noodzakelijk voor een volledige gebruikerservaring.
 
-4. **Gebruikersinterface verbeteren**
-   - Weergeven van controleresultaten en geschiedenis in de gebruikersinterface
-   - Verbeteren van gebruikerservaring voor het beheren van huisartsenpraktijken
-   - Implementeren van notificatie-instellingen in de gebruikersinterface
-   - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de gebruikerservaring.
-
-5. **Utilities.gs implementeren**
-   - Als nice-to-have voor code-optimalisatie
-   - Verplaatsen van herbruikbare functies naar deze module
-   - Verbeteren van code-kwaliteit en onderhoudbaarheid
-   - Deze stap is niet noodzakelijk voor de basiswerking van de applicatie, maar verbetert de onderhoudbaarheid van de code.
-
-De bugfix voor DataLayer reference error (PR #39) en de end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie omdat deze kritieke fouten oplossen en zorgen voor een betrouwbare werking. De implementatie van de handmatige controlefunctionaliteit is ook noodzakelijk voor een complete gebruikerservaring. De andere stappen (UI verbeteren en Utilities.gs implementeren) zijn niet noodzakelijk voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid van de code verbeteren.
+De huidige bugfix voor DataLayer reference error (PR #39) en de end-to-end testen zijn noodzakelijk voor de basiswerking van de applicatie. De implementatie van de handmatige controlefunctionaliteit is ook noodzakelijk voor een complete gebruikerservaring. De nice-to-have items zijn niet essentieel voor de basiswerking maar zullen de gebruikerservaring en onderhoudbaarheid verbeteren.
